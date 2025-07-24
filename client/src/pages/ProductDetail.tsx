@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ArrowLeft, Heart, Share2, Truck, Shield, RotateCcw } from 'lucide-react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { api, endpoints } from '../utils/api';
-import { Product, ProductListItem } from '../types';
+import type { Product, ProductListItem } from '../types';
 
 const ImageCarousel: React.FC<{ images: Product['images'] }> = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -160,14 +160,14 @@ const RelatedProducts: React.FC<{ category: string; currentProductId: string }> 
   category, 
   currentProductId 
 }) => {
-  const { data: relatedProducts } = useQuery<ProductListItem[]>(
-    ['related-products', category, currentProductId],
-    async () => {
+  const { data: relatedProducts } = useQuery<ProductListItem[]>({
+    queryKey: ['related-products', category, currentProductId],
+    queryFn: async () => {
       const response = await api.get(`${endpoints.products}?category=${category}&limit=4`);
       const products = response.data.results || response.data;
       return products.filter((product: ProductListItem) => product.id !== currentProductId);
     }
-  );
+  });
 
   if (!relatedProducts?.length) return null;
 
@@ -214,17 +214,15 @@ const ProductDetail: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const { data: product, isLoading, error } = useQuery<Product>(
-    ['product', slug],
-    async () => {
+  const { data: product, isLoading, error } = useQuery<Product>({
+    queryKey: ['product', slug],
+    queryFn: async () => {
       if (!slug) throw new Error('Product slug is required');
       const response = await api.get(`${endpoints.products}${slug}/`);
       return response.data;
     },
-    {
-      enabled: !!slug
-    }
-  );
+    enabled: !!slug
+  });
 
   const handleShare = async () => {
     if (navigator.share && product) {

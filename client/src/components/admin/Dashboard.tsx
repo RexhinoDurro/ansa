@@ -20,7 +20,7 @@ import {
   Grid,
   MessageSquare
 } from 'lucide-react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { api } from '../../utils/api';
 
 // Types for admin data

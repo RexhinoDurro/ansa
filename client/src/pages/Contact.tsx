@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle } from 'lucide-react';
 import { api, endpoints } from '../utils/api';
 
@@ -91,25 +89,77 @@ const ContactInfo: React.FC = () => {
 const ContactForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [formData, setFormData] = useState<ContactForm>({
+    name: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: ''
+  });
+  const [errors, setErrors] = useState<Partial<ContactForm>>({});
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset
-  } = useForm<ContactForm>();
+  const validateForm = () => {
+    const newErrors: Partial<ContactForm> = {};
+    
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters';
+    }
+    
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)) {
+      newErrors.email = 'Invalid email address';
+    }
+    
+    if (!formData.subject) {
+      newErrors.subject = 'Subject is required';
+    }
+    
+    if (!formData.message.trim()) {
+      newErrors.message = 'Message is required';
+    } else if (formData.message.trim().length < 10) {
+      newErrors.message = 'Message must be at least 10 characters';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-  const onSubmit = async (data: ContactForm) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear error when user starts typing
+    if (errors[name as keyof ContactForm]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
-      await api.post(endpoints.contact, data);
+      await api.post(endpoints.contact, formData);
       setIsSubmitted(true);
-      reset();
-      toast.success('Thank you! Your message has been sent successfully.');
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: ''
+      });
+      console.log('Message sent successfully');
     } catch (error) {
-      toast.error('Failed to send message. Please try again.');
       console.error('Contact form error:', error);
+      alert('Failed to send message. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -141,7 +191,7 @@ const ContactForm: React.FC = () => {
     <div className="bg-white p-8 rounded-lg shadow-sm border border-neutral-200">
       <h2 className="text-2xl font-semibold text-neutral-900 mb-6">Send us a Message</h2>
       
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-2">
@@ -149,17 +199,16 @@ const ContactForm: React.FC = () => {
             </label>
             <input
               type="text"
-              {...register('name', { 
-                required: 'Name is required',
-                minLength: { value: 2, message: 'Name must be at least 2 characters' }
-              })}
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 ${
                 errors.name ? 'border-red-300' : 'border-neutral-300'
               }`}
               placeholder="Enter your full name"
             />
             {errors.name && (
-              <p className="text-red-600 text-sm mt-1">{errors.name.message}</p>
+              <p className="text-red-600 text-sm mt-1">{errors.name}</p>
             )}
           </div>
 
@@ -169,20 +218,16 @@ const ContactForm: React.FC = () => {
             </label>
             <input
               type="email"
-              {...register('email', { 
-                required: 'Email is required',
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: 'Invalid email address'
-                }
-              })}
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 ${
                 errors.email ? 'border-red-300' : 'border-neutral-300'
               }`}
               placeholder="Enter your email address"
             />
             {errors.email && (
-              <p className="text-red-600 text-sm mt-1">{errors.email.message}</p>
+              <p className="text-red-600 text-sm mt-1">{errors.email}</p>
             )}
           </div>
         </div>
@@ -194,7 +239,9 @@ const ContactForm: React.FC = () => {
             </label>
             <input
               type="tel"
-              {...register('phone')}
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
               className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200"
               placeholder="Enter your phone number"
             />
@@ -205,7 +252,9 @@ const ContactForm: React.FC = () => {
               Subject *
             </label>
             <select
-              {...register('subject', { required: 'Subject is required' })}
+              name="subject"
+              value={formData.subject}
+              onChange={handleChange}
               className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 ${
                 errors.subject ? 'border-red-300' : 'border-neutral-300'
               }`}
@@ -221,7 +270,7 @@ const ContactForm: React.FC = () => {
               <option value="Other">Other</option>
             </select>
             {errors.subject && (
-              <p className="text-red-600 text-sm mt-1">{errors.subject.message}</p>
+              <p className="text-red-600 text-sm mt-1">{errors.subject}</p>
             )}
           </div>
         </div>
@@ -232,17 +281,16 @@ const ContactForm: React.FC = () => {
           </label>
           <textarea
             rows={6}
-            {...register('message', { 
-              required: 'Message is required',
-              minLength: { value: 10, message: 'Message must be at least 10 characters' }
-            })}
+            name="message"
+            value={formData.message}
+            onChange={handleChange}
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 resize-none ${
               errors.message ? 'border-red-300' : 'border-neutral-300'
             }`}
             placeholder="Tell us how we can help you..."
           />
           {errors.message && (
-            <p className="text-red-600 text-sm mt-1">{errors.message.message}</p>
+            <p className="text-red-600 text-sm mt-1">{errors.message}</p>
           )}
         </div>
 

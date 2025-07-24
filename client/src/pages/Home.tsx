@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { api, endpoints } from '../utils/api';
-import { HomeSlider, ProductListItem } from '../types';
+import type { HomeSlider, ProductListItem } from '../types';
 
 // Mock slider data (replace with API call)
 const mockSliderData: HomeSlider[] = [
@@ -157,13 +157,13 @@ const HeroSlider: React.FC = () => {
 };
 
 const FeaturedProducts: React.FC = () => {
-  const { data: products, isLoading } = useQuery<ProductListItem[]>(
-    'featured-products',
-    async () => {
+  const { data: products, isLoading } = useQuery<ProductListItem[]>({
+    queryKey: ['featured-products'],
+    queryFn: async () => {
       const response = await api.get(endpoints.featuredProducts);
       return response.data.results || response.data;
     }
-  );
+  });
 
   if (isLoading) {
     return (

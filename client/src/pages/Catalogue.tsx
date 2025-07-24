@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Filter, Grid, List, Search, X, ChevronDown } from 'lucide-react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { api, endpoints } from '../utils/api';
-import { ProductListItem, Category, ApiResponse } from '../types';
+import type { ProductListItem, Category, ApiResponse } from '../types';
 
 interface FilterState {
   category: string;
@@ -389,13 +389,13 @@ const Catalogue: React.FC = () => {
   });
 
   // Fetch filter options
-  const { data: filterOptions } = useQuery<FilterOptions>(
-    'filter-options',
-    async () => {
+  const { data: filterOptions } = useQuery<FilterOptions>({
+    queryKey: ['filter-options'],
+    queryFn: async () => {
       const response = await api.get(endpoints.filters);
       return response.data;
     }
-  );
+  });
 
   // Build query params for API
   const buildQueryParams = () => {
@@ -412,14 +412,14 @@ const Catalogue: React.FC = () => {
   };
 
   // Fetch products
-  const { data: productsData, isLoading } = useQuery<ApiResponse<ProductListItem>>(
-    ['products', filters, sortBy, currentPage],
-    async () => {
+  const { data: productsData, isLoading } = useQuery<ApiResponse<ProductListItem>>({
+    queryKey: ['products', filters, sortBy, currentPage],
+    queryFn: async () => {
       const queryString = buildQueryParams();
       const response = await api.get(`${endpoints.products}?${queryString}`);
       return response.data;
     }
-  );
+  });
 
   // Update URL when filters change
   useEffect(() => {
