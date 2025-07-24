@@ -1,44 +1,477 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'react-hot-toast';
+import { MapPin, Phone, Mail, Clock, Send, CheckCircle } from 'lucide-react';
+import { api, endpoints } from '../utils/api';
+
+interface ContactForm {
+  name: string;
+  email: string;
+  phone: string;
+  subject: string;
+  message: string;
+}
+
+const ContactInfo: React.FC = () => {
+  const contactDetails = [
+    {
+      icon: MapPin,
+      title: 'Visit Our Showroom',
+      details: [
+        '123 Furniture Street',
+        'Design District',
+        'City, State 12345'
+      ],
+      action: 'Get Directions',
+      actionLink: 'https://maps.google.com'
+    },
+    {
+      icon: Phone,
+      title: 'Call Us',
+      details: [
+        '(555) 123-4567',
+        '(555) 123-4568 (Sales)',
+        '(555) 123-4569 (Support)'
+      ],
+      action: 'Call Now',
+      actionLink: 'tel:+15551234567'
+    },
+    {
+      icon: Mail,
+      title: 'Email Us',
+      details: [
+        'info@furnitureco.com',
+        'sales@furnitureco.com',
+        'support@furnitureco.com'
+      ],
+      action: 'Send Email',
+      actionLink: 'mailto:info@furnitureco.com'
+    },
+    {
+      icon: Clock,
+      title: 'Store Hours',
+      details: [
+        'Monday - Friday: 9AM - 8PM',
+        'Saturday: 10AM - 6PM',
+        'Sunday: 12PM - 5PM'
+      ],
+      action: 'Plan Your Visit',
+      actionLink: '#'
+    }
+  ];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {contactDetails.map((detail, index) => {
+        const Icon = detail.icon;
+        return (
+          <div key={index} className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200 hover:shadow-md transition-shadow duration-300">
+            <div className="bg-primary-50 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+              <Icon className="w-6 h-6 text-primary-600" />
+            </div>
+            <h3 className="font-semibold text-neutral-900 mb-3">{detail.title}</h3>
+            <div className="space-y-1 mb-4">
+              {detail.details.map((item, idx) => (
+                <p key={idx} className="text-sm text-neutral-600">{item}</p>
+              ))}
+            </div>
+            <a
+              href={detail.actionLink}
+              className="text-primary-600 hover:text-primary-700 font-medium text-sm transition-colors duration-200"
+            >
+              {detail.action}
+            </a>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const ContactForm: React.FC = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset
+  } = useForm<ContactForm>();
+
+  const onSubmit = async (data: ContactForm) => {
+    setIsSubmitting(true);
+    
+    try {
+      await api.post(endpoints.contact, data);
+      setIsSubmitted(true);
+      reset();
+      toast.success('Thank you! Your message has been sent successfully.');
+    } catch (error) {
+      toast.error('Failed to send message. Please try again.');
+      console.error('Contact form error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isSubmitted) {
+    return (
+      <div className="bg-white p-8 rounded-lg shadow-sm border border-neutral-200">
+        <div className="text-center">
+          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+          <h3 className="text-2xl font-semibold text-neutral-900 mb-2">
+            Message Sent Successfully!
+          </h3>
+          <p className="text-neutral-600 mb-6">
+            Thank you for contacting us. We'll get back to you within 24 hours.
+          </p>
+          <button
+            onClick={() => setIsSubmitted(false)}
+            className="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200"
+          >
+            Send Another Message
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white p-8 rounded-lg shadow-sm border border-neutral-200">
+      <h2 className="text-2xl font-semibold text-neutral-900 mb-6">Send us a Message</h2>
+      
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">
+              Full Name *
+            </label>
+            <input
+              type="text"
+              {...register('name', { 
+                required: 'Name is required',
+                minLength: { value: 2, message: 'Name must be at least 2 characters' }
+              })}
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 ${
+                errors.name ? 'border-red-300' : 'border-neutral-300'
+              }`}
+              placeholder="Enter your full name"
+            />
+            {errors.name && (
+              <p className="text-red-600 text-sm mt-1">{errors.name.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">
+              Email Address *
+            </label>
+            <input
+              type="email"
+              {...register('email', { 
+                required: 'Email is required',
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: 'Invalid email address'
+                }
+              })}
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 ${
+                errors.email ? 'border-red-300' : 'border-neutral-300'
+              }`}
+              placeholder="Enter your email address"
+            />
+            {errors.email && (
+              <p className="text-red-600 text-sm mt-1">{errors.email.message}</p>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              {...register('phone')}
+              className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200"
+              placeholder="Enter your phone number"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">
+              Subject *
+            </label>
+            <select
+              {...register('subject', { required: 'Subject is required' })}
+              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 ${
+                errors.subject ? 'border-red-300' : 'border-neutral-300'
+              }`}
+            >
+              <option value="">Select a subject</option>
+              <option value="General Inquiry">General Inquiry</option>
+              <option value="Product Question">Product Question</option>
+              <option value="Custom Order">Custom Order</option>
+              <option value="Shipping & Delivery">Shipping & Delivery</option>
+              <option value="Returns & Exchanges">Returns & Exchanges</option>
+              <option value="Technical Support">Technical Support</option>
+              <option value="Feedback">Feedback</option>
+              <option value="Other">Other</option>
+            </select>
+            {errors.subject && (
+              <p className="text-red-600 text-sm mt-1">{errors.subject.message}</p>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-neutral-700 mb-2">
+            Message *
+          </label>
+          <textarea
+            rows={6}
+            {...register('message', { 
+              required: 'Message is required',
+              minLength: { value: 10, message: 'Message must be at least 10 characters' }
+            })}
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 resize-none ${
+              errors.message ? 'border-red-300' : 'border-neutral-300'
+            }`}
+            placeholder="Tell us how we can help you..."
+          />
+          {errors.message && (
+            <p className="text-red-600 text-sm mt-1">{errors.message.message}</p>
+          )}
+        </div>
+
+        <div className="bg-neutral-50 p-4 rounded-lg">
+          <p className="text-sm text-neutral-600">
+            By submitting this form, you agree to our{' '}
+            <a href="/privacy" className="text-primary-600 hover:text-primary-700">
+              Privacy Policy
+            </a>{' '}
+            and{' '}
+            <a href="/terms" className="text-primary-600 hover:text-primary-700">
+              Terms of Service
+            </a>
+            . We'll never share your information with third parties.
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-300 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center"
+        >
+          {isSubmitting ? (
+            <>
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+              Sending Message...
+            </>
+          ) : (
+            <>
+              <Send className="w-5 h-5 mr-2" />
+              Send Message
+            </>
+          )}
+        </button>
+      </form>
+    </div>
+  );
+};
+
+const MapSection: React.FC = () => {
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-neutral-200 overflow-hidden">
+      <div className="aspect-video bg-neutral-200 relative">
+        {/* Replace with actual Google Maps embed */}
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3024.1234567890!2d-74.005972!3d40.712775!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDDCsDQyJzQ2LjAiTiA3NMKwMDAnMjEuNSJX!5e0!3m2!1sen!2sus!4v1234567890"
+          width="100%"
+          height="100%"
+          style={{ border: 0 }}
+          allowFullScreen
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          title="Furniture Co. Location"
+          className="absolute inset-0"
+        ></iframe>
+        
+        {/* Fallback for demo */}
+        <div className="absolute inset-0 bg-neutral-100 flex items-center justify-center">
+          <div className="text-center">
+            <MapPin className="w-12 h-12 text-neutral-400 mx-auto mb-2" />
+            <p className="text-neutral-600">Interactive Map</p>
+            <p className="text-sm text-neutral-500">123 Furniture Street, Design District</p>
+          </div>
+        </div>
+      </div>
+      
+      <div className="p-6">
+        <h3 className="font-semibold text-neutral-900 mb-2">Visit Our Showroom</h3>
+        <p className="text-neutral-600 mb-4">
+          Come see our furniture collections in person. Our showroom features room displays 
+          that showcase how our pieces look in real home settings.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <a
+            href="https://maps.google.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-4 rounded-lg text-center transition-colors duration-200"
+          >
+            Get Directions
+          </a>
+          <button className="flex-1 border border-neutral-300 hover:border-primary-300 hover:bg-primary-50 text-neutral-700 hover:text-primary-600 font-semibold py-3 px-4 rounded-lg transition-colors duration-200">
+            Schedule Visit
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Contact: React.FC = () => {
   return (
     <div className="pt-20">
-      <div className="container mx-auto px-4 py-12">
-        <h1 className="text-4xl font-serif font-bold mb-8">Contact Us</h1>
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-white p-8 rounded-lg shadow-lg">
-            <form className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium mb-2">Name</label>
-                <input 
-                  type="text" 
-                  className="w-full p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-primary-50 to-accent-50 py-16">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl font-serif font-bold text-neutral-900 mb-6">
+              Get in Touch
+            </h1>
+            <p className="text-xl text-neutral-600 mb-8">
+              Have questions about our furniture? Want to schedule a consultation? 
+              Or just need some design advice? We're here to help.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-neutral-600">
+              <div className="flex items-center">
+                <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                <span>Free Design Consultation</span>
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-2">Email</label>
-                <input 
-                  type="email" 
-                  className="w-full p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
+              <div className="flex items-center">
+                <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                <span>24-hour Response Time</span>
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-2">Message</label>
-                <textarea 
-                  rows={5}
-                  className="w-full p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                ></textarea>
+              <div className="flex items-center">
+                <CheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                <span>Expert Furniture Advice</span>
               </div>
-              
-              <button type="submit" className="btn-primary w-full py-3">
-                Send Message
-              </button>
-            </form>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Contact Information */}
+      <section className="py-16 bg-neutral-50">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-serif font-bold text-neutral-900 mb-4">
+              Multiple Ways to Reach Us
+            </h2>
+            <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
+              Choose the method that works best for you. We're committed to providing 
+              excellent customer service across all channels.
+            </p>
+          </div>
+          <ContactInfo />
+        </div>
+      </section>
+
+      {/* Contact Form and Map */}
+      <section className="py-16">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <ContactForm />
+            <MapSection />
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-16 bg-neutral-50">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-serif font-bold text-neutral-900 mb-4">
+                Frequently Asked Questions
+              </h2>
+              <p className="text-lg text-neutral-600">
+                Quick answers to common questions about our furniture and services.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-semibold text-neutral-900 mb-2">
+                    Do you offer custom furniture?
+                  </h3>
+                  <p className="text-neutral-600 text-sm">
+                    Yes! We offer custom furniture solutions. Contact us to discuss 
+                    your specific requirements and get a personalized quote.
+                  </p>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold text-neutral-900 mb-2">
+                    What's your delivery timeframe?
+                  </h3>
+                  <p className="text-neutral-600 text-sm">
+                    Standard delivery is 3-7 business days for in-stock items. 
+                    Custom pieces typically take 4-8 weeks depending on complexity.
+                  </p>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold text-neutral-900 mb-2">
+                    Do you offer assembly services?
+                  </h3>
+                  <p className="text-neutral-600 text-sm">
+                    Yes, we offer professional assembly services for an additional fee. 
+                    Our team can set up your furniture in your preferred location.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-semibold text-neutral-900 mb-2">
+                    What's your return policy?
+                  </h3>
+                  <p className="text-neutral-600 text-sm">
+                    We offer a 30-day return policy for most items in original condition. 
+                    Custom pieces may have different return terms.
+                  </p>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold text-neutral-900 mb-2">
+                    Do you have financing options?
+                  </h3>
+                  <p className="text-neutral-600 text-sm">
+                    Yes, we offer flexible financing options including 0% APR for 
+                    qualified customers. Contact us for more details.
+                  </p>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold text-neutral-900 mb-2">
+                    Can I visit your showroom?
+                  </h3>
+                  <p className="text-neutral-600 text-sm">
+                    Absolutely! Our showroom is open 7 days a week. We recommend 
+                    scheduling an appointment for personalized service.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

@@ -8,7 +8,7 @@ import Catalogue from './pages/Catalogue';
 import ProductDetail from './pages/ProductDetail';
 import About from './pages/About';
 import Contact from './pages/Contact';
-import './styles/index.css';
+
 
 const queryClient = new QueryClient();
 
