@@ -1,17 +1,19 @@
 # Backend
 venv
-backend/db.sqlite3
-backend/media/
-backend/__pycache__/
-backend/*/__pycache__/
-backend/*.pyc
-backend/.env
+furniture_backend/db.sqlite3
+furniture_backend/media/
+furniture_backend/__pycache__/
+furniture_backend/*/__pycache__/
+furniture_backend/*.pyc
+furniture_backend/.env
 
 # Frontend
-frontend/node_modules/
-frontend/dist/
-frontend/.env
-frontend/.env.local
+client/node_modules/
+client/dist/
+client/.env
+client/.env.local
+client/package
+client/package-lock
 
 # General
 *.log

@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from django.db.models import Avg, Count, Min, Max
+from django.db.models import Avg, Count, Min, Max, F
 from rest_framework import viewsets, status, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -11,7 +11,6 @@ from furniture.models import (
     Product, Category, Brand, HomeSlider, ContactMessage, 
     Newsletter, ProductCollection, ProductReview
 )
-from furniture_backend.api import models
 from .serializers import (
     ProductListSerializer, ProductDetailSerializer, CategorySerializer,
     HomeSliderSerializer, ContactMessageSerializer, NewsletterSerializer,
@@ -192,7 +191,7 @@ class AdminStatsView(APIView):
         unread_messages = ContactMessage.objects.filter(is_read=False).count()
         low_stock_products = Product.objects.filter(
             track_inventory=True,
-            stock_quantity__lte=models.F('min_stock_level')
+            stock_quantity__lte=F('min_stock_level')
         ).count()
         pending_reviews = ProductReview.objects.filter(is_approved=False).count()
         
