@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-
+import logo from '../../assets/logo.png'
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -46,7 +46,7 @@ const Navbar: React.FC = () => {
             to="/" 
             className="text-2xl lg:text-3xl font-serif font-bold text-primary-700 hover:text-primary-800 transition-colors duration-200"
           >
-            Furniture Co.
+            <img src={logo}></img>
           </Link>
           
           {/* Desktop Navigation */}

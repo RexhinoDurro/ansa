@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class FurnitureAppConfig(AppConfig):
+class FurnitureConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'furniture_app'
+    name = 'furniture'

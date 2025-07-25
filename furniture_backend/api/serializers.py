@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.db.models import Avg, Count
-from .models import (
+from furniture.models import (
     Product, ProductImage, ProductReview, Category, Brand, 
     HomeSlider, ContactMessage, Newsletter, ProductCollection,
     Wishlist, RecentlyViewed
