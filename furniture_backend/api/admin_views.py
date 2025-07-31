@@ -1,4 +1,4 @@
-# furniture_backend/api/admin_views.py
+# furniture_backend/api/admin_views.py (Fixed)
 from rest_framework import viewsets, status, generics
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -16,7 +16,13 @@ from .serializers import (
     ProductCreateUpdateSerializer, ProductDetailSerializer, CategorySerializer,
     ProductImageSerializer, ContactMessageDetailSerializer
 )
-from .authentication import AdminAuthenticationMixin
+from .authentication import CsrfExemptSessionAuthentication
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+
+class AdminAuthenticationMixin:
+    """Mixin for admin-only views with CSRF exemption"""
+    authentication_classes = [CsrfExemptSessionAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
 class AdminProductViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
     """Admin-only product management"""

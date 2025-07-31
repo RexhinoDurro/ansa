@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from .models import (
+from furniture.models import (
     Category, Brand, Product, ProductImage, ProductReview, 
     HomeSlider, ContactMessage, Newsletter, ProductCollection,
     Wishlist, RecentlyViewed

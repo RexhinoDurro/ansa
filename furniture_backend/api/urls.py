@@ -2,7 +2,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
-from .authentication import AdminLoginView, AdminLogoutView, AdminProfileView
+from .authentication import AdminLoginView, AdminLogoutView, AdminProfileView, CSRFTokenView
 from .admin_views import (
     AdminProductViewSet, AdminCategoryViewSet, 
     AdminContactMessageViewSet, AdminDashboardStatsView
@@ -29,6 +29,9 @@ urlpatterns = [
     path('contact/', views.ContactMessageView.as_view(), name='contact'),
     path('filters/', views.FilterOptionsView.as_view(), name='filters'),
     path('newsletter/', views.NewsletterView.as_view(), name='newsletter'),
+    
+    # CSRF token endpoint
+    path('csrf-token/', CSRFTokenView.as_view(), name='csrf-token'),
     
     # Admin authentication endpoints
     path('admin/login/', AdminLoginView.as_view(), name='admin-login'),

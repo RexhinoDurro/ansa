@@ -1,4 +1,4 @@
-# furniture_backend/api/authentication.py
+# furniture_backend/api/authentication.py (Fixed)
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from rest_framework.views import APIView
+from django.middleware.csrf import get_token
 import json
 
 class AdminAuthenticationMixin:
@@ -16,13 +17,24 @@ class AdminAuthenticationMixin:
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated, IsAdminUser]
 
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    """Session authentication without CSRF for API endpoints"""
+    def enforce_csrf(self, request):
+        return  # Skip CSRF check
+
 @method_decorator(csrf_exempt, name='dispatch')
 class AdminLoginView(APIView):
     """Admin login endpoint"""
+    authentication_classes = [CsrfExemptSessionAuthentication]
     
     def post(self, request):
         try:
-            data = json.loads(request.body)
+            # Handle both JSON and form data
+            if request.content_type == 'application/json':
+                data = json.loads(request.body)
+            else:
+                data = request.data
+                
             username = data.get('username')
             password = data.get('password')
             
@@ -31,12 +43,17 @@ class AdminLoginView(APIView):
                     'error': 'Username and password are required'
                 }, status=status.HTTP_400_BAD_REQUEST)
             
-            user = authenticate(username=username, password=password)
+            user = authenticate(request, username=username, password=password)
             
             if user and user.is_active and user.is_staff:
                 login(request, user)
+                
+                # Get CSRF token for future requests
+                csrf_token = get_token(request)
+                
                 return Response({
                     'message': 'Login successful',
+                    'csrf_token': csrf_token,
                     'user': {
                         'id': user.id,
                         'username': user.username,
@@ -57,12 +74,13 @@ class AdminLoginView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({
-                'error': 'An error occurred during login'
+                'error': 'An error occurred during login',
+                'detail': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class AdminLogoutView(APIView):
     """Admin logout endpoint"""
-    authentication_classes = [SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication]
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
@@ -73,7 +91,7 @@ class AdminLogoutView(APIView):
 
 class AdminProfileView(APIView):
     """Get current admin user profile"""
-    authentication_classes = [SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication]
     permission_classes = [IsAuthenticated, IsAdminUser]
     
     def get(self, request):
@@ -90,3 +108,14 @@ class AdminProfileView(APIView):
                 'last_login': user.last_login
             }
         }, status=status.HTTP_200_OK)
+
+# CSRF token endpoint for getting CSRF token if needed
+@method_decorator(csrf_exempt, name='dispatch')
+class CSRFTokenView(APIView):
+    """Get CSRF token"""
+    
+    def get(self, request):
+        csrf_token = get_token(request)
+        return Response({
+            'csrf_token': csrf_token
+        })
