@@ -1,6 +1,6 @@
-// client/src/App.tsx (Updated to include admin routes)
+// client/src/App.tsx (Fixed)
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Public components
@@ -55,20 +55,24 @@ function App() {
               </Layout>
             } />
 
-            {/* Admin Routes */}
-            <Route path="/admin/login" element={<AdminLogin onLogin={() => {}} />} />
+            {/* Admin Login Route */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            
+            {/* Admin Routes - Protected */}
             <Route path="/admin" element={
               <ProtectedRoute>
                 <AdminLayout />
               </ProtectedRoute>
             }>
+              {/* Default admin route redirects to dashboard */}
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="products" element={<ProductManager />} />
               <Route path="categories" element={<CategoryManager />} />
-              <Route path="orders" element={<div>Orders Management (Coming Soon)</div>} />
-              <Route path="customers" element={<div>Customer Management (Coming Soon)</div>} />
-              <Route path="messages" element={<div>Message Management (Coming Soon)</div>} />
-              <Route path="settings" element={<div>Settings (Coming Soon)</div>} />
+              <Route path="orders" element={<div className="p-6"><h2 className="text-2xl font-bold">Orders Management</h2><p className="text-gray-600 mt-2">Coming Soon</p></div>} />
+              <Route path="customers" element={<div className="p-6"><h2 className="text-2xl font-bold">Customer Management</h2><p className="text-gray-600 mt-2">Coming Soon</p></div>} />
+              <Route path="messages" element={<div className="p-6"><h2 className="text-2xl font-bold">Message Management</h2><p className="text-gray-600 mt-2">Coming Soon</p></div>} />
+              <Route path="settings" element={<div className="p-6"><h2 className="text-2xl font-bold">Settings</h2><p className="text-gray-600 mt-2">Coming Soon</p></div>} />
             </Route>
           </Routes>
         </Router>

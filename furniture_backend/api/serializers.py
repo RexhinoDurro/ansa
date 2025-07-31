@@ -311,6 +311,81 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Sale price must be lower than regular price")
         
         return data
+    
+# furniture_backend/api/serializers.py (Add this updated ProductCreateUpdateSerializer)
+
+class ProductCreateUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for creating and updating products"""
+    
+    class Meta:
+        model = Product
+        fields = [
+            'name', 'description', 'short_description',
+            'category', 'subcategory', 'brand',
+            'price', 'sale_price', 'materials', 'colors',
+            'stock_quantity', 'status', 'featured'
+        ]
+    
+    def validate(self, data):
+        # Custom validation logic
+        if data.get('sale_price') and data.get('price'):
+            if data['sale_price'] >= data['price']:
+                raise serializers.ValidationError("Sale price must be lower than regular price")
+        
+        # Validate category exists
+        if data.get('category'):
+            try:
+                Category.objects.get(id=data['category'].id if hasattr(data['category'], 'id') else data['category'])
+            except Category.DoesNotExist:
+                raise serializers.ValidationError("Selected category does not exist")
+        
+        # Validate subcategory belongs to category if provided
+        if data.get('subcategory') and data.get('category'):
+            try:
+                subcategory = Category.objects.get(
+                    id=data['subcategory'].id if hasattr(data['subcategory'], 'id') else data['subcategory']
+                )
+                category = data['category']
+                if hasattr(category, 'id'):
+                    category_id = category.id
+                else:
+                    category_id = category
+                
+                if str(subcategory.parent_category.id) != str(category_id):
+                    raise serializers.ValidationError("Subcategory must belong to the selected category")
+            except Category.DoesNotExist:
+                raise serializers.ValidationError("Selected subcategory does not exist")
+        
+        return data
+    
+    def create(self, validated_data):
+        """Create a new product"""
+        print("Creating product with data:", validated_data)
+        
+        # Set defaults for optional fields
+        validated_data.setdefault('materials', 'wood')
+        validated_data.setdefault('colors', 'natural')
+        validated_data.setdefault('status', 'active')
+        validated_data.setdefault('featured', False)
+        validated_data.setdefault('stock_quantity', 0)
+        
+        # Create the product
+        product = Product.objects.create(**validated_data)
+        print(f"Created product: {product.name} with ID: {product.id}")
+        
+        return product
+    
+    def update(self, instance, validated_data):
+        """Update an existing product"""
+        print("Updating product with data:", validated_data)
+        
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        instance.save()
+        print(f"Updated product: {instance.name}")
+        
+        return instance
 
 class ReviewCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating product reviews"""

@@ -1,6 +1,6 @@
-// client/src/components/admin/ProductManager.tsx
+// client/src/components/admin/ProductManager.tsx (Fixed with Visible Buttons)
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, Upload, X, Image as ImageIcon, Package } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -19,7 +19,7 @@ interface Product {
   stock_quantity: number;
   status: string;
   featured: boolean;
-  images: ProductImage[];
+  images?: ProductImage[];
 }
 
 interface ProductImage {
@@ -32,7 +32,7 @@ interface ProductImage {
 interface Category {
   id: string;
   name: string;
-  subcategories: Category[];
+  subcategories?: Category[];
 }
 
 const ProductManager: React.FC = () => {
@@ -43,13 +43,12 @@ const ProductManager: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [previewImages, setPreviewImages] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
     short_description: '',
     description: '',
-    specifications: '',
-    care_instructions: '',
     price: '',
     sale_price: '',
     category: '',
@@ -57,22 +56,9 @@ const ProductManager: React.FC = () => {
     brand: '',
     materials: 'wood',
     colors: 'natural',
-    condition: 'new',
-    dimensions_length: '',
-    dimensions_width: '',
-    dimensions_height: '',
-    weight: '',
     stock_quantity: '0',
-    min_stock_level: '5',
     status: 'active',
     featured: false,
-    is_bestseller: false,
-    is_new_arrival: false,
-    requires_assembly: false,
-    assembly_time_minutes: '',
-    free_shipping: false,
-    meta_title: '',
-    meta_description: ''
   });
 
   useEffect(() => {
@@ -83,28 +69,42 @@ const ProductManager: React.FC = () => {
   const fetchProducts = async () => {
     try {
       const response = await fetch('http://localhost:8000/api/admin/products/', {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
       if (response.ok) {
         const data = await response.json();
-        setProducts(data.results || data);
+        console.log('Fetched products:', data);
+        setProducts(data.results || data || []);
+      } else {
+        throw new Error('Failed to fetch products');
       }
     } catch (error) {
       console.error('Error fetching products:', error);
+      setError('Failed to load products');
+      setProducts([]);
     }
   };
 
   const fetchCategories = async () => {
     try {
       const response = await fetch('http://localhost:8000/api/admin/categories/', {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
       if (response.ok) {
         const data = await response.json();
-        setCategories(data.results || data);
+        setCategories(data.results || data || []);
+      } else {
+        throw new Error('Failed to fetch categories');
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
+      setCategories([]);
     }
   };
 
@@ -127,27 +127,60 @@ const ProductManager: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
+
+    console.log('=== FRONTEND DEBUG ===');
+    console.log('Form data:', formData);
+    console.log('Editing product:', editingProduct);
+    console.log('Selected images:', selectedImages);
 
     try {
       const formDataToSend = new FormData();
       
-      // Add form fields
+      // Add form fields with validation
+      const requiredFields = ['name', 'description', 'price', 'category'];
+      const missingFields = [];
+      
+      for (const field of requiredFields) {
+        if (!formData[field as keyof typeof formData] || formData[field as keyof typeof formData] === '') {
+          missingFields.push(field);
+        }
+      }
+      
+      if (missingFields.length > 0) {
+        setError(`Please fill in required fields: ${missingFields.join(', ')}`);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Add form fields to FormData
       Object.entries(formData).forEach(([key, value]) => {
-        if (value !== '') {
+        if (value !== '' && value !== null && value !== undefined) {
+          console.log(`Adding field: ${key} = ${value}`);
           formDataToSend.append(key, value.toString());
         }
       });
 
       // Add images
       selectedImages.forEach((image, index) => {
+        console.log(`Adding image ${index}:`, image.name);
         formDataToSend.append('images', image);
       });
 
-      const url = editingProduct 
+      // Log what we're sending
+      console.log('FormData contents:');
+      for (let pair of formDataToSend.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+
+      const url = editingProduct && editingProduct.id
         ? `http://localhost:8000/api/admin/products/${editingProduct.id}/`
         : 'http://localhost:8000/api/admin/products/';
       
-      const method = editingProduct ? 'PATCH' : 'POST';
+      const method = editingProduct && editingProduct.id ? 'PATCH' : 'POST';
+
+      console.log('Making request to:', url);
+      console.log('Method:', method);
 
       const response = await fetch(url, {
         method,
@@ -155,59 +188,63 @@ const ProductManager: React.FC = () => {
         body: formDataToSend
       });
 
+      console.log('Response status:', response.status);
+
+      const responseData = await response.text();
+      console.log('Response data (raw):', responseData);
+
+      let parsedData;
+      try {
+        parsedData = JSON.parse(responseData);
+        console.log('Response data (parsed):', parsedData);
+      } catch (e) {
+        console.log('Failed to parse response as JSON');
+        parsedData = { error: 'Invalid response format' };
+      }
+
       if (response.ok) {
         await fetchProducts();
         closeModal();
         alert(editingProduct ? 'Product updated successfully!' : 'Product created successfully!');
       } else {
-        const errorData = await response.json();
-        console.error('Error:', errorData);
-        alert('Error saving product. Please check the form.');
+        console.error('Server error:', parsedData);
+        setError(parsedData.error || 'Error saving product. Please check the form.');
       }
     } catch (error) {
-      console.error('Error:', error);
-      alert('Network error. Please try again.');
+      console.error('Network error:', error);
+      setError('Network error. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleEdit = (product: Product) => {
+    console.log('Editing product:', product);
     setEditingProduct(product);
     setFormData({
-      name: product.name,
-      short_description: product.short_description,
-      description: product.description,
-      specifications: '',
-      care_instructions: '',
-      price: product.price.toString(),
+      name: product.name || '',
+      short_description: product.short_description || '',
+      description: product.description || '',
+      price: product.price?.toString() || '',
       sale_price: product.sale_price?.toString() || '',
-      category: product.category,
+      category: product.category || '',
       subcategory: product.subcategory || '',
       brand: product.brand || '',
-      materials: product.materials,
-      colors: product.colors,
-      condition: 'new',
-      dimensions_length: '',
-      dimensions_width: '',
-      dimensions_height: '',
-      weight: '',
-      stock_quantity: product.stock_quantity.toString(),
-      min_stock_level: '5',
-      status: product.status,
-      featured: product.featured,
-      is_bestseller: false,
-      is_new_arrival: false,
-      requires_assembly: false,
-      assembly_time_minutes: '',
-      free_shipping: false,
-      meta_title: '',
-      meta_description: ''
+      materials: product.materials || 'wood',
+      colors: product.colors || 'natural',
+      stock_quantity: product.stock_quantity?.toString() || '0',
+      status: product.status || 'active',
+      featured: product.featured || false,
     });
     setShowModal(true);
   };
 
   const handleDelete = async (id: string) => {
+    if (!id) {
+      alert('Error: Product ID is missing');
+      return;
+    }
+
     if (!confirm('Are you sure you want to delete this product?')) return;
 
     try {
@@ -235,8 +272,6 @@ const ProductManager: React.FC = () => {
       name: '',
       short_description: '',
       description: '',
-      specifications: '',
-      care_instructions: '',
       price: '',
       sale_price: '',
       category: '',
@@ -244,25 +279,13 @@ const ProductManager: React.FC = () => {
       brand: '',
       materials: 'wood',
       colors: 'natural',
-      condition: 'new',
-      dimensions_length: '',
-      dimensions_width: '',
-      dimensions_height: '',
-      weight: '',
       stock_quantity: '0',
-      min_stock_level: '5',
       status: 'active',
       featured: false,
-      is_bestseller: false,
-      is_new_arrival: false,
-      requires_assembly: false,
-      assembly_time_minutes: '',
-      free_shipping: false,
-      meta_title: '',
-      meta_description: ''
     });
     setSelectedImages([]);
     setPreviewImages([]);
+    setError(null);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -281,103 +304,139 @@ const ProductManager: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-neutral-900">Product Management</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-neutral-900">Product Management</h2>
+          <p className="text-neutral-600 mt-1">Manage your product inventory</p>
+        </div>
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+          className="flex items-center bg-primary-600 hover:bg-primary-700 bg-blue-500 hover:bg-blue-600 font-medium rounded-lg transition-colors duration-200  px-6 py-3 rounded-lg transition-colors duration-200 font-semibold shadow-md hover:shadow-lg"
         >
-          <Plus className="w-4 h-4 mr-2" />
+          <Plus className="w-5 h-5 mr-2" />
           Add Product
         </button>
       </div>
 
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">{error}</p>
+        </div>
+      )}
+
       {/* Products Table */}
       <div className="bg-white rounded-lg shadow-sm border border-neutral-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-neutral-50 border-b border-neutral-200">
-              <tr>
-                <th className="text-left px-6 py-3 text-sm font-medium text-neutral-900">Product</th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-neutral-900">Price</th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-neutral-900">Stock</th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-neutral-900">Status</th>
-                <th className="text-left px-6 py-3 text-sm font-medium text-neutral-900">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-200">
-              {products.map((product) => (
-                <tr key={product.id} className="hover:bg-neutral-50">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      {product.images[0] ? (
-                        <img
-                          src={product.images[0].image}
-                          alt={product.images[0].alt_text}
-                          className="w-12 h-12 rounded-lg object-cover mr-4"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 bg-neutral-200 rounded-lg flex items-center justify-center mr-4">
-                          <ImageIcon className="w-6 h-6 text-neutral-400" />
-                        </div>
-                      )}
-                      <div>
-                        <p className="font-medium text-neutral-900">{product.name}</p>
-                        <p className="text-sm text-neutral-600">SKU: {product.sku}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div>
-                      <p className="font-medium text-neutral-900">${product.price}</p>
-                      {product.sale_price && (
-                        <p className="text-sm text-green-600">${product.sale_price} (Sale)</p>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      product.stock_quantity > 10 ? 'bg-green-100 text-green-800' :
-                      product.stock_quantity > 0 ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {product.stock_quantity} units
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      product.status === 'active' ? 'bg-green-100 text-green-800' :
-                      product.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {product.status}
-                    </span>
-                    {product.featured && (
-                      <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        Featured
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => handleEdit(product)}
-                        className="p-2 text-neutral-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-200"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(product.id)}
-                        className="p-2 text-neutral-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
+        {products.length === 0 ? (
+          <div className="p-8 text-center">
+            <Package className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-neutral-900 mb-2">No products yet</h3>
+            <p className="text-neutral-600 mb-4">
+              Start by creating your first product. Make sure you have categories created first.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                onClick={() => window.open('/admin/categories', '_self')}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-semibold"
+              >
+                Manage Categories First
+              </button>
+              <button
+                onClick={() => setShowModal(true)}
+                className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-semibold"
+              >
+                Create First Product
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-neutral-50 border-b border-neutral-200">
+                <tr>
+                  <th className="text-left px-6 py-3 text-sm font-medium text-neutral-900">Product</th>
+                  <th className="text-left px-6 py-3 text-sm font-medium text-neutral-900">Price</th>
+                  <th className="text-left px-6 py-3 text-sm font-medium text-neutral-900">Stock</th>
+                  <th className="text-left px-6 py-3 text-sm font-medium text-neutral-900">Status</th>
+                  <th className="text-left px-6 py-3 text-sm font-medium text-neutral-900">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-neutral-200">
+                {products.map((product) => (
+                  <tr key={product.id} className="hover:bg-neutral-50">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center">
+                        {product.images && product.images.length > 0 && product.images[0] ? (
+                          <img
+                            src={product.images[0].image}
+                            alt={product.images[0].alt_text || product.name}
+                            className="w-12 h-12 rounded-lg object-cover mr-4"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-neutral-200 rounded-lg flex items-center justify-center mr-4">
+                            <ImageIcon className="w-6 h-6 text-neutral-400" />
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-medium text-neutral-900">{product.name}</p>
+                          <p className="text-sm text-neutral-600">SKU: {product.sku || 'N/A'}</p>
+                          <p className="text-xs text-neutral-500">ID: {product.id}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div>
+                        <p className="font-medium text-neutral-900">${product.price}</p>
+                        {product.sale_price && (
+                          <p className="text-sm text-green-600">${product.sale_price} (Sale)</p>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        product.stock_quantity > 10 ? 'bg-green-100 text-green-800' :
+                        product.stock_quantity > 0 ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {product.stock_quantity} units
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        product.status === 'active' ? 'bg-green-100 text-green-800' :
+                        product.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {product.status}
+                      </span>
+                      {product.featured && (
+                        <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          Featured
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-3">
+                        <button
+                          onClick={() => handleEdit(product)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition-colors duration-200 font-medium text-sm flex items-center"
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(product.id)}
+                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition-colors duration-200 font-medium text-sm flex items-center"
+                        >
+                          <Trash2 className="w-4 h-4 mr-1" />
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Product Modal */}
@@ -399,12 +458,28 @@ const ProductManager: React.FC = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Basic Information */}
-                <div className="md:col-span-2">
-                  <h4 className="text-lg font-medium text-neutral-900 mb-4">Basic Information</h4>
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                  <p className="text-red-800">{error}</p>
                 </div>
+              )}
 
+              {categories.length === 0 && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                  <p className="text-yellow-800">
+                    <strong>Warning:</strong> No categories found. You need to create categories first before adding products.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => window.open('/admin/categories', '_self')}
+                    className="mt-2 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded font-semibold"
+                  >
+                    Go to Category Management
+                  </button>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">
                     Product Name *
@@ -490,11 +565,6 @@ const ProductManager: React.FC = () => {
                   />
                 </div>
 
-                {/* Categorization */}
-                <div className="md:col-span-2">
-                  <h4 className="text-lg font-medium text-neutral-900 mb-4">Categorization</h4>
-                </div>
-
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">
                     Category *
@@ -524,10 +594,10 @@ const ProductManager: React.FC = () => {
                     value={formData.subcategory}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    disabled={!selectedCategory?.subcategories.length}
+                    disabled={!selectedCategory?.subcategories?.length}
                   >
                     <option value="">Select Subcategory</option>
-                    {selectedCategory?.subcategories.map((subcategory) => (
+                    {selectedCategory?.subcategories?.map((subcategory) => (
                       <option key={subcategory.id} value={subcategory.id}>
                         {subcategory.name}
                       </option>
@@ -578,11 +648,6 @@ const ProductManager: React.FC = () => {
                   </select>
                 </div>
 
-                {/* Status and Options */}
-                <div className="md:col-span-2">
-                  <h4 className="text-lg font-medium text-neutral-900 mb-4">Status & Options</h4>
-                </div>
-
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">
                     Status
@@ -609,28 +674,6 @@ const ProductManager: React.FC = () => {
                       className="mr-2 rounded"
                     />
                     <span className="text-sm text-neutral-700">Featured Product</span>
-                  </label>
-                  
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      name="is_bestseller"
-                      checked={formData.is_bestseller}
-                      onChange={handleInputChange}
-                      className="mr-2 rounded"
-                    />
-                    <span className="text-sm text-neutral-700">Bestseller</span>
-                  </label>
-                  
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      name="is_new_arrival"
-                      checked={formData.is_new_arrival}
-                      onChange={handleInputChange}
-                      className="mr-2 rounded"
-                    />
-                    <span className="text-sm text-neutral-700">New Arrival</span>
                   </label>
                 </div>
 
@@ -688,14 +731,14 @@ const ProductManager: React.FC = () => {
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="px-4 py-2 text-neutral-600 hover:text-neutral-800 font-medium"
+                  className="px-6 py-3 text-white bg-blue-500 hover:bg-blue-600 font-medium rounded-lg transition-colors duration-200"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={isLoading}
-                  className="bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-300 text-white font-semibold px-6 py-2 rounded-lg transition-colors duration-200"
+                  disabled={isLoading || categories.length === 0}
+                  className="bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-300 text-white font-semibold px-8 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
                 >
                   {isLoading ? 'Saving...' : editingProduct ? 'Update Product' : 'Create Product'}
                 </button>

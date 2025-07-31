@@ -1,4 +1,4 @@
-// client/src/components/admin/CategoryManager.tsx
+// client/src/components/admin/CategoryManager.tsx (Fixed)
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, X, FolderPlus, Folder, ChevronRight, ChevronDown } from 'lucide-react';
 
@@ -21,6 +21,7 @@ const CategoryManager: React.FC = () => {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -37,20 +38,28 @@ const CategoryManager: React.FC = () => {
   const fetchCategories = async () => {
     try {
       const response = await fetch('http://localhost:8000/api/admin/categories/', {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
       if (response.ok) {
         const data = await response.json();
-        setCategories(data.results || data);
+        setCategories(data.results || data || []);
+      } else {
+        throw new Error('Failed to fetch categories');
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
+      setError('Failed to load categories');
+      setCategories([]);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
     try {
       const url = editingCategory 
@@ -75,11 +84,11 @@ const CategoryManager: React.FC = () => {
       } else {
         const errorData = await response.json();
         console.error('Error:', errorData);
-        alert('Error saving category. Please check the form.');
+        setError('Error saving category. Please check the form.');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Network error. Please try again.');
+      setError('Network error. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -128,6 +137,7 @@ const CategoryManager: React.FC = () => {
       is_active: true,
       sort_order: 0
     });
+    setError(null);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -178,7 +188,7 @@ const CategoryManager: React.FC = () => {
               <div>
                 <h3 className="font-medium text-neutral-900">{category.name}</h3>
                 <p className="text-sm text-neutral-600">
-                  {category.product_count} products
+                  {category.product_count || 0} products
                   {category.description && ` • ${category.description.substring(0, 50)}${category.description.length > 50 ? '...' : ''}`}
                 </p>
               </div>
@@ -237,6 +247,12 @@ const CategoryManager: React.FC = () => {
           Add Category
         </button>
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">{error}</p>
+        </div>
+      )}
 
       {/* Category Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -302,9 +318,25 @@ const CategoryManager: React.FC = () => {
           </p>
         </div>
         
-        {parentCategories.length > 0 ? (
+        {categories.length > 0 ? (
           <div>
-            {renderCategoryTree(parentCategories)}
+            {parentCategories.length > 0 ? (
+              renderCategoryTree(parentCategories)
+            ) : (
+              <div className="p-8 text-center">
+                <Folder className="w-12 h-12 text-neutral-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-neutral-900 mb-2">Only subcategories found</h3>
+                <p className="text-neutral-600 mb-4">
+                  Create some parent categories to organize your products.
+                </p>
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                >
+                  Create Parent Category
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="p-8 text-center">
@@ -342,6 +374,12 @@ const CategoryManager: React.FC = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="p-6">
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                  <p className="text-red-800">{error}</p>
+                </div>
+              )}
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-2">

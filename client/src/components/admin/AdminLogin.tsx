@@ -1,27 +1,16 @@
-// AdminLogin.tsx (Fixed)
+// client/src/components/admin/AdminLogin.tsx (Fixed)
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAdmin } from '../../contexts/AdminContext';
 
 interface LoginData {
   username: string;
   password: string;
 }
 
-interface User {
-  id: number;
-  username: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  is_superuser: boolean;
-}
-
-interface LoginResponse {
-  message: string;
-  csrf_token?: string;
-  user: User;
-}
-
 const AdminLogin: React.FC = () => {
+  const navigate = useNavigate();
+  const { login } = useAdmin();
   const [formData, setFormData] = useState<LoginData>({
     username: '',
     password: '',
@@ -49,30 +38,23 @@ const AdminLogin: React.FC = () => {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        credentials: 'include', // Important for session cookies
+        credentials: 'include',
         body: JSON.stringify(formData),
       });
 
-      const data: LoginResponse | { error: string } = await response.json();
+      const data = await response.json();
 
       if (response.ok) {
-        const successData = data as LoginResponse;
-        console.log('Login successful:', successData);
+        console.log('Login successful:', data);
         
-        // Store user data in localStorage or context
-        localStorage.setItem('admin_user', JSON.stringify(successData.user));
+        // Use the context login function
+        login(data.user);
         
-        // Store CSRF token if provided
-        if (successData.csrf_token) {
-          localStorage.setItem('csrf_token', successData.csrf_token);
-        }
-        
-        // Redirect to admin dashboard or reload page
-        window.location.href = '/admin/dashboard';
+        // Navigate to admin dashboard
+        navigate('/admin/dashboard');
         
       } else {
-        const errorData = data as { error: string };
-        setError(errorData.error || 'Login failed');
+        setError(data.error || 'Login failed');
       }
     } catch (err) {
       console.error('Login error:', err);

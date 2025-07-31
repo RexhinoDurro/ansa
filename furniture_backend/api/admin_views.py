@@ -2,7 +2,7 @@
 from rest_framework import viewsets, status, generics
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.views import APIView
 from django.db import models
 from django.db.models import Count, Q, Sum
@@ -10,6 +10,7 @@ from django.core.files.base import ContentFile
 from django.utils import timezone
 from datetime import datetime, timedelta
 import uuid
+import json
 
 from furniture.models import Product, Category, Brand, ProductImage, ContactMessage, ProductReview
 from .serializers import (
@@ -28,7 +29,7 @@ class AdminProductViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
     """Admin-only product management"""
     queryset = Product.objects.all().select_related('category', 'subcategory', 'brand').prefetch_related('images')
     serializer_class = ProductCreateUpdateSerializer
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -36,53 +37,153 @@ class AdminProductViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
         return ProductCreateUpdateSerializer
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        product = serializer.save()
+        print("=== CREATE PRODUCT DEBUG ===")
+        print("Request data:", request.data)
+        print("Request files:", request.FILES)
         
-        # Handle image uploads
-        images = request.FILES.getlist('images')
-        for i, image in enumerate(images):
-            ProductImage.objects.create(
-                product=product,
-                image=image,
-                alt_text=f"{product.name} - Image {i+1}",
-                is_primary=(i == 0),
-                order=i
+        try:
+            # Extract data
+            data = request.data.copy()
+            images = request.FILES.getlist('images')
+            
+            print("Extracted data:", data)
+            print("Images count:", len(images))
+            
+            # Validate required fields
+            required_fields = ['name', 'description', 'price', 'category']
+            missing_fields = []
+            for field in required_fields:
+                if not data.get(field):
+                    missing_fields.append(field)
+            
+            if missing_fields:
+                return Response(
+                    {'error': f'Missing required fields: {", ".join(missing_fields)}'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Convert string values to proper types
+            try:
+                if data.get('price'):
+                    data['price'] = float(data['price'])
+                if data.get('sale_price'):
+                    data['sale_price'] = float(data['sale_price'])
+                if data.get('stock_quantity'):
+                    data['stock_quantity'] = int(data['stock_quantity'])
+                if data.get('featured'):
+                    data['featured'] = data['featured'].lower() in ['true', '1', 'on']
+            except (ValueError, TypeError) as e:
+                return Response(
+                    {'error': f'Invalid data format: {str(e)}'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Validate category exists
+            try:
+                category = Category.objects.get(id=data['category'])
+                print(f"Found category: {category.name}")
+            except Category.DoesNotExist:
+                return Response(
+                    {'error': 'Selected category does not exist'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Validate subcategory if provided
+            if data.get('subcategory'):
+                try:
+                    subcategory = Category.objects.get(id=data['subcategory'])
+                    if subcategory.parent_category != category:
+                        return Response(
+                            {'error': 'Subcategory must belong to the selected category'},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                except Category.DoesNotExist:
+                    return Response(
+                        {'error': 'Selected subcategory does not exist'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            # Create product
+            serializer = self.get_serializer(data=data)
+            if serializer.is_valid():
+                product = serializer.save()
+                print(f"Created product: {product.name}")
+                
+                # Handle image uploads
+                for i, image in enumerate(images):
+                    ProductImage.objects.create(
+                        product=product,
+                        image=image,
+                        alt_text=f"{product.name} - Image {i+1}",
+                        is_primary=(i == 0),
+                        order=i
+                    )
+                    print(f"Created image {i+1} for product")
+                
+                # Return the created product
+                response_serializer = ProductDetailSerializer(product, context={'request': request})
+                return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                print("Serializer errors:", serializer.errors)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                
+        except Exception as e:
+            print(f"Unexpected error: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return Response(
+                {'error': f'Server error: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-        
-        return Response(
-            ProductDetailSerializer(product, context={'request': request}).data,
-            status=status.HTTP_201_CREATED
-        )
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        product = serializer.save()
-
-        # Handle new image uploads
+        
+        # Extract data
+        data = request.data.copy()
         images = request.FILES.getlist('images')
-        if images:
-            for i, image in enumerate(images):
-                # Get the highest order number for existing images
-                max_order = ProductImage.objects.filter(product=product).aggregate(
-                    max_order=models.Max('order')
-                )['max_order'] or -1
-                
-                ProductImage.objects.create(
-                    product=product,
-                    image=image,
-                    alt_text=f"{product.name} - Image {max_order + i + 2}",
-                    is_primary=False,
-                    order=max_order + i + 1
-                )
+        
+        # Convert string values to proper types
+        try:
+            if data.get('price'):
+                data['price'] = float(data['price'])
+            if data.get('sale_price'):
+                data['sale_price'] = float(data['sale_price'])
+            if data.get('stock_quantity'):
+                data['stock_quantity'] = int(data['stock_quantity'])
+            if data.get('featured'):
+                data['featured'] = data['featured'].lower() in ['true', '1', 'on']
+        except (ValueError, TypeError) as e:
+            return Response(
+                {'error': f'Invalid data format: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        serializer = self.get_serializer(instance, data=data, partial=partial)
+        if serializer.is_valid():
+            product = serializer.save()
 
-        return Response(
-            ProductDetailSerializer(product, context={'request': request}).data
-        )
+            # Handle new image uploads
+            if images:
+                for i, image in enumerate(images):
+                    # Get the highest order number for existing images
+                    max_order = ProductImage.objects.filter(product=product).aggregate(
+                        max_order=models.Max('order')
+                    )['max_order'] or -1
+                    
+                    ProductImage.objects.create(
+                        product=product,
+                        image=image,
+                        alt_text=f"{product.name} - Image {max_order + i + 2}",
+                        is_primary=False,
+                        order=max_order + i + 1
+                    )
+
+            response_serializer = ProductDetailSerializer(product, context={'request': request})
+            return Response(response_serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'])
     def upload_images(self, request, pk=None):
@@ -150,17 +251,22 @@ class AdminCategoryViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
     """Admin-only category management"""
     queryset = Category.objects.all().order_by('sort_order', 'name')
     serializer_class = CategorySerializer
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        category = serializer.save()
+        print("=== CREATE CATEGORY DEBUG ===")
+        print("Request data:", request.data)
         
-        return Response(
-            CategorySerializer(category, context={'request': request}).data,
-            status=status.HTTP_201_CREATED
-        )
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            category = serializer.save()
+            return Response(
+                CategorySerializer(category, context={'request': request}).data,
+                status=status.HTTP_201_CREATED
+            )
+        else:
+            print("Category serializer errors:", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['get'])
     def tree(self, request):
