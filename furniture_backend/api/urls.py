@@ -5,7 +5,8 @@ from . import views
 from .authentication import AdminLoginView, AdminLogoutView, AdminProfileView, CSRFTokenView
 from .admin_views import (
     AdminProductViewSet, AdminCategoryViewSet, 
-    AdminContactMessageViewSet, AdminDashboardStatsView
+    AdminContactMessageViewSet, AdminDashboardStatsView,
+    AdminCustomRequestViewSet
 )
 
 # Create a router for ViewSets
@@ -18,6 +19,7 @@ admin_router = DefaultRouter()
 admin_router.register(r'products', AdminProductViewSet, basename='admin-product')
 admin_router.register(r'categories', AdminCategoryViewSet, basename='admin-category')
 admin_router.register(r'messages', AdminContactMessageViewSet, basename='admin-messages')
+admin_router.register(r'custom-requests', AdminCustomRequestViewSet, basename='admin-custom-requests')
 
 urlpatterns = [
     # Public API endpoints
@@ -27,6 +29,7 @@ urlpatterns = [
     path('featured-products/', views.FeaturedProductsView.as_view(), name='featured-products'),
     path('slider/', views.HomeSliderView.as_view(), name='slider'),
     path('contact/', views.ContactMessageView.as_view(), name='contact'),
+    path('custom-request/', views.CustomRequestView.as_view(), name='custom-request'),
     path('filters/', views.FilterOptionsView.as_view(), name='filters'),
     path('newsletter/', views.NewsletterView.as_view(), name='newsletter'),
     

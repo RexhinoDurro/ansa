@@ -12,6 +12,9 @@ from datetime import datetime, timedelta
 import uuid
 import json
 
+from furniture.models import CustomRequest
+from .serializers import AdminCustomRequestSerializer
+
 from furniture.models import Product, Category, Brand, ProductImage, ContactMessage, ProductReview
 from .serializers import (
     ProductCreateUpdateSerializer, ProductDetailSerializer, CategorySerializer,
@@ -245,6 +248,107 @@ class AdminProductViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
             'active_products': active_products,
             'draft_products': draft_products,
             'low_stock_products': low_stock_products,
+        })
+
+class AdminCustomRequestViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
+    """Admin-only custom request management"""
+    queryset = CustomRequest.objects.all().select_related('assigned_to').order_by('-created_at')
+    serializer_class = AdminCustomRequestSerializer
+    parser_classes = [JSONParser]
+
+    @action(detail=True, methods=['post'])
+    def update_status(self, request, pk=None):
+        """Update custom request status"""
+        custom_request = self.get_object()
+        new_status = request.data.get('status')
+        
+        if new_status not in dict(CustomRequest.STATUS_CHOICES):
+            return Response({
+                'error': 'Invalid status'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        old_status = custom_request.status
+        custom_request.status = new_status
+        
+        # Update timestamps based on status
+        if new_status == 'reviewing' and old_status == 'pending':
+            custom_request.reviewed_at = timezone.now()
+        elif new_status == 'completed' and old_status != 'completed':
+            custom_request.completed_at = timezone.now()
+        
+        custom_request.save()
+        
+        return Response({
+            'message': f'Status updated to {custom_request.get_status_display()}'
+        })
+
+    @action(detail=True, methods=['post'])
+    def assign_to_user(self, request, pk=None):
+        """Assign custom request to a user"""
+        custom_request = self.get_object()
+        user_id = request.data.get('user_id')
+        
+        if user_id:
+            try:
+                user = User.objects.get(id=user_id, is_staff=True)
+                custom_request.assigned_to = user
+                custom_request.save()
+                return Response({
+                    'message': f'Request assigned to {user.get_full_name() or user.username}'
+                })
+            except User.DoesNotExist:
+                return Response({
+                    'error': 'User not found'
+                }, status=status.HTTP_404_NOT_FOUND)
+        else:
+            custom_request.assigned_to = None
+            custom_request.save()
+            return Response({
+                'message': 'Request unassigned'
+            })
+
+    @action(detail=True, methods=['post'])
+    def add_notes(self, request, pk=None):
+        """Add admin notes to custom request"""
+        custom_request = self.get_object()
+        notes = request.data.get('notes')
+        
+        if not notes:
+            return Response({
+                'error': 'Notes are required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Append to existing notes with timestamp and user
+        timestamp = timezone.now().strftime('%Y-%m-%d %H:%M')
+        user_name = request.user.get_full_name() or request.user.username
+        new_note = f"\n[{timestamp} - {user_name}]: {notes}"
+        
+        if custom_request.admin_notes:
+            custom_request.admin_notes += new_note
+        else:
+            custom_request.admin_notes = new_note.strip()
+        
+        custom_request.save()
+        
+        return Response({
+            'message': 'Notes added successfully'
+        })
+
+    @action(detail=False, methods=['get'])
+    def stats(self, request):
+        """Get custom request statistics"""
+        total_requests = CustomRequest.objects.count()
+        pending_requests = CustomRequest.objects.filter(status='pending').count()
+        in_progress_requests = CustomRequest.objects.filter(
+            status__in=['reviewing', 'quoted', 'approved', 'in_progress']
+        ).count()
+        completed_requests = CustomRequest.objects.filter(status='completed').count()
+        
+        return Response({
+            'total_requests': total_requests,
+            'pending_requests': pending_requests,
+            'in_progress_requests': in_progress_requests,
+            'completed_requests': completed_requests,
         })
 
 class AdminCategoryViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):

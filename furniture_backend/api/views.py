@@ -18,6 +18,9 @@ from .serializers import (
     ReviewCreateSerializer
 )
 from .filters import ProductFilter
+from furniture.models import CustomRequest
+from .serializers import CustomRequestSerializer
+
 
 class ProductViewSet(viewsets.ModelViewSet):
     """
@@ -77,6 +80,30 @@ class ProductViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class CustomRequestView(generics.CreateAPIView):
+    """
+    Create a new custom request
+    """
+    queryset = CustomRequest.objects.all()
+    serializer_class = CustomRequestSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        custom_request = serializer.save()
+        
+        # You can add email notification logic here
+        # send_custom_request_notification_email(custom_request)
+        
+        return Response(
+            {
+                'message': 'Thank you for your custom request! We will review it and get back to you soon.',
+                'request_id': custom_request.id
+            },
+            status=status.HTTP_201_CREATED
+        )
+        
 class ProductDetailView(generics.RetrieveAPIView):
     """
     Retrieve a single product by slug

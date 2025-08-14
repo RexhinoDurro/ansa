@@ -57,6 +57,110 @@ class Category(models.Model):
             return f"{self.parent_category.get_full_path} > {self.name}"
         return self.name
 
+
+class CustomRequest(models.Model):
+    STYLE_CHOICES = [
+        ('modern', 'Modern'),
+        ('minimal', 'Minimal'),
+        ('classic', 'Classic'),
+        ('traditional', 'Traditional'),
+        ('contemporary', 'Contemporary'),
+        ('rustic', 'Rustic'),
+        ('scandinavian', 'Scandinavian'),
+    ]
+    
+    BUDGET_CHOICES = [
+        ('under-500', 'Under €500'),
+        ('500-1000', '€500 - €1,000'),
+        ('1000-2500', '€1,000 - €2,500'),
+        ('2500-5000', '€2,500 - €5,000'),
+        ('over-5000', 'Over €5,000'),
+    ]
+    
+    CONTACT_METHOD_CHOICES = [
+        ('email', 'Email'),
+        ('phone', 'Phone'),
+        ('both', 'Both Email & Phone'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('pending', 'Pending Review'),
+        ('reviewing', 'Under Review'),
+        ('quoted', 'Quote Sent'),
+        ('approved', 'Approved'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    # Project Details
+    title = models.CharField(max_length=200, help_text="Project title")
+    description = models.TextField(help_text="Detailed project description")
+    width = models.CharField(max_length=50, blank=True, help_text="Width dimension")
+    height = models.CharField(max_length=50, blank=True, help_text="Height dimension")
+    primary_color = models.CharField(max_length=7, default='#3b82f6', help_text="Hex color code")
+    style = models.CharField(max_length=20, choices=STYLE_CHOICES, blank=True)
+    deadline = models.DateField(blank=True, null=True, help_text="Preferred completion date")
+    budget = models.CharField(max_length=20, choices=BUDGET_CHOICES, blank=True)
+    additional = models.TextField(blank=True, help_text="Additional requirements or notes")
+    
+    # Contact Information
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20, blank=True)
+    contact_method = models.CharField(max_length=10, choices=CONTACT_METHOD_CHOICES, default='email')
+    
+    # Admin fields
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    admin_notes = models.TextField(blank=True, help_text="Internal admin notes")
+    estimated_price = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        blank=True, 
+        null=True,
+        help_text="Estimated price for the custom request"
+    )
+    assigned_to = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        blank=True, 
+        null=True,
+        help_text="Admin user assigned to this request"
+    )
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    reviewed_at = models.DateTimeField(blank=True, null=True)
+    completed_at = models.DateTimeField(blank=True, null=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Custom Request"
+        verbose_name_plural = "Custom Requests"
+    
+    def __str__(self):
+        return f"{self.name} - {self.title}"
+    
+    @property
+    def budget_display(self):
+        """Convert budget code to readable format"""
+        if not self.budget:
+            return "Not specified"
+        return dict(self.BUDGET_CHOICES).get(self.budget, self.budget)
+    
+    @property
+    def dimensions_display(self):
+        """Display dimensions in readable format"""
+        if self.width and self.height:
+            return f"{self.width} × {self.height}"
+        elif self.width:
+            return f"Width: {self.width}"
+        elif self.height:
+            return f"Height: {self.height}"
+        return "Not specified"
+    
+    
 class Brand(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True, blank=True)

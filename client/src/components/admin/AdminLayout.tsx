@@ -1,12 +1,10 @@
-// client/src/components/admin/AdminLayout.tsx
+// client/src/components/admin/AdminLayout.tsx (Complete File)
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   BarChart3, 
   Package, 
-  Users, 
   ShoppingCart, 
-  MessageSquare,
   Settings,
   Menu,
   X,
@@ -28,9 +26,7 @@ const AdminLayout: React.FC = () => {
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, path: '/admin/dashboard' },
     { id: 'products', label: 'Products', icon: Package, path: '/admin/products' },
     { id: 'categories', label: 'Categories', icon: Grid, path: '/admin/categories' },
-    { id: 'orders', label: 'Orders', icon: ShoppingCart, path: '/admin/orders' },
-    { id: 'customers', label: 'Customers', icon: Users, path: '/admin/customers' },
-    { id: 'messages', label: 'Messages', icon: MessageSquare, path: '/admin/messages' },
+    { id: 'orders', label: 'Custom Requests', icon: ShoppingCart, path: '/admin/orders' },
     { id: 'settings', label: 'Settings', icon: Settings, path: '/admin/settings' },
   ];
 

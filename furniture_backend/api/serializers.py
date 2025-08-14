@@ -3,7 +3,7 @@ from django.db.models import Avg, Count
 from furniture.models import (
     Product, ProductImage, ProductReview, Category, Brand, 
     HomeSlider, ContactMessage, Newsletter, ProductCollection,
-    Wishlist, RecentlyViewed
+    Wishlist, RecentlyViewed, CustomRequest
 )
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -387,6 +387,45 @@ class ProductCreateUpdateSerializer(serializers.ModelSerializer):
         
         return instance
 
+
+class CustomRequestSerializer(serializers.ModelSerializer):
+    budget_display = serializers.CharField(read_only=True)
+    dimensions_display = serializers.CharField(read_only=True)
+    
+    class Meta:
+        model = CustomRequest
+        fields = [
+            'title', 'description', 'width', 'height', 'primary_color',
+            'style', 'deadline', 'budget', 'budget_display', 'additional',
+            'name', 'email', 'phone', 'contact_method', 'dimensions_display'
+        ]
+        extra_kwargs = {
+            'deadline': {'input_formats': ['%Y-%m-%d']},
+        }
+    
+    def create(self, validated_data):
+        # You could add email notification logic here
+        custom_request = CustomRequest.objects.create(**validated_data)
+        return custom_request
+
+class AdminCustomRequestSerializer(serializers.ModelSerializer):
+    """Admin serializer for custom requests with all fields"""
+    budget_display = serializers.CharField(read_only=True)
+    dimensions_display = serializers.CharField(read_only=True)
+    assigned_to_name = serializers.CharField(source='assigned_to.get_full_name', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    
+    class Meta:
+        model = CustomRequest
+        fields = [
+            'id', 'title', 'description', 'width', 'height', 'primary_color',
+            'style', 'deadline', 'budget', 'budget_display', 'additional',
+            'name', 'email', 'phone', 'contact_method', 'status', 'status_display',
+            'admin_notes', 'estimated_price', 'assigned_to', 'assigned_to_name',
+            'dimensions_display', 'created_at', 'updated_at', 'reviewed_at', 'completed_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+        
 class ReviewCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating product reviews"""
     

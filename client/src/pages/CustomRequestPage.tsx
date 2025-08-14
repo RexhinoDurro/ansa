@@ -1,3 +1,4 @@
+// client/src/pages/CustomRequestPage.tsx (Complete File)
 import React, { useState } from 'react';
 import { ChevronDown, X, Palette, Send } from 'lucide-react';
 
@@ -6,7 +7,7 @@ interface FormData {
   description: string;
   width: string;
   height: string;
-  primaryColor: string;
+  primary_color: string;
   style: string;
   deadline: string;
   budget: string;
@@ -14,7 +15,7 @@ interface FormData {
   name: string;
   email: string;
   phone: string;
-  contactMethod: string;
+  contact_method: string;
 }
 
 const CustomRequestPage: React.FC = () => {
@@ -23,7 +24,7 @@ const CustomRequestPage: React.FC = () => {
     description: '',
     width: '',
     height: '',
-    primaryColor: '#3b82f6',
+    primary_color: '#3b82f6',
     style: '',
     deadline: '',
     budget: '',
@@ -31,7 +32,7 @@ const CustomRequestPage: React.FC = () => {
     name: '',
     email: '',
     phone: '',
-    contactMethod: 'email'
+    contact_method: 'email'
   });
 
   const [expandedSections, setExpandedSections] = useState({
@@ -55,7 +56,7 @@ const CustomRequestPage: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Simple validation
@@ -64,43 +65,43 @@ const CustomRequestPage: React.FC = () => {
       return;
     }
     
-    // Create summary
-    let summary = `Custom Request Summary:\n\n`;
-    summary += `Project: ${formData.title}\n`;
-    summary += `Description: ${formData.description}\n`;
-    if (formData.width || formData.height) {
-      summary += `Dimensions: ${formData.width || 'Auto'} x ${formData.height || 'Auto'}\n`;
+    try {
+      const response = await fetch('http://localhost:8000/api/custom-request/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(data.message || 'Thank you! Your custom request has been submitted. We will contact you soon!');
+        
+        // Reset form
+        setFormData({
+          title: '',
+          description: '',
+          width: '',
+          height: '',
+          primary_color: '#3b82f6',
+          style: '',
+          deadline: '',
+          budget: '',
+          additional: '',
+          name: '',
+          email: '',
+          phone: '',
+          contact_method: 'email'
+        });
+      } else {
+        alert('There was an error submitting your request. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting custom request:', error);
+      alert('There was an error submitting your request. Please try again.');
     }
-    summary += `Primary Color: ${formData.primaryColor}\n`;
-    if (formData.style) summary += `Style: ${formData.style}\n`;
-    if (formData.deadline) summary += `Deadline: ${formData.deadline}\n`;
-    if (formData.budget) summary += `Budget: ${formData.budget}\n`;
-    if (formData.additional) summary += `Additional Notes: ${formData.additional}\n`;
-    summary += `\nContact Information:\n`;
-    summary += `Name: ${formData.name}\n`;
-    summary += `Email: ${formData.email}\n`;
-    if (formData.phone) summary += `Phone: ${formData.phone}\n`;
-    summary += `Preferred Contact: ${formData.contactMethod}\n`;
-    
-    // Show summary
-    alert(summary + '\nThank you! Your custom request has been submitted. We will contact you soon!');
-    
-    // Reset form
-    setFormData({
-      title: '',
-      description: '',
-      width: '',
-      height: '',
-      primaryColor: '#3b82f6',
-      style: '',
-      deadline: '',
-      budget: '',
-      additional: '',
-      name: '',
-      email: '',
-      phone: '',
-      contactMethod: 'email'
-    });
   };
 
   const clearForm = () => {
@@ -109,7 +110,7 @@ const CustomRequestPage: React.FC = () => {
       description: '',
       width: '',
       height: '',
-      primaryColor: '#3b82f6',
+      primary_color: '#3b82f6',
       style: '',
       deadline: '',
       budget: '',
@@ -117,7 +118,7 @@ const CustomRequestPage: React.FC = () => {
       name: '',
       email: '',
       phone: '',
-      contactMethod: 'email'
+      contact_method: 'email'
     });
   };
 
@@ -190,10 +191,10 @@ const CustomRequestPage: React.FC = () => {
                   <div className="flex items-center gap-2 mt-1">
                     <div 
                       className="w-4 h-4 rounded border border-gray-300"
-                      style={{ backgroundColor: formData.primaryColor }}
+                      style={{ backgroundColor: formData.primary_color }}
                     />
                     <span className="font-medium text-gray-900">
-                      {formData.primaryColor}
+                      {formData.primary_color}
                     </span>
                   </div>
                 </div>
@@ -313,15 +314,15 @@ const CustomRequestPage: React.FC = () => {
                         <div className="flex items-center gap-4">
                           <input
                             type="color"
-                            name="primaryColor"
-                            value={formData.primaryColor}
+                            name="primary_color"
+                            value={formData.primary_color}
                             onChange={handleInputChange}
                             className="w-12 h-12 border border-gray-300 rounded-lg cursor-pointer"
                           />
                           <input
                             type="text"
-                            value={formData.primaryColor}
-                            onChange={(e) => setFormData(prev => ({ ...prev, primaryColor: e.target.value }))}
+                            value={formData.primary_color}
+                            onChange={(e) => setFormData(prev => ({ ...prev, primary_color: e.target.value }))}
                             placeholder="#3b82f6"
                             className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                           />
@@ -450,8 +451,8 @@ const CustomRequestPage: React.FC = () => {
                           Preferred Contact Method
                         </label>
                         <select
-                          name="contactMethod"
-                          value={formData.contactMethod}
+                          name="contact_method"
+                          value={formData.contact_method}
                           onChange={handleInputChange}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                         >

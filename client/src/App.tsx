@@ -1,4 +1,4 @@
-// client/src/App.tsx (Fixed)
+// client/src/App.tsx (Complete File)
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -20,6 +20,7 @@ import ProtectedRoute from './components/admin/ProtectedRoute';
 import Dashboard from './components/admin/Dashboard';
 import ProductManager from './components/admin/ProductManager';
 import CategoryManager from './components/admin/CategoryManager';
+import CustomRequestManager from './components/admin/CustomRequestManager';
 
 const queryClient = new QueryClient();
 
@@ -75,9 +76,7 @@ function App() {
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="products" element={<ProductManager />} />
               <Route path="categories" element={<CategoryManager />} />
-              <Route path="orders" element={<div className="p-6"><h2 className="text-2xl font-bold">Orders Management</h2><p className="text-gray-600 mt-2">Coming Soon</p></div>} />
-              <Route path="customers" element={<div className="p-6"><h2 className="text-2xl font-bold">Customer Management</h2><p className="text-gray-600 mt-2">Coming Soon</p></div>} />
-              <Route path="messages" element={<div className="p-6"><h2 className="text-2xl font-bold">Message Management</h2><p className="text-gray-600 mt-2">Coming Soon</p></div>} />
+              <Route path="orders" element={<CustomRequestManager />} />
               <Route path="settings" element={<div className="p-6"><h2 className="text-2xl font-bold">Settings</h2><p className="text-gray-600 mt-2">Coming Soon</p></div>} />
             </Route>
           </Routes>
