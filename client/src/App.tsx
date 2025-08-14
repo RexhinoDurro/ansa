@@ -55,6 +55,11 @@ function App() {
                 <Contact />
               </Layout>
             } />
+             <Route path="/custom-request-page" element={
+              <Layout>
+                <CustomRequestPage/>
+              </Layout>
+            } />
 
             {/* Admin Login Route */}
             <Route path="/admin/login" element={<AdminLogin />} />

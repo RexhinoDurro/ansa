@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Filter, Grid, List, Search, X, ChevronDown } from 'lucide-react';
+import { Filter, Grid, List, Search, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api, endpoints } from '../utils/api';
 import type { ProductListItem, Category, ApiResponse } from '../types';
 
 interface FilterState {
   category: string;
+  subcategory: string;
   material: string;
   color: string;
   minPrice: string;
@@ -134,6 +135,8 @@ const FilterSidebar: React.FC<{
     price: false
   });
 
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({
       ...prev,
@@ -141,9 +144,20 @@ const FilterSidebar: React.FC<{
     }));
   };
 
+  const toggleCategory = (categoryId: string) => {
+    const newExpanded = new Set(expandedCategories);
+    if (newExpanded.has(categoryId)) {
+      newExpanded.delete(categoryId);
+    } else {
+      newExpanded.add(categoryId);
+    }
+    setExpandedCategories(newExpanded);
+  };
+
   const clearFilters = () => {
     setFilters({
       category: '',
+      subcategory: '',
       material: '',
       color: '',
       minPrice: '',
@@ -153,6 +167,22 @@ const FilterSidebar: React.FC<{
   };
 
   const hasActiveFilters = Object.values(filters).some(value => value !== '');
+
+  // Separate parent categories and subcategories
+  const parentCategories = filterOptions?.categories?.filter(cat => !cat.parent_category) || [];
+  const subcategories = filterOptions?.categories?.filter(cat => cat.parent_category) || [];
+
+  const handleCategorySelect = (categoryId: string) => {
+    setFilters(prev => ({ 
+      ...prev, 
+      category: categoryId,
+      subcategory: '' // Clear subcategory when parent category changes
+    }));
+  };
+
+  const handleSubcategorySelect = (subcategoryId: string) => {
+    setFilters(prev => ({ ...prev, subcategory: subcategoryId }));
+  };
 
   return (
     <>
@@ -207,42 +237,86 @@ const FilterSidebar: React.FC<{
           </div>
         </div>
 
-        {/* Category Filter */}
+        {/* Category Filter with Hierarchical Structure */}
         <div className="mb-6">
           <button
             onClick={() => toggleSection('category')}
             className="flex items-center justify-between w-full text-sm font-medium mb-2"
           >
-            Category
+            Categories
             <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${
               expandedSections.category ? 'rotate-180' : ''
             }`} />
           </button>
+          
           {expandedSections.category && (
-            <div className="space-y-2">
-              <label className="flex items-center">
+            <div className="space-y-1">
+              {/* All Categories Option */}
+              <label className="flex items-center p-2 rounded hover:bg-neutral-50 cursor-pointer">
                 <input
                   type="radio"
                   name="category"
                   value=""
                   checked={filters.category === ''}
-                  onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
-                  className="mr-2"
+                  onChange={(e) => handleCategorySelect(e.target.value)}
+                  className="mr-3"
                 />
                 <span className="text-sm">All Categories</span>
               </label>
-              {filterOptions?.categories.map((category) => (
-                <label key={category.id} className="flex items-center">
-                  <input
-                    type="radio"
-                    name="category"
-                    value={category.id.toString()}
-                    checked={filters.category === category.id.toString()}
-                    onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
-                    className="mr-2"
-                  />
-                  <span className="text-sm">{category.name}</span>
-                </label>
+
+              {/* Parent Categories */}
+              {parentCategories.map((category) => (
+                <div key={category.id} className="space-y-1">
+                  <div className="flex items-center">
+                    <label className="flex items-center p-2 rounded hover:bg-neutral-50 cursor-pointer flex-1">
+                      <input
+                        type="radio"
+                        name="category"
+                        value={category.id.toString()}
+                        checked={filters.category === category.id.toString()}
+                        onChange={(e) => handleCategorySelect(e.target.value)}
+                        className="mr-3"
+                      />
+                      <span className="text-sm font-medium">{category.name}</span>
+                    </label>
+                    
+                    {/* Toggle button for subcategories */}
+                    {category.subcategories && category.subcategories.length > 0 && (
+                      <button
+                        onClick={() => toggleCategory(category.id.toString())}
+                        className="p-1 hover:bg-neutral-200 rounded"
+                      >
+                        {expandedCategories.has(category.id.toString()) ? (
+                          <ChevronDown className="w-3 h-3 text-neutral-600" />
+                        ) : (
+                          <ChevronRight className="w-3 h-3 text-neutral-600" />
+                        )}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Subcategories */}
+                  {expandedCategories.has(category.id.toString()) && category.subcategories && (
+                    <div className="ml-6 space-y-1">
+                      {category.subcategories.map((subcategory) => (
+                        <label 
+                          key={subcategory.id} 
+                          className="flex items-center p-2 rounded hover:bg-neutral-50 cursor-pointer"
+                        >
+                          <input
+                            type="radio"
+                            name="subcategory"
+                            value={subcategory.id.toString()}
+                            checked={filters.subcategory === subcategory.id.toString()}
+                            onChange={(e) => handleSubcategorySelect(e.target.value)}
+                            className="mr-3"
+                          />
+                          <span className="text-sm text-neutral-700">{subcategory.name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           )}
@@ -381,6 +455,7 @@ const Catalogue: React.FC = () => {
   // Initialize filters from URL params
   const [filters, setFilters] = useState<FilterState>({
     category: searchParams.get('category') || '',
+    subcategory: searchParams.get('subcategory') || '',
     material: searchParams.get('material') || '',
     color: searchParams.get('color') || '',
     minPrice: searchParams.get('min_price') || '',
@@ -401,6 +476,7 @@ const Catalogue: React.FC = () => {
   const buildQueryParams = () => {
     const params = new URLSearchParams();
     if (filters.category) params.append('category', filters.category);
+    if (filters.subcategory) params.append('subcategory', filters.subcategory);
     if (filters.material) params.append('materials', filters.material);
     if (filters.color) params.append('colors', filters.color);
     if (filters.minPrice) params.append('price__gte', filters.minPrice);
@@ -614,14 +690,16 @@ const Catalogue: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Filters Sidebar */}
-      <FilterSidebar
-        filters={filters}
-        setFilters={setFilters}
-        filterOptions={filterOptions}
-        isOpen={filtersOpen}
-        onClose={() => setFiltersOpen(false)}
-      />
+      {/* Mobile Filters Sidebar - Only show when mobile menu is opened */}
+      {filtersOpen && (
+        <FilterSidebar
+          filters={filters}
+          setFilters={setFilters}
+          filterOptions={filterOptions}
+          isOpen={filtersOpen}
+          onClose={() => setFiltersOpen(false)}
+        />
+      )}
     </div>
   );
 };

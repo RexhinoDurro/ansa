@@ -25,7 +25,7 @@ const Navbar: React.FC = () => {
     { name: 'Catalogue', path: '/catalogue' },
     { name: 'About', path: '/about' },
     { name: 'Contact', path: '/contact' },
-    { name: 'Custom', path: '/customrequestpage' },
+    { name: 'Custom', path: '/custom-request-page' },
   ];
 
   const isActivePath = (path: string) => {
