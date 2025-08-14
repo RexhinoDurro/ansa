@@ -336,7 +336,7 @@ const MapSection: React.FC = () => {
       <div className="aspect-video bg-neutral-200 relative">
         {/* Replace with actual Google Maps embed */}
         <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3024.1234567890!2d-74.005972!3d40.712775!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDDCsDQyJzQ2LjAiTiA3NMKwMDAnMjEuNSJX!5e0!3m2!1sen!2sus!4v1234567890"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d11988.544086733365!2d19.834755531922887!3d41.305904449121265!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x135031c1d9418cfb%3A0xa2e2088da9965781!2sFlladi%20i%20Tuneleve!5e0!3m2!1sen!2s!4v1755091610264!5m2!1sen!2s"
           width="100%"
           height="100%"
           style={{ border: 0 }}
@@ -347,13 +347,13 @@ const MapSection: React.FC = () => {
           className="absolute inset-0"
         ></iframe>
         
-        {/* Fallback for demo */}
-        <div className="absolute inset-0 bg-neutral-100 flex items-center justify-center">
-          <div className="text-center">
-            <MapPin className="w-12 h-12 text-neutral-400 mx-auto mb-2" />
-            <p className="text-neutral-600">Interactive Map</p>
-            <p className="text-sm text-neutral-500">123 Furniture Street, Design District</p>
-          </div>
+        {/* Location image overlay */}
+        <div className="absolute inset-0 bg-black bg-opacity-20 flex items-end">
+          <img 
+            src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+            alt="Flladi i Tuneleve - Beautiful mountain landscape view"
+            className="w-full h-full object-cover opacity-30"
+          />
         </div>
       </div>
       
@@ -365,16 +365,21 @@ const MapSection: React.FC = () => {
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
           <a
-            href="https://maps.google.com"
+            href="https://www.google.com/maps/place/Flladi+i+Tuneleve/@41.305904449121265,19.834755531922887,12z"
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-4 rounded-lg text-center transition-colors duration-200"
           >
             Get Directions
           </a>
-          <button className="flex-1 border border-neutral-300 hover:border-primary-300 hover:bg-primary-50 text-neutral-700 hover:text-primary-600 font-semibold py-3 px-4 rounded-lg transition-colors duration-200">
+          <a
+            href="https://www.google.com/maps/place/Flladi+i+Tuneleve/@41.305904449121265,19.834755531922887,12z"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 border border-neutral-300 hover:border-primary-300 hover:bg-primary-50 text-neutral-700 hover:text-primary-600 font-semibold py-3 px-4 rounded-lg text-center transition-colors duration-200"
+          >
             Schedule Visit
-          </button>
+          </a>
         </div>
       </div>
     </div>

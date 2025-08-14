@@ -24,7 +24,8 @@ const Navbar: React.FC = () => {
     { name: 'Home', path: '/' },
     { name: 'Catalogue', path: '/catalogue' },
     { name: 'About', path: '/about' },
-    { name: 'Contact', path: '/contact' }
+    { name: 'Contact', path: '/contact' },
+    { name: 'Custom', path: '/customrequestpage' },
   ];
 
   const isActivePath = (path: string) => {
@@ -35,10 +36,10 @@ const Navbar: React.FC = () => {
 
   return (
     <nav className={`fixed w-full z-50 transition-all duration-500 ease-in-out ${
-      scrolled 
-        ? 'bg-white/85 backdrop-blur-lg shadow-sm border-b border-neutral-200/30' 
-        : 'bg-transparent border-b border-white/10'
-    }`}>
+  scrolled
+    ? 'bg-blue-900/95 backdrop-blur-lg shadow-sm border-b border-neutral-200/30'
+    : 'bg-blue-900/90 border-b border-white/10'
+}`}>
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}

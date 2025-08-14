@@ -9,7 +9,8 @@ import Home from './pages/Home';
 import Catalogue from './pages/Catalogue';
 import ProductDetail from './pages/ProductDetail';
 import About from './pages/About';
-import Contact from './pages/Contact';
+import Contact from './pages/Contact'; 
+import CustomRequestPage from './pages/CustomRequestPage';
 
 // Admin components
 import { AdminProvider } from './contexts/AdminContext';

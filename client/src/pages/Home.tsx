@@ -264,10 +264,10 @@ const Home: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
               <h2 className="text-4xl font-serif font-bold text-neutral-900 mb-6">
-                Crafting Beautiful Spaces Since 1990
+                Crafting Beautiful Spaces Since 2015
               </h2>
               <p className="text-lg text-neutral-600 mb-6">
-                At Furniture Co., we believe that great furniture should tell a story. Each piece in our collection is carefully crafted by skilled artisans who understand that furniture is more than just functional – it's an expression of your personal style.
+                At Furniture Ansa., we believe that great furniture should tell a story. Each piece in our collection is carefully crafted by skilled artisans who understand that furniture is more than just functional – it's an expression of your personal style.
               </p>
               <p className="text-lg text-neutral-600 mb-8">
                 From sustainable materials to timeless designs, we're committed to creating furniture that not only looks beautiful but also stands the test of time.
