@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next'; // Add this import
 import { api, endpoints } from '../utils/api';
 
 interface ContactForm {
@@ -11,21 +12,23 @@ interface ContactForm {
 }
 
 const ContactInfo: React.FC = () => {
+  const { t } = useTranslation('common'); // Add this hook
+
   const contactDetails = [
     {
       icon: MapPin,
-      title: 'Visit Our Showroom',
+      title: t('contact.visitShowroom'),
       details: [
         '123 Furniture Street',
         'Design District',
         'City, State 12345'
       ],
-      action: 'Get Directions',
+      action: t('contact.getDirections'),
       actionLink: 'https://maps.google.com'
     },
     {
       icon: Phone,
-      title: 'Call Us',
+      title: t('contact.callUs'),
       details: [
         '(555) 123-4567',
         '(555) 123-4568 (Sales)',
@@ -36,7 +39,7 @@ const ContactInfo: React.FC = () => {
     },
     {
       icon: Mail,
-      title: 'Email Us',
+      title: t('contact.emailUs'),
       details: [
         'info@furnitureco.com',
         'sales@furnitureco.com',
@@ -47,13 +50,13 @@ const ContactInfo: React.FC = () => {
     },
     {
       icon: Clock,
-      title: 'Store Hours',
+      title: t('contact.storeHours'),
       details: [
-        'Monday - Friday: 9AM - 8PM',
-        'Saturday: 10AM - 6PM',
+        t('footer.mondayFriday'),
+        t('footer.weekend'),
         'Sunday: 12PM - 5PM'
       ],
-      action: 'Plan Your Visit',
+      action: t('contact.scheduleVisit'),
       actionLink: '#'
     }
   ];
@@ -87,6 +90,7 @@ const ContactInfo: React.FC = () => {
 };
 
 const ContactForm: React.FC = () => {
+  const { t } = useTranslation('common'); // Add this hook
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState<ContactForm>({
@@ -102,25 +106,25 @@ const ContactForm: React.FC = () => {
     const newErrors: Partial<ContactForm> = {};
     
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = t('common.error') + ': Name is required'; // You can add specific error translations
     } else if (formData.name.trim().length < 2) {
       newErrors.name = 'Name must be at least 2 characters';
     }
     
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = t('common.error') + ': Email is required';
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)) {
       newErrors.email = 'Invalid email address';
     }
     
     if (!formData.subject) {
-      newErrors.subject = 'Subject is required';
+      newErrors.subject = t('contact.subject') + ' is required';
     }
     
     if (!formData.message.trim()) {
-      newErrors.message = 'Message is required';
+      newErrors.message = t('contact.message') + ' is required';
     } else if (formData.message.trim().length < 10) {
-      newErrors.message = 'Message must be at least 10 characters';
+      newErrors.message = t('contact.message') + ' must be at least 10 characters';
     }
     
     setErrors(newErrors);
@@ -171,7 +175,7 @@ const ContactForm: React.FC = () => {
         <div className="text-center">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <h3 className="text-2xl font-semibold text-neutral-900 mb-2">
-            Message Sent Successfully!
+            {t('contact.messageSent')}
           </h3>
           <p className="text-neutral-600 mb-6">
             Thank you for contacting us. We'll get back to you within 24 hours.
@@ -189,13 +193,13 @@ const ContactForm: React.FC = () => {
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-sm border border-neutral-200">
-      <h2 className="text-2xl font-semibold text-neutral-900 mb-6">Send us a Message</h2>
+      <h2 className="text-2xl font-semibold text-neutral-900 mb-6">{t('contact.sendMessage')}</h2>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-2">
-              Full Name *
+              {t('contact.fullName')} *
             </label>
             <input
               type="text"
@@ -214,7 +218,7 @@ const ContactForm: React.FC = () => {
 
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-2">
-              Email Address *
+              {t('contact.emailAddress')} *
             </label>
             <input
               type="email"
@@ -235,7 +239,7 @@ const ContactForm: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-2">
-              Phone Number
+              {t('contact.phoneNumber')}
             </label>
             <input
               type="tel"
@@ -249,7 +253,7 @@ const ContactForm: React.FC = () => {
 
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-2">
-              Subject *
+              {t('contact.subject')} *
             </label>
             <select
               name="subject"
@@ -277,7 +281,7 @@ const ContactForm: React.FC = () => {
 
         <div>
           <label className="block text-sm font-medium text-neutral-700 mb-2">
-            Message *
+            {t('contact.message')} *
           </label>
           <textarea
             rows={6}
@@ -298,11 +302,11 @@ const ContactForm: React.FC = () => {
           <p className="text-sm text-neutral-600">
             By submitting this form, you agree to our{' '}
             <a href="/privacy" className="text-primary-600 hover:text-primary-700">
-              Privacy Policy
+              {t('footer.privacyPolicy')}
             </a>{' '}
             and{' '}
             <a href="/terms" className="text-primary-600 hover:text-primary-700">
-              Terms of Service
+              {t('footer.termsOfService')}
             </a>
             . We'll never share your information with third parties.
           </p>
@@ -321,7 +325,7 @@ const ContactForm: React.FC = () => {
           ) : (
             <>
               <Send className="w-5 h-5 mr-2" />
-              Send Message
+              {t('contact.sendButton')}
             </>
           )}
         </button>
@@ -331,6 +335,8 @@ const ContactForm: React.FC = () => {
 };
 
 const MapSection: React.FC = () => {
+  const { t } = useTranslation('common'); // Add this hook
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-neutral-200 overflow-hidden">
       <div className="aspect-video bg-neutral-200 relative">
@@ -358,7 +364,7 @@ const MapSection: React.FC = () => {
       </div>
       
       <div className="p-6">
-        <h3 className="font-semibold text-neutral-900 mb-2">Visit Our Showroom</h3>
+        <h3 className="font-semibold text-neutral-900 mb-2">{t('contact.visitShowroom')}</h3>
         <p className="text-neutral-600 mb-4">
           Come see our furniture collections in person. Our showroom features room displays 
           that showcase how our pieces look in real home settings.
@@ -370,7 +376,7 @@ const MapSection: React.FC = () => {
             rel="noopener noreferrer"
             className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-4 rounded-lg text-center transition-colors duration-200"
           >
-            Get Directions
+            {t('contact.getDirections')}
           </a>
           <a
             href="https://www.google.com/maps/place/Flladi+i+Tuneleve/@41.305904449121265,19.834755531922887,12z"
@@ -378,7 +384,7 @@ const MapSection: React.FC = () => {
             rel="noopener noreferrer"
             className="flex-1 border border-neutral-300 hover:border-primary-300 hover:bg-primary-50 text-neutral-700 hover:text-primary-600 font-semibold py-3 px-4 rounded-lg text-center transition-colors duration-200"
           >
-            Schedule Visit
+            {t('contact.scheduleVisit')}
           </a>
         </div>
       </div>
@@ -387,6 +393,8 @@ const MapSection: React.FC = () => {
 };
 
 const Contact: React.FC = () => {
+  const { t } = useTranslation('common'); // Add this hook
+
   return (
     <div className="pt-20">
       {/* Hero Section */}
@@ -394,11 +402,10 @@ const Contact: React.FC = () => {
         <div className="container mx-auto px-4 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-serif font-bold text-neutral-900 mb-6">
-              Get in Touch
+              {t('contact.title')}
             </h1>
             <p className="text-xl text-neutral-600 mb-8">
-              Have questions about our furniture? Want to schedule a consultation? 
-              Or just need some design advice? We're here to help.
+              {t('contact.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-neutral-600">
               <div className="flex items-center">

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Filter, Grid, List, Search, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next'; // Add this import
 import { api, endpoints } from '../utils/api';
 import type { ProductListItem, Category, ApiResponse } from '../types';
 
@@ -26,6 +27,8 @@ const ProductCard: React.FC<{ product: ProductListItem; viewMode: 'grid' | 'list
   product, 
   viewMode 
 }) => {
+  const { t } = useTranslation();
+
   if (viewMode === 'list') {
     return (
       <Link
@@ -41,7 +44,7 @@ const ProductCard: React.FC<{ product: ProductListItem; viewMode: 'grid' | 'list
             />
           ) : (
             <div className="w-full h-full bg-neutral-200 flex items-center justify-center">
-              <span className="text-neutral-400">No Image</span>
+              <span className="text-neutral-400">{t('catalogue.noImage')}</span>
             </div>
           )}
         </div>
@@ -59,16 +62,16 @@ const ProductCard: React.FC<{ product: ProductListItem; viewMode: 'grid' | 'list
           </p>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4 text-sm text-neutral-500">
-              <span>Category: {product.category_name}</span>
-              <span>Material: {product.materials}</span>
-              <span>Color: {product.colors}</span>
+              <span>{t('catalogue.category')}: {product.category_name}</span>
+              <span>{t('catalogue.material')}: {product.materials}</span>
+              <span>{t('catalogue.color')}: {product.colors}</span>
             </div>
             <span className={`text-xs px-3 py-1 rounded-full ${
               product.is_in_stock 
                 ? 'bg-green-100 text-green-800' 
                 : 'bg-red-100 text-red-800'
             }`}>
-              {product.is_in_stock ? 'In Stock' : 'Out of Stock'}
+              {product.is_in_stock ? t('catalogue.inStock') : t('catalogue.outOfStock')}
             </span>
           </div>
         </div>
@@ -90,7 +93,7 @@ const ProductCard: React.FC<{ product: ProductListItem; viewMode: 'grid' | 'list
           />
         ) : (
           <div className="w-full h-full bg-neutral-200 flex items-center justify-center">
-            <span className="text-neutral-400">No Image</span>
+            <span className="text-neutral-400">{t('catalogue.noImage')}</span>
           </div>
         )}
       </div>
@@ -110,7 +113,7 @@ const ProductCard: React.FC<{ product: ProductListItem; viewMode: 'grid' | 'list
               ? 'bg-green-100 text-green-800' 
               : 'bg-red-100 text-red-800'
           }`}>
-            {product.is_in_stock ? 'In Stock' : 'Out of Stock'}
+            {product.is_in_stock ? t('catalogue.inStock') : t('catalogue.outOfStock')}
           </span>
         </div>
         <div className="text-xs text-neutral-500">
@@ -128,6 +131,7 @@ const FilterSidebar: React.FC<{
   isOpen: boolean;
   onClose: () => void;
 }> = ({ filters, setFilters, filterOptions, isOpen, onClose }) => {
+  const { t } = useTranslation();
   const [expandedSections, setExpandedSections] = useState({
     category: true,
     material: false,
@@ -206,34 +210,46 @@ const FilterSidebar: React.FC<{
       `}>
         {/* Mobile header */}
         <div className="flex items-center justify-between mb-6 lg:hidden">
-          <h3 className="text-lg font-semibold">Filters</h3>
-          <button onClick={onClose} className="p-2">
-            <X size={20} />
+          <h3 className="text-xl font-bold text-neutral-900">Filters</h3>
+          <button 
+            onClick={onClose} 
+            className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+          >
+            <X size={24} className="text-neutral-600" />
           </button>
         </div>
 
         {/* Clear filters */}
         {hasActiveFilters && (
-          <button
-            onClick={clearFilters}
-            className="w-full mb-4 px-3 py-2 text-sm text-primary-600 border border-primary-200 rounded-lg hover:bg-primary-50 transition-colors duration-200"
-          >
-            Clear All Filters
-          </button>
+          <div className="mb-6">
+            <button
+              onClick={clearFilters}
+              className="w-full px-4 py-3 text-sm font-medium text-white bg-gradient-to-r from-red-500 to-red-600 rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-sm hover:shadow-md"
+            >
+              Clear All Filters
+            </button>
+          </div>
         )}
 
         {/* Search */}
         <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Search</label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+          <div className="relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 group-focus-within:text-primary-500 transition-colors" />
             <input
               type="text"
               value={filters.search}
               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
               placeholder="Search products..."
-              className="w-full pl-10 pr-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full pl-12 pr-4 py-3.5 bg-neutral-50 border-0 rounded-xl text-sm placeholder:text-neutral-400 focus:bg-white focus:ring-2 focus:ring-primary-200 focus:outline-none transition-all duration-200 shadow-sm"
             />
+            {filters.search && (
+              <button
+                onClick={() => setFilters(prev => ({ ...prev, search: '' }))}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-neutral-100 rounded-full transition-colors"
+              >
+                <X className="w-4 h-4 text-neutral-400" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -241,55 +257,58 @@ const FilterSidebar: React.FC<{
         <div className="mb-6">
           <button
             onClick={() => toggleSection('category')}
-            className="flex items-center justify-between w-full text-sm font-medium mb-2"
+            className="flex items-center justify-between w-full p-3 text-sm font-semibold bg-neutral-50 hover:bg-neutral-100 rounded-xl transition-colors duration-200"
           >
-            Categories
+            <span className="flex items-center">
+              <div className="w-2 h-2 bg-primary-500 rounded-full mr-3"></div>
+              Categories
+            </span>
             <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${
               expandedSections.category ? 'rotate-180' : ''
             }`} />
           </button>
           
           {expandedSections.category && (
-            <div className="space-y-1">
+            <div className="mt-3 space-y-1 pl-2">
               {/* All Categories Option */}
-              <label className="flex items-center p-2 rounded hover:bg-neutral-50 cursor-pointer">
+              <label className="flex items-center p-3 rounded-lg hover:bg-primary-50 cursor-pointer transition-colors duration-150 group">
                 <input
                   type="radio"
                   name="category"
                   value=""
                   checked={filters.category === ''}
                   onChange={(e) => handleCategorySelect(e.target.value)}
-                  className="mr-3"
+                  className="mr-3 w-4 h-4 text-primary-600 focus:ring-primary-500 focus:ring-2"
                 />
-                <span className="text-sm">All Categories</span>
+                <span className="text-sm font-medium text-neutral-700 group-hover:text-primary-700">All Categories</span>
               </label>
 
               {/* Parent Categories */}
               {parentCategories.map((category) => (
                 <div key={category.id} className="space-y-1">
                   <div className="flex items-center">
-                    <label className="flex items-center p-2 rounded hover:bg-neutral-50 cursor-pointer flex-1">
+                    <label className="flex items-center p-3 rounded-lg hover:bg-primary-50 cursor-pointer flex-1 transition-colors duration-150 group">
                       <input
                         type="radio"
                         name="category"
                         value={category.id.toString()}
                         checked={filters.category === category.id.toString()}
                         onChange={(e) => handleCategorySelect(e.target.value)}
-                        className="mr-3"
+                        className="mr-3 w-4 h-4 text-primary-600 focus:ring-primary-500 focus:ring-2"
                       />
-                      <span className="text-sm font-medium">{category.name}</span>
+                      <span className="text-sm font-semibold text-neutral-800 group-hover:text-primary-700">{category.name}</span>
                     </label>
                     
                     {/* Toggle button for subcategories */}
                     {category.subcategories && category.subcategories.length > 0 && (
                       <button
                         onClick={() => toggleCategory(category.id.toString())}
-                        className="p-1 hover:bg-neutral-200 rounded"
+                        className="p-2 hover:bg-neutral-200 rounded-lg transition-colors duration-150"
                       >
                         {expandedCategories.has(category.id.toString()) ? (
-                          <ChevronDown className="w-3 h-3 text-neutral-600" />
+                          <ChevronDown className="w-4 h-4 text-neutral-600" />
                         ) : (
-                          <ChevronRight className="w-3 h-3 text-neutral-600" />
+                          <ChevronRight className="w-4 h-4 text-neutral-600" />
                         )}
                       </button>
                     )}
@@ -297,11 +316,11 @@ const FilterSidebar: React.FC<{
 
                   {/* Subcategories */}
                   {expandedCategories.has(category.id.toString()) && category.subcategories && (
-                    <div className="ml-6 space-y-1">
+                    <div className="ml-6 space-y-1 border-l-2 border-neutral-100 pl-4">
                       {category.subcategories.map((subcategory) => (
                         <label 
                           key={subcategory.id} 
-                          className="flex items-center p-2 rounded hover:bg-neutral-50 cursor-pointer"
+                          className="flex items-center p-2 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors duration-150 group"
                         >
                           <input
                             type="radio"
@@ -309,9 +328,9 @@ const FilterSidebar: React.FC<{
                             value={subcategory.id.toString()}
                             checked={filters.subcategory === subcategory.id.toString()}
                             onChange={(e) => handleSubcategorySelect(e.target.value)}
-                            className="mr-3"
+                            className="mr-3 w-4 h-4 text-blue-600 focus:ring-blue-500 focus:ring-2"
                           />
-                          <span className="text-sm text-neutral-700">{subcategory.name}</span>
+                          <span className="text-sm text-neutral-600 group-hover:text-blue-700">{subcategory.name}</span>
                         </label>
                       ))}
                     </div>
@@ -326,37 +345,40 @@ const FilterSidebar: React.FC<{
         <div className="mb-6">
           <button
             onClick={() => toggleSection('material')}
-            className="flex items-center justify-between w-full text-sm font-medium mb-2"
+            className="flex items-center justify-between w-full p-3 text-sm font-semibold bg-neutral-50 hover:bg-neutral-100 rounded-xl transition-colors duration-200"
           >
-            Material
+            <span className="flex items-center">
+              <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+              Material
+            </span>
             <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${
               expandedSections.material ? 'rotate-180' : ''
             }`} />
           </button>
           {expandedSections.material && (
-            <div className="space-y-2">
-              <label className="flex items-center">
+            <div className="mt-3 space-y-2 pl-2">
+              <label className="flex items-center p-3 rounded-lg hover:bg-green-50 cursor-pointer transition-colors duration-150 group">
                 <input
                   type="radio"
                   name="material"
                   value=""
                   checked={filters.material === ''}
                   onChange={(e) => setFilters(prev => ({ ...prev, material: e.target.value }))}
-                  className="mr-2"
+                  className="mr-3 w-4 h-4 text-green-600 focus:ring-green-500 focus:ring-2"
                 />
-                <span className="text-sm">All Materials</span>
+                <span className="text-sm font-medium text-neutral-700 group-hover:text-green-700">All Materials</span>
               </label>
               {filterOptions?.materials.map((material) => (
-                <label key={material.value} className="flex items-center">
+                <label key={material.value} className="flex items-center p-3 rounded-lg hover:bg-green-50 cursor-pointer transition-colors duration-150 group">
                   <input
                     type="radio"
                     name="material"
                     value={material.value}
                     checked={filters.material === material.value}
                     onChange={(e) => setFilters(prev => ({ ...prev, material: e.target.value }))}
-                    className="mr-2"
+                    className="mr-3 w-4 h-4 text-green-600 focus:ring-green-500 focus:ring-2"
                   />
-                  <span className="text-sm">{material.label}</span>
+                  <span className="text-sm text-neutral-700 group-hover:text-green-700">{material.label}</span>
                 </label>
               ))}
             </div>
@@ -367,37 +389,40 @@ const FilterSidebar: React.FC<{
         <div className="mb-6">
           <button
             onClick={() => toggleSection('color')}
-            className="flex items-center justify-between w-full text-sm font-medium mb-2"
+            className="flex items-center justify-between w-full p-3 text-sm font-semibold bg-neutral-50 hover:bg-neutral-100 rounded-xl transition-colors duration-200"
           >
-            Color
+            <span className="flex items-center">
+              <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+              Color
+            </span>
             <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${
               expandedSections.color ? 'rotate-180' : ''
             }`} />
           </button>
           {expandedSections.color && (
-            <div className="space-y-2">
-              <label className="flex items-center">
+            <div className="mt-3 space-y-2 pl-2">
+              <label className="flex items-center p-3 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors duration-150 group">
                 <input
                   type="radio"
                   name="color"
                   value=""
                   checked={filters.color === ''}
                   onChange={(e) => setFilters(prev => ({ ...prev, color: e.target.value }))}
-                  className="mr-2"
+                  className="mr-3 w-4 h-4 text-blue-600 focus:ring-blue-500 focus:ring-2"
                 />
-                <span className="text-sm">All Colors</span>
+                <span className="text-sm font-medium text-neutral-700 group-hover:text-blue-700">All Colors</span>
               </label>
               {filterOptions?.colors.map((color) => (
-                <label key={color.value} className="flex items-center">
+                <label key={color.value} className="flex items-center p-3 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors duration-150 group">
                   <input
                     type="radio"
                     name="color"
                     value={color.value}
                     checked={filters.color === color.value}
                     onChange={(e) => setFilters(prev => ({ ...prev, color: e.target.value }))}
-                    className="mr-2"
+                    className="mr-3 w-4 h-4 text-blue-600 focus:ring-blue-500 focus:ring-2"
                   />
-                  <span className="text-sm">{color.label}</span>
+                  <span className="text-sm text-neutral-700 group-hover:text-blue-700">{color.label}</span>
                 </label>
               ))}
             </div>
@@ -408,34 +433,43 @@ const FilterSidebar: React.FC<{
         <div className="mb-6">
           <button
             onClick={() => toggleSection('price')}
-            className="flex items-center justify-between w-full text-sm font-medium mb-2"
+            className="flex items-center justify-between w-full p-3 text-sm font-semibold bg-neutral-50 hover:bg-neutral-100 rounded-xl transition-colors duration-200"
           >
-            Price Range
+            <span className="flex items-center">
+              <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
+              Price Range
+            </span>
             <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${
               expandedSections.price ? 'rotate-180' : ''
             }`} />
           </button>
           {expandedSections.price && (
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs text-neutral-600 mb-1">Min Price</label>
-                <input
-                  type="number"
-                  value={filters.minPrice}
-                  onChange={(e) => setFilters(prev => ({ ...prev, minPrice: e.target.value }))}
-                  placeholder="$0"
-                  className="w-full px-3 py-2 text-sm border border-neutral-300 rounded focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
+            <div className="mt-3 space-y-4 pl-2">
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wide">Min Price</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 text-sm">$</span>
+                  <input
+                    type="number"
+                    value={filters.minPrice}
+                    onChange={(e) => setFilters(prev => ({ ...prev, minPrice: e.target.value }))}
+                    placeholder="0"
+                    className="w-full pl-8 pr-4 py-3 bg-neutral-50 border-0 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-purple-200 focus:outline-none transition-all duration-200"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-xs text-neutral-600 mb-1">Max Price</label>
-                <input
-                  type="number"
-                  value={filters.maxPrice}
-                  onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: e.target.value }))}
-                  placeholder="$1000"
-                  className="w-full px-3 py-2 text-sm border border-neutral-300 rounded focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-neutral-700 uppercase tracking-wide">Max Price</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 text-sm">$</span>
+                  <input
+                    type="number"
+                    value={filters.maxPrice}
+                    onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: e.target.value }))}
+                    placeholder="1000"
+                    className="w-full pl-8 pr-4 py-3 bg-neutral-50 border-0 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-purple-200 focus:outline-none transition-all duration-200"
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -446,6 +480,7 @@ const FilterSidebar: React.FC<{
 };
 
 const Catalogue: React.FC = () => {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('created_at');
@@ -520,10 +555,10 @@ const Catalogue: React.FC = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-serif font-bold text-neutral-900 mb-4">
-            Our Catalogue
+            {t('catalogue.title')}
           </h1>
           <p className="text-lg text-neutral-600">
-            Discover our complete collection of handcrafted furniture pieces
+            {t('catalogue.description')}
           </p>
         </div>
 
@@ -536,7 +571,7 @@ const Catalogue: React.FC = () => {
                 className="flex items-center px-4 py-2 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors duration-200"
               >
                 <Filter className="w-4 h-4 mr-2" />
-                Filters
+                {t('catalogue.filters')}
               </button>
             </div>
             <div className="hidden lg:block">
@@ -556,7 +591,7 @@ const Catalogue: React.FC = () => {
             <div className="flex items-center justify-between mb-6 bg-white p-4 rounded-lg border border-neutral-200">
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-neutral-600">
-                  {productsData ? `${productsData.count} products found` : 'Loading...'}
+                  {productsData ? t('catalogue.productsFound', { count: productsData.count }) : t('catalogue.loading')}
                 </span>
               </div>
               
@@ -567,12 +602,12 @@ const Catalogue: React.FC = () => {
                   onChange={(e) => setSortBy(e.target.value)}
                   className="px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
-                  <option value="created_at">Newest First</option>
-                  <option value="-created_at">Oldest First</option>
-                  <option value="price">Price: Low to High</option>
-                  <option value="-price">Price: High to Low</option>
-                  <option value="name">Name: A to Z</option>
-                  <option value="-name">Name: Z to A</option>
+                  <option value="created_at">{t('catalogue.sort.newestFirst')}</option>
+                  <option value="-created_at">{t('catalogue.sort.oldestFirst')}</option>
+                  <option value="price">{t('catalogue.sort.priceLowToHigh')}</option>
+                  <option value="-price">{t('catalogue.sort.priceHighToLow')}</option>
+                  <option value="name">{t('catalogue.sort.nameAtoZ')}</option>
+                  <option value="-name">{t('catalogue.sort.nameZtoA')}</option>
                 </select>
                 
                 {/* View Mode */}
@@ -635,7 +670,7 @@ const Catalogue: React.FC = () => {
                           onClick={() => setCurrentPage(currentPage - 1)}
                           className="px-4 py-2 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors duration-200"
                         >
-                          Previous
+                          {t('catalogue.pagination.previous')}
                         </button>
                       )}
                       
@@ -666,7 +701,7 @@ const Catalogue: React.FC = () => {
                           onClick={() => setCurrentPage(currentPage + 1)}
                           className="px-4 py-2 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors duration-200"
                         >
-                          Next
+                          {t('catalogue.pagination.next')}
                         </button>
                       )}
                     </div>
@@ -679,10 +714,10 @@ const Catalogue: React.FC = () => {
                   <Search size={48} className="mx-auto" />
                 </div>
                 <h3 className="text-xl font-semibold text-neutral-900 mb-2">
-                  No products found
+                  {t('catalogue.noProductsFound')}
                 </h3>
                 <p className="text-neutral-600">
-                  Try adjusting your filters or search terms
+                  {t('catalogue.noProductsFoundDescription')}
                 </p>
               </div>
             )}
