@@ -7,6 +7,12 @@ from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 
+from furniture.models import GalleryCategory, GalleryProject, GalleryImage
+from .serializers import (
+    GalleryCategorySerializer, GalleryProjectListSerializer, 
+    GalleryProjectDetailSerializer
+)
+
 from furniture.models import (
     Product, Category, Brand, HomeSlider, ContactMessage, 
     Newsletter, ProductCollection, ProductReview
@@ -80,7 +86,72 @@ class ProductViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class GalleryCategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for Gallery Categories (read-only for public)
+    """
+    queryset = GalleryCategory.objects.filter(is_active=True).order_by('sort_order', 'name')
+    serializer_class = GalleryCategorySerializer
+    lookup_field = 'slug'
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        # Include projects if specifically requested
+        context['include_projects'] = self.action == 'retrieve'
+        return context
+
+    @action(detail=True, methods=['get'])
+    def projects(self, request, slug=None):
+        """Get all projects for a specific category"""
+        category = self.get_object()
+        projects = category.gallery_projects.filter(is_active=True).order_by('sort_order', '-created_at')
+        
+        # Apply filters
+        featured_only = request.query_params.get('featured', '').lower() == 'true'
+        if featured_only:
+            projects = projects.filter(featured=True)
+        
+        serializer = GalleryProjectListSerializer(projects, many=True, context={'request': request})
+        return Response(serializer.data)
+
+class GalleryProjectViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for Gallery Projects (read-only for public)
+    """
+    queryset = GalleryProject.objects.filter(is_active=True).select_related('gallery_category').prefetch_related('images')
+    serializer_class = GalleryProjectListSerializer
+    lookup_field = 'slug'
+    
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return GalleryProjectDetailSerializer
+        return GalleryProjectListSerializer
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        # Filter by category
+        category_slug = self.request.query_params.get('category')
+        if category_slug:
+            queryset = queryset.filter(gallery_category__slug=category_slug)
+        
+        # Filter featured projects
+        featured_only = self.request.query_params.get('featured', '').lower() == 'true'
+        if featured_only:
+            queryset = queryset.filter(featured=True)
+        
+        return queryset.order_by('sort_order', '-created_at')
+
+class FeaturedGalleryProjectsView(generics.ListAPIView):
+    """
+    List featured gallery projects
+    """
+    queryset = GalleryProject.objects.filter(
+        is_active=True, 
+        featured=True
+    ).select_related('gallery_category').prefetch_related('images').order_by('sort_order', '-created_at')
+    serializer_class = GalleryProjectListSerializer
+    
 class CustomRequestView(generics.CreateAPIView):
     """
     Create a new custom request

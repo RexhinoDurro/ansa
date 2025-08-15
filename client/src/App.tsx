@@ -21,7 +21,8 @@ import Dashboard from './components/admin/Dashboard';
 import ProductManager from './components/admin/ProductManager';
 import CategoryManager from './components/admin/CategoryManager';
 import CustomRequestManager from './components/admin/CustomRequestManager';
-
+import GalleryManager from './components/admin/GalleryManager';
+import Gallery from './pages/Gallery';
 const queryClient = new QueryClient();
 
 function App() {
@@ -61,6 +62,11 @@ function App() {
                 <CustomRequestPage/>
               </Layout>
             } />
+            <Route path="/gallery" element={
+              <Layout>
+                <Gallery/>
+              </Layout>
+            } />
 
             {/* Admin Login Route */}
             <Route path="/admin/login" element={<AdminLogin />} />
@@ -74,6 +80,7 @@ function App() {
               {/* Default admin route redirects to dashboard */}
               <Route index element={<Navigate to="/admin/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
+              <Route path="gallery" element={<GalleryManager />} />
               <Route path="products" element={<ProductManager />} />
               <Route path="categories" element={<CategoryManager />} />
               <Route path="orders" element={<CustomRequestManager />} />

@@ -9,17 +9,26 @@ from .admin_views import (
     AdminCustomRequestViewSet
 )
 
+from .views import GalleryCategoryViewSet, GalleryProjectViewSet, FeaturedGalleryProjectsView
+from .admin_views import (
+    AdminGalleryCategoryViewSet, AdminGalleryProjectViewSet, AdminGalleryImageViewSet
+)
+
 # Create a router for ViewSets
 router = DefaultRouter()
 router.register(r'products', views.ProductViewSet, basename='product')
 router.register(r'categories', views.CategoryViewSet, basename='category')
-
+router.register(r'gallery-categories', GalleryCategoryViewSet, basename='gallery-category')
+router.register(r'gallery-projects', GalleryProjectViewSet, basename='gallery-project')
 # Admin router
 admin_router = DefaultRouter()
 admin_router.register(r'products', AdminProductViewSet, basename='admin-product')
 admin_router.register(r'categories', AdminCategoryViewSet, basename='admin-category')
 admin_router.register(r'messages', AdminContactMessageViewSet, basename='admin-messages')
 admin_router.register(r'custom-requests', AdminCustomRequestViewSet, basename='admin-custom-requests')
+admin_router.register(r'gallery-categories', AdminGalleryCategoryViewSet, basename='admin-gallery-category')
+admin_router.register(r'gallery-projects', AdminGalleryProjectViewSet, basename='admin-gallery-project')
+admin_router.register(r'gallery-images', AdminGalleryImageViewSet, basename='admin-gallery-image')
 
 urlpatterns = [
     # Public API endpoints
@@ -35,7 +44,7 @@ urlpatterns = [
     
     # CSRF token endpoint
     path('csrf-token/', CSRFTokenView.as_view(), name='csrf-token'),
-    
+    path('featured-gallery/', FeaturedGalleryProjectsView.as_view(), name='featured-gallery'),
     # Admin authentication endpoints
     path('admin/login/', AdminLoginView.as_view(), name='admin-login'),
     path('admin/logout/', AdminLogoutView.as_view(), name='admin-logout'),

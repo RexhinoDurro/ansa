@@ -5,6 +5,7 @@ from furniture.models import (
     HomeSlider, ContactMessage, Newsletter, ProductCollection,
     Wishlist, RecentlyViewed, CustomRequest
 )
+from furniture.models import GalleryCategory, GalleryProject, GalleryImage
 
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,6 +16,106 @@ class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
         fields = ['id', 'name', 'slug', 'description', 'logo', 'website']
+
+
+class GalleryImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GalleryImage
+        fields = [
+            'id', 'image', 'title', 'description', 'alt_text', 
+            'is_primary', 'is_before_image', 'tags', 'order', 'created_at'
+        ]
+
+class GalleryProjectListSerializer(serializers.ModelSerializer):
+    primary_image = GalleryImageSerializer(read_only=True)
+    image_count = serializers.IntegerField(read_only=True)
+    category_name = serializers.CharField(source='gallery_category.name', read_only=True)
+    
+    class Meta:
+        model = GalleryProject
+        fields = [
+            'id', 'title', 'slug', 'description', 'client_name', 
+            'project_date', 'location', 'materials_used', 'dimensions',
+            'price_range', 'featured', 'primary_image', 'image_count',
+            'category_name', 'created_at'
+        ]
+
+class GalleryProjectDetailSerializer(serializers.ModelSerializer):
+    images = GalleryImageSerializer(many=True, read_only=True)
+    gallery_category = serializers.StringRelatedField(read_only=True)
+    image_count = serializers.IntegerField(read_only=True)
+    
+    class Meta:
+        model = GalleryProject
+        fields = [
+            'id', 'title', 'slug', 'description', 'client_name',
+            'project_date', 'location', 'materials_used', 'dimensions',
+            'price_range', 'featured', 'gallery_category', 'images',
+            'image_count', 'created_at', 'updated_at'
+        ]
+
+class GalleryCategorySerializer(serializers.ModelSerializer):
+    projects = serializers.SerializerMethodField()
+    project_count = serializers.IntegerField(read_only=True)
+    total_images = serializers.IntegerField(read_only=True)
+    
+    class Meta:
+        model = GalleryCategory
+        fields = [
+            'id', 'name', 'slug', 'description', 'cover_image',
+            'projects', 'project_count', 'total_images', 'created_at'
+        ]
+    
+    def get_projects(self, obj):
+        # Only include projects if specifically requested
+        if self.context.get('include_projects', False):
+            projects = obj.gallery_projects.filter(is_active=True)
+            return GalleryProjectListSerializer(
+                projects, 
+                many=True, 
+                context=self.context
+            ).data
+        return []
+
+# Admin serializers for CRUD operations
+class AdminGalleryImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GalleryImage
+        fields = '__all__'
+
+class AdminGalleryProjectSerializer(serializers.ModelSerializer):
+    images = AdminGalleryImageSerializer(many=True, read_only=True)
+    category_name = serializers.CharField(source='gallery_category.name', read_only=True)
+    image_count = serializers.IntegerField(read_only=True)
+    
+    class Meta:
+        model = GalleryProject
+        fields = [
+            'id', 'gallery_category', 'title', 'slug', 'description',
+            'client_name', 'project_date', 'location', 'materials_used',
+            'dimensions', 'price_range', 'featured', 'is_active',
+            'sort_order', 'images', 'category_name', 'image_count',
+            'created_at', 'updated_at'
+        ]
+        extra_kwargs = {
+            'slug': {'read_only': True}
+        }
+
+class AdminGalleryCategorySerializer(serializers.ModelSerializer):
+    projects = AdminGalleryProjectSerializer(source='gallery_projects', many=True, read_only=True)
+    project_count = serializers.IntegerField(read_only=True)
+    total_images = serializers.IntegerField(read_only=True)
+    
+    class Meta:
+        model = GalleryCategory
+        fields = [
+            'id', 'name', 'slug', 'description', 'cover_image',
+            'is_active', 'sort_order', 'projects', 'project_count',
+            'total_images', 'created_at', 'updated_at'
+        ]
+        extra_kwargs = {
+            'slug': {'read_only': True}
+        }
 
 class CategorySerializer(serializers.ModelSerializer):
     subcategories = serializers.SerializerMethodField()

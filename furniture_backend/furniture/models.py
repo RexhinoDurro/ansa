@@ -58,6 +58,160 @@ class Category(models.Model):
         return self.name
 
 
+def gallery_image_path(instance, filename):
+    """Generate upload path for gallery images"""
+    ext = filename.split('.')[-1]
+    filename = f'{uuid.uuid4()}.{ext}'
+    
+    # Use current date if project doesn't have created_at yet
+    from datetime import datetime
+    try:
+        year = instance.gallery_project.created_at.year
+        month = instance.gallery_project.created_at.month
+        category_id = instance.gallery_project.gallery_category.id
+    except:
+        # Fallback for new objects
+        now = datetime.now()
+        year = now.year
+        month = now.month
+        category_id = getattr(instance.gallery_project, 'gallery_category_id', 'unknown')
+    
+    return os.path.join('gallery', 
+                       str(category_id), 
+                       str(year), 
+                       str(month), 
+                       filename)
+
+
+class GalleryCategory(models.Model):
+    """Gallery categories (e.g., Living Room, Bedroom, etc.)"""
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True, blank=True)
+    description = models.TextField(blank=True)
+    cover_image = models.ImageField(upload_to='gallery/categories/', blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    sort_order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name_plural = "Gallery Categories"
+        ordering = ['sort_order', 'name']
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return self.name
+    
+    @property
+    def project_count(self):
+        return self.gallery_projects.filter(is_active=True).count()
+    
+    @property
+    def total_images(self):
+        return GalleryImage.objects.filter(
+            gallery_project__gallery_category=self,
+            gallery_project__is_active=True
+        ).count()
+
+class GalleryProject(models.Model):
+    """Gallery projects/subcategories (e.g., Red Pattern Sofa, Modern Coffee Table, etc.)"""
+    gallery_category = models.ForeignKey(
+        GalleryCategory, 
+        on_delete=models.CASCADE, 
+        related_name='gallery_projects'
+    )
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=200, blank=True)
+    description = models.TextField(blank=True)
+    client_name = models.CharField(max_length=100, blank=True, help_text="Client name (optional)")
+    project_date = models.DateField(blank=True, null=True, help_text="When the project was completed")
+    location = models.CharField(max_length=200, blank=True, help_text="Project location")
+    materials_used = models.CharField(max_length=300, blank=True)
+    dimensions = models.CharField(max_length=100, blank=True)
+    price_range = models.CharField(
+        max_length=50, 
+        choices=[
+            ('under-1000', 'Under €1,000'),
+            ('1000-5000', '€1,000 - €5,000'),
+            ('5000-10000', '€5,000 - €10,000'),
+            ('10000-25000', '€10,000 - €25,000'),
+            ('over-25000', 'Over €25,000'),
+        ],
+        blank=True
+    )
+    featured = models.BooleanField(default=False, help_text="Show in featured projects")
+    is_active = models.BooleanField(default=True)
+    sort_order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['sort_order', '-created_at']
+        unique_together = ['gallery_category', 'slug']
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.title)
+            self.slug = base_slug
+            counter = 1
+            while GalleryProject.objects.filter(
+                gallery_category=self.gallery_category, 
+                slug=self.slug
+            ).exclude(pk=self.pk).exists():
+                self.slug = f"{base_slug}-{counter}"
+                counter += 1
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.gallery_category.name} - {self.title}"
+    
+    @property
+    def primary_image(self):
+        return self.images.filter(is_primary=True).first()
+    
+    @property
+    def image_count(self):
+        return self.images.count()
+
+class GalleryImage(models.Model):
+    """Individual images in gallery projects"""
+    gallery_project = models.ForeignKey(
+        GalleryProject, 
+        on_delete=models.CASCADE, 
+        related_name='images'
+    )
+    image = models.ImageField(upload_to=gallery_image_path)
+    title = models.CharField(max_length=200, blank=True)
+    description = models.TextField(blank=True)
+    alt_text = models.CharField(max_length=200, blank=True)
+    is_primary = models.BooleanField(default=False, help_text="Primary image for the project")
+    is_before_image = models.BooleanField(default=False, help_text="Before/after comparison")
+    tags = models.CharField(max_length=300, blank=True, help_text="Comma-separated tags")
+    order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['order', 'created_at']
+        indexes = [
+            models.Index(fields=['gallery_project', 'is_primary']),
+        ]
+    
+    def save(self, *args, **kwargs):
+        # Ensure only one primary image per project
+        if self.is_primary:
+            GalleryImage.objects.filter(
+                gallery_project=self.gallery_project, 
+                is_primary=True
+            ).update(is_primary=False)
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.gallery_project.title} - {self.title or f'Image {self.order}'}"
+    
 class CustomRequest(models.Model):
     STYLE_CHOICES = [
         ('modern', 'Modern'),

@@ -12,7 +12,8 @@ import {
   User,
   Bell,
   Home,
-  Grid
+  Grid,
+  Image as ImageIcon
 } from 'lucide-react';
 import { useAdmin } from '../../contexts/AdminContext';
 
@@ -26,6 +27,7 @@ const AdminLayout: React.FC = () => {
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, path: '/admin/dashboard' },
     { id: 'products', label: 'Products', icon: Package, path: '/admin/products' },
     { id: 'categories', label: 'Categories', icon: Grid, path: '/admin/categories' },
+    { id: 'gallery', label: 'Gallery', icon: ImageIcon, path: '/admin/gallery' }, //
     { id: 'orders', label: 'Custom Requests', icon: ShoppingCart, path: '/admin/orders' },
     { id: 'settings', label: 'Settings', icon: Settings, path: '/admin/settings' },
   ];
