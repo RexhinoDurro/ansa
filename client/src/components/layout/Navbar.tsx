@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import logo from '../../assets/logo.png'
+import { useTranslation } from 'react-i18next';
+import logo from '../../assets/logo.png';
+import LanguageSwitcher from '../LanguageSwitcher';
+
+
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const { t } = useTranslation('common');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,12 +26,12 @@ const Navbar: React.FC = () => {
   }, [location]);
 
   const navItems = [
-    { name: 'Home', path: '/' },
-    { name: 'Catalogue', path: '/catalogue' },
-    { name: 'About', path: '/about' },
-    { name: 'Contact', path: '/contact' },
-    { name: 'Gallery', path: '/gallery' },
-    { name: 'Custom', path: '/custom-request-page' },
+    { name: t('navigation.home'), path: '/' },
+    { name: t('navigation.catalogue'), path: '/catalogue' },
+    { name: t('navigation.about'), path: '/about' },
+    { name: t('navigation.contact'), path: '/contact' },
+    { name: t('navigation.gallery'), path: '/gallery' },
+    { name: t('navigation.custom'), path: '/custom-request-page' },
   ];
 
   const isActivePath = (path: string) => {
@@ -48,7 +53,7 @@ const Navbar: React.FC = () => {
             to="/" 
             className="text-2xl lg:text-3xl font-serif font-bold text-primary-700 hover:text-primary-800 transition-colors duration-200"
           >
-            <img src={logo}></img>
+            <img src={logo} alt="Furniture Ansa" />
           </Link>
           
           {/* Desktop Navigation */}
@@ -71,18 +76,24 @@ const Navbar: React.FC = () => {
                 }`}></span>
               </Link>
             ))}
+            
+            {/* Language Switcher */}
+            <LanguageSwitcher />
           </div>
           
           {/* Mobile menu button */}
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className={`md:hidden p-2 rounded-lg transition-colors duration-200 ${
-              scrolled ? 'text-neutral-700 hover:bg-neutral-100' : 'text-white hover:bg-white/10'
-            }`}
-            aria-label="Toggle mobile menu"
-          >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="md:hidden flex items-center space-x-4">
+            <LanguageSwitcher />
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className={`p-2 rounded-lg transition-colors duration-200 ${
+                scrolled ? 'text-neutral-700 hover:bg-neutral-100' : 'text-white hover:bg-white/10'
+              }`}
+              aria-label="Toggle mobile menu"
+            >
+              {isOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
         
         {/* Mobile Navigation */}
