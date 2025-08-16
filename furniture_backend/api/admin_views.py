@@ -20,6 +20,7 @@ from .serializers import (
 
 from furniture.models import CustomRequest
 from .serializers import AdminCustomRequestSerializer
+from furniture.translation_service import translation_service
 
 from furniture.models import Product, Category, Brand, ProductImage, ContactMessage, ProductReview
 from .serializers import (
@@ -324,7 +325,7 @@ class AdminProductViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
         return ProductCreateUpdateSerializer
 
     def create(self, request, *args, **kwargs):
-        print("=== CREATE PRODUCT DEBUG ===")
+        print("=== CREATE PRODUCT WITH TRANSLATION DEBUG ===")
         print("Request data:", request.data)
         print("Request files:", request.FILES)
         
@@ -332,9 +333,6 @@ class AdminProductViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
             # Extract data
             data = request.data.copy()
             images = request.FILES.getlist('images')
-            
-            print("Extracted data:", data)
-            print("Images count:", len(images))
             
             # Validate required fields
             required_fields = ['name', 'description', 'price', 'category']
@@ -375,26 +373,30 @@ class AdminProductViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            # Validate subcategory if provided
-            if data.get('subcategory'):
-                try:
-                    subcategory = Category.objects.get(id=data['subcategory'])
-                    if subcategory.parent_category != category:
-                        return Response(
-                            {'error': 'Subcategory must belong to the selected category'},
-                            status=status.HTTP_400_BAD_REQUEST
-                        )
-                except Category.DoesNotExist:
-                    return Response(
-                        {'error': 'Selected subcategory does not exist'},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-            
             # Create product
             serializer = self.get_serializer(data=data)
             if serializer.is_valid():
                 product = serializer.save()
                 print(f"Created product: {product.name}")
+                
+                # Generate translations for the product
+                try:
+                    print("Generating translations...")
+                    translations = translation_service.translate_product_data({
+                        'name': product.name,
+                        'description': product.description,
+                        'short_description': product.short_description,
+                        'specifications': product.specifications,
+                        'care_instructions': product.care_instructions,
+                    })
+                    
+                    # Save translations
+                    product.save_translations(translations)
+                    print("Translations saved successfully")
+                    
+                except Exception as translation_error:
+                    print(f"Translation error: {str(translation_error)}")
+                    # Continue without translations if they fail
                 
                 # Handle image uploads
                 for i, image in enumerate(images):
@@ -422,7 +424,7 @@ class AdminProductViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
                 {'error': f'Server error: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
+    
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
@@ -451,10 +453,29 @@ class AdminProductViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
         if serializer.is_valid():
             product = serializer.save()
 
+            # Update translations if relevant fields were changed
+            translation_fields = ['name', 'description', 'short_description', 'specifications', 'care_instructions']
+            if any(field in data for field in translation_fields):
+                try:
+                    print("Updating translations...")
+                    translations = translation_service.translate_product_data({
+                        'name': product.name,
+                        'description': product.description,
+                        'short_description': product.short_description,
+                        'specifications': product.specifications,
+                        'care_instructions': product.care_instructions,
+                    })
+                    
+                    # Save updated translations
+                    product.save_translations(translations)
+                    print("Translations updated successfully")
+                    
+                except Exception as translation_error:
+                    print(f"Translation update error: {str(translation_error)}")
+
             # Handle new image uploads
             if images:
                 for i, image in enumerate(images):
-                    # Get the highest order number for existing images
                     max_order = ProductImage.objects.filter(product=product).aggregate(
                         max_order=models.Max('order')
                     )['max_order'] or -1
@@ -471,68 +492,6 @@ class AdminProductViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
             return Response(response_serializer.data)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=True, methods=['post'])
-    def upload_images(self, request, pk=None):
-        """Upload additional images for a product"""
-        product = self.get_object()
-        images = request.FILES.getlist('images')
-        
-        if not images:
-            return Response({
-                'error': 'No images provided'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
-        created_images = []
-        max_order = ProductImage.objects.filter(product=product).aggregate(
-            max_order=models.Max('order')
-        )['max_order'] or -1
-        
-        for i, image in enumerate(images):
-            product_image = ProductImage.objects.create(
-                product=product,
-                image=image,
-                alt_text=request.data.get(f'alt_text_{i}', f"{product.name} - Image {max_order + i + 2}"),
-                is_primary=False,
-                order=max_order + i + 1
-            )
-            created_images.append(product_image)
-        
-        serializer = ProductImageSerializer(created_images, many=True)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    @action(detail=True, methods=['delete'])
-    def delete_image(self, request, pk=None):
-        """Delete a specific product image"""
-        product = self.get_object()
-        image_id = request.data.get('image_id')
-        
-        try:
-            image = ProductImage.objects.get(id=image_id, product=product)
-            image.delete()
-            return Response({'message': 'Image deleted successfully'})
-        except ProductImage.DoesNotExist:
-            return Response({
-                'error': 'Image not found'
-            }, status=status.HTTP_404_NOT_FOUND)
-
-    @action(detail=False, methods=['get'])
-    def stats(self, request):
-        """Get product statistics"""
-        total_products = Product.objects.count()
-        active_products = Product.objects.filter(status='active').count()
-        draft_products = Product.objects.filter(status='draft').count()
-        low_stock_products = Product.objects.filter(
-            track_inventory=True,
-            stock_quantity__lte=models.F('min_stock_level')
-        ).count()
-        
-        return Response({
-            'total_products': total_products,
-            'active_products': active_products,
-            'draft_products': draft_products,
-            'low_stock_products': low_stock_products,
-        })
 
 class AdminCustomRequestViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
     """Admin-only custom request management"""
@@ -642,12 +601,29 @@ class AdminCategoryViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def create(self, request, *args, **kwargs):
-        print("=== CREATE CATEGORY DEBUG ===")
+        print("=== CREATE CATEGORY WITH TRANSLATION DEBUG ===")
         print("Request data:", request.data)
         
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             category = serializer.save()
+            
+            # Generate translations for the category
+            try:
+                print("Generating category translations...")
+                translations = translation_service.translate_category_data({
+                    'name': category.name,
+                    'description': category.description,
+                })
+                
+                # Save translations
+                category.save_translations(translations)
+                print("Category translations saved successfully")
+                
+            except Exception as translation_error:
+                print(f"Category translation error: {str(translation_error)}")
+                # Continue without translations if they fail
+            
             return Response(
                 CategorySerializer(category, context={'request': request}).data,
                 status=status.HTTP_201_CREATED
@@ -655,36 +631,37 @@ class AdminCategoryViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
         else:
             print("Category serializer errors:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        if serializer.is_valid():
+            category = serializer.save()
+            
+            # Update translations if name or description changed
+            if 'name' in request.data or 'description' in request.data:
+                try:
+                    print("Updating category translations...")
+                    translations = translation_service.translate_category_data({
+                        'name': category.name,
+                        'description': category.description,
+                    })
+                    
+                    # Save updated translations
+                    category.save_translations(translations)
+                    print("Category translations updated successfully")
+                    
+                except Exception as translation_error:
+                    print(f"Category translation update error: {str(translation_error)}")
+            
+            return Response(
+                CategorySerializer(category, context={'request': request}).data
+            )
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['get'])
-    def tree(self, request):
-        """Get category tree structure"""
-        parent_categories = Category.objects.filter(
-            parent_category=None, 
-            is_active=True
-        ).prefetch_related('subcategories')
-        
-        tree_data = []
-        for parent in parent_categories:
-            parent_data = CategorySerializer(parent, context={'request': request}).data
-            tree_data.append(parent_data)
-        
-        return Response(tree_data)
-
-    @action(detail=True, methods=['post'])
-    def reorder(self, request, pk=None):
-        """Reorder categories"""
-        category = self.get_object()
-        new_order = request.data.get('sort_order')
-        
-        if new_order is not None:
-            category.sort_order = new_order
-            category.save()
-            return Response({'message': 'Category reordered successfully'})
-        
-        return Response({
-            'error': 'sort_order is required'
-        }, status=status.HTTP_400_BAD_REQUEST)
 
 class AdminContactMessageViewSet(AdminAuthenticationMixin, viewsets.ReadOnlyModelViewSet):
     """Admin-only contact message management"""

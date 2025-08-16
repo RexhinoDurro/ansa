@@ -6,7 +6,7 @@ from furniture.models import (
     Wishlist, RecentlyViewed, CustomRequest
 )
 from furniture.models import GalleryCategory, GalleryProject, GalleryImage
-
+from django.utils.translation import get_language
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage
@@ -120,12 +120,16 @@ class AdminGalleryCategorySerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     subcategories = serializers.SerializerMethodField()
     product_count = serializers.SerializerMethodField()
+    # Add localized fields
+    localized_name = serializers.SerializerMethodField()
+    localized_description = serializers.SerializerMethodField()
     
     class Meta:
         model = Category
         fields = [
             'id', 'name', 'slug', 'description', 'parent_category', 
-            'image', 'subcategories', 'product_count'
+            'image', 'subcategories', 'product_count',
+            'localized_name', 'localized_description'
         ]
     
     def get_subcategories(self, obj):
@@ -139,6 +143,26 @@ class CategorySerializer(serializers.ModelSerializer):
     
     def get_product_count(self, obj):
         return obj.products.filter(status='active').count()
+    
+    def get_localized_name(self, obj):
+        """Get localized name based on request language"""
+        request = self.context.get('request')
+        if request:
+            # Get language from request headers or query params
+            lang = request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')[:2]
+            if lang in ['it', 'al']:
+                return obj.get_localized_name(lang)
+        return obj.name
+    
+    def get_localized_description(self, obj):
+        """Get localized description based on request language"""
+        request = self.context.get('request')
+        if request:
+            # Get language from request headers or query params
+            lang = request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')[:2]
+            if lang in ['it', 'al']:
+                return obj.get_localized_description(lang)
+        return obj.description
 
 class ProductReviewSerializer(serializers.ModelSerializer):
     class Meta:
@@ -156,6 +180,10 @@ class ProductListSerializer(serializers.ModelSerializer):
     discount_percentage = serializers.IntegerField(read_only=True)
     average_rating = serializers.SerializerMethodField()
     review_count = serializers.SerializerMethodField()
+    # Add localized fields
+    localized_name = serializers.SerializerMethodField()
+    localized_description = serializers.SerializerMethodField()
+    localized_short_description = serializers.SerializerMethodField()
     
     class Meta:
         model = Product
@@ -164,7 +192,8 @@ class ProductListSerializer(serializers.ModelSerializer):
             'current_price', 'discount_percentage', 'primary_image', 
             'category_name', 'brand_name', 'colors', 'materials', 'condition',
             'featured', 'is_bestseller', 'is_new_arrival', 'is_in_stock', 
-            'is_low_stock', 'average_rating', 'review_count', 'created_at'
+            'is_low_stock', 'average_rating', 'review_count', 'created_at',
+            'localized_name', 'localized_description', 'localized_short_description'
         ]
     
     def get_average_rating(self, obj):
@@ -175,6 +204,34 @@ class ProductListSerializer(serializers.ModelSerializer):
     
     def get_review_count(self, obj):
         return obj.reviews.filter(is_approved=True).count()
+    
+    def get_localized_name(self, obj):
+        """Get localized name based on request language"""
+        request = self.context.get('request')
+        if request:
+            # Check for language in query params first, then headers
+            lang = request.GET.get('lang') or request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')[:2]
+            if lang in ['it', 'al']:
+                return obj.get_localized_name(lang)
+        return obj.name
+    
+    def get_localized_description(self, obj):
+        """Get localized description based on request language"""
+        request = self.context.get('request')
+        if request:
+            lang = request.GET.get('lang') or request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')[:2]
+            if lang in ['it', 'al']:
+                return obj.get_localized_description(lang)
+        return obj.description
+    
+    def get_localized_short_description(self, obj):
+        """Get localized short description based on request language"""
+        request = self.context.get('request')
+        if request:
+            lang = request.GET.get('lang') or request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')[:2]
+            if lang in ['it', 'al']:
+                return obj.get_localized_short_description(lang)
+        return obj.short_description
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
@@ -191,6 +248,12 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     review_count = serializers.SerializerMethodField()
     rating_distribution = serializers.SerializerMethodField()
     related_products = serializers.SerializerMethodField()
+    # Add localized fields
+    localized_name = serializers.SerializerMethodField()
+    localized_description = serializers.SerializerMethodField()
+    localized_short_description = serializers.SerializerMethodField()
+    localized_specifications = serializers.SerializerMethodField()
+    localized_care_instructions = serializers.SerializerMethodField()
     
     class Meta:
         model = Product
@@ -205,7 +268,9 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             'requires_assembly', 'assembly_time_minutes', 'assembly_difficulty',
             'requires_shipping', 'free_shipping', 'images', 'reviews',
             'average_rating', 'review_count', 'rating_distribution',
-            'related_products', 'created_at', 'updated_at'
+            'related_products', 'created_at', 'updated_at',
+            'localized_name', 'localized_description', 'localized_short_description',
+            'localized_specifications', 'localized_care_instructions'
         ]
     
     def get_average_rating(self, obj):
@@ -237,6 +302,51 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             many=True, 
             context=self.context
         ).data
+    
+    def get_localized_name(self, obj):
+        """Get localized name based on request language"""
+        request = self.context.get('request')
+        if request:
+            lang = request.GET.get('lang') or request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')[:2]
+            if lang in ['it', 'al']:
+                return obj.get_localized_name(lang)
+        return obj.name
+    
+    def get_localized_description(self, obj):
+        """Get localized description based on request language"""
+        request = self.context.get('request')
+        if request:
+            lang = request.GET.get('lang') or request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')[:2]
+            if lang in ['it', 'al']:
+                return obj.get_localized_description(lang)
+        return obj.description
+    
+    def get_localized_short_description(self, obj):
+        """Get localized short description based on request language"""
+        request = self.context.get('request')
+        if request:
+            lang = request.GET.get('lang') or request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')[:2]
+            if lang in ['it', 'al']:
+                return obj.get_localized_short_description(lang)
+        return obj.short_description
+    
+    def get_localized_specifications(self, obj):
+        """Get localized specifications based on request language"""
+        request = self.context.get('request')
+        if request:
+            lang = request.GET.get('lang') or request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')[:2]
+            if lang in ['it', 'al']:
+                return obj.get_localized_specifications(lang)
+        return obj.specifications
+    
+    def get_localized_care_instructions(self, obj):
+        """Get localized care instructions based on request language"""
+        request = self.context.get('request')
+        if request:
+            lang = request.GET.get('lang') or request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')[:2]
+            if lang in ['it', 'al']:
+                return obj.get_localized_care_instructions(lang)
+        return obj.care_instructions
 
 class HomeSliderSerializer(serializers.ModelSerializer):
     class Meta:

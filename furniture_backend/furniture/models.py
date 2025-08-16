@@ -3,8 +3,89 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.text import slugify
 from django.urls import reverse
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 import uuid
 import os
+
+
+# Translation Models (moved from api app)
+class Translation(models.Model):
+    """Store translations for any model field"""
+    
+    # Generic foreign key to link to any model
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.CharField(max_length=100)  # Use CharField to support UUID
+    content_object = GenericForeignKey('content_type', 'object_id')
+    
+    # Translation details
+    field_name = models.CharField(max_length=100)  # e.g., 'name', 'description'
+    language_code = models.CharField(max_length=5)  # e.g., 'en', 'it', 'al'
+    translated_text = models.TextField()
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ['content_type', 'object_id', 'field_name', 'language_code']
+        indexes = [
+            models.Index(fields=['content_type', 'object_id', 'language_code']),
+        ]
+    
+    def __str__(self):
+        return f"{self.content_object} - {self.field_name} ({self.language_code})"
+
+class TranslatableModelMixin:
+    """Mixin to add translation functionality to models"""
+    
+    def get_translation(self, field_name: str, language_code: str) -> str:
+        """Get translated text for a specific field and language"""
+        try:
+            content_type = ContentType.objects.get_for_model(self)
+            translation = Translation.objects.get(
+                content_type=content_type,
+                object_id=str(self.pk),
+                field_name=field_name,
+                language_code=language_code
+            )
+            return translation.translated_text
+        except Translation.DoesNotExist:
+            # Return original field value if no translation exists
+            return getattr(self, field_name, '')
+    
+    def set_translation(self, field_name: str, language_code: str, translated_text: str):
+        """Set translation for a specific field and language"""
+        content_type = ContentType.objects.get_for_model(self)
+        translation, created = Translation.objects.update_or_create(
+            content_type=content_type,
+            object_id=str(self.pk),
+            field_name=field_name,
+            language_code=language_code,
+            defaults={'translated_text': translated_text}
+        )
+        return translation
+    
+    def get_all_translations(self, language_code: str) -> dict:
+        """Get all translations for this object in a specific language"""
+        content_type = ContentType.objects.get_for_model(self)
+        translations = Translation.objects.filter(
+            content_type=content_type,
+            object_id=str(self.pk),
+            language_code=language_code
+        )
+        
+        return {
+            translation.field_name: translation.translated_text
+            for translation in translations
+        }
+    
+    def save_translations(self, translations_data: dict):
+        """Save multiple translations for this object"""
+        for language_code, fields in translations_data.items():
+            for field_name, translated_text in fields.items():
+                if translated_text:  # Only save non-empty translations
+                    self.set_translation(field_name, language_code, translated_text)
 
 def product_image_path(instance, filename):
     """Generate upload path for product images"""
@@ -19,7 +100,7 @@ def slider_image_path(instance, filename):
     filename = f'{uuid.uuid4()}.{ext}'
     return os.path.join('slider', filename)
 
-class Category(models.Model):
+class Category(TranslatableModelMixin, models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True, blank=True)
     description = models.TextField(blank=True)
@@ -56,6 +137,19 @@ class Category(models.Model):
         if self.parent_category:
             return f"{self.parent_category.get_full_path} > {self.name}"
         return self.name
+    
+    # Translation helper methods
+    def get_localized_name(self, language_code: str = 'en') -> str:
+        """Get localized name"""
+        if language_code == 'en':
+            return self.name
+        return self.get_translation('name', language_code) or self.name
+    
+    def get_localized_description(self, language_code: str = 'en') -> str:
+        """Get localized description"""
+        if language_code == 'en':
+            return self.description
+        return self.get_translation('description', language_code) or self.description
 
 
 def gallery_image_path(instance, filename):
@@ -335,7 +429,7 @@ class Brand(models.Model):
     def __str__(self):
         return self.name
 
-class Product(models.Model):
+class Product(TranslatableModelMixin, models.Model):
     COLOR_CHOICES = [
         ('white', 'White'), ('black', 'Black'), ('brown', 'Brown'), ('gray', 'Gray'),
         ('beige', 'Beige'), ('blue', 'Blue'), ('green', 'Green'), ('red', 'Red'),
@@ -546,6 +640,36 @@ class Product(models.Model):
     
     def get_absolute_url(self):
         return reverse('product-detail', kwargs={'slug': self.slug})
+    
+    def get_localized_name(self, language_code: str = 'en') -> str:
+        """Get localized name"""
+        if language_code == 'en':
+            return self.name
+        return self.get_translation('name', language_code) or self.name
+    
+    def get_localized_description(self, language_code: str = 'en') -> str:
+        """Get localized description"""
+        if language_code == 'en':
+            return self.description
+        return self.get_translation('description', language_code) or self.description
+    
+    def get_localized_short_description(self, language_code: str = 'en') -> str:
+        """Get localized short description"""
+        if language_code == 'en':
+            return self.short_description
+        return self.get_translation('short_description', language_code) or self.short_description
+    
+    def get_localized_specifications(self, language_code: str = 'en') -> str:
+        """Get localized specifications"""
+        if language_code == 'en':
+            return self.specifications
+        return self.get_translation('specifications', language_code) or self.specifications
+    
+    def get_localized_care_instructions(self, language_code: str = 'en') -> str:
+        """Get localized care instructions"""
+        if language_code == 'en':
+            return self.care_instructions
+        return self.get_translation('care_instructions', language_code) or self.care_instructions
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')

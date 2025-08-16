@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Filter, Grid, List, Search, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { useTranslation } from 'react-i18next'; // Add this import
+import { useTranslation as useI18nTranslation } from 'react-i18next'; // Renamed to avoid conflict
+import { useTranslation } from '../hooks/useTranslation'; // Our custom hook
 import { api, endpoints } from '../utils/api';
 import type { ProductListItem, Category, ApiResponse } from '../types';
 
@@ -27,8 +28,14 @@ const ProductCard: React.FC<{ product: ProductListItem; viewMode: 'grid' | 'list
   product, 
   viewMode 
 }) => {
-  const { t } = useTranslation();
+  const { t } = useI18nTranslation(); // For general UI translations
+  const { getLocalizedProduct } = useTranslation(); // For product data localization
 
+  // Get localized product data
+  const localizedProduct = getLocalizedProduct(product);
+
+  // ... rest of your ProductCard component code stays the same
+  
   if (viewMode === 'list') {
     return (
       <Link
@@ -39,7 +46,7 @@ const ProductCard: React.FC<{ product: ProductListItem; viewMode: 'grid' | 'list
           {product.primary_image ? (
             <img
               src={product.primary_image.image}
-              alt={product.primary_image.alt_text || product.name}
+              alt={product.primary_image.alt_text || localizedProduct.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
@@ -51,14 +58,14 @@ const ProductCard: React.FC<{ product: ProductListItem; viewMode: 'grid' | 'list
         <div className="p-6 flex-1">
           <div className="flex items-start justify-between mb-2">
             <h3 className="font-semibold text-xl text-neutral-900 group-hover:text-primary-600 transition-colors duration-200">
-              {product.name}
+              {localizedProduct.name}
             </h3>
             <span className="text-2xl font-bold text-primary-600">
               ${product.price}
             </span>
           </div>
           <p className="text-neutral-600 mb-4">
-            {product.short_description}
+            {localizedProduct.short_description}
           </p>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4 text-sm text-neutral-500">
@@ -88,7 +95,7 @@ const ProductCard: React.FC<{ product: ProductListItem; viewMode: 'grid' | 'list
         {product.primary_image ? (
           <img
             src={product.primary_image.image}
-            alt={product.primary_image.alt_text || product.name}
+            alt={product.primary_image.alt_text || localizedProduct.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
@@ -99,10 +106,10 @@ const ProductCard: React.FC<{ product: ProductListItem; viewMode: 'grid' | 'list
       </div>
       <div className="p-4">
         <h3 className="font-semibold text-neutral-900 mb-2 group-hover:text-primary-600 transition-colors duration-200">
-          {product.name}
+          {localizedProduct.name}
         </h3>
         <p className="text-sm text-neutral-600 mb-3 line-clamp-2">
-          {product.short_description}
+          {localizedProduct.short_description}
         </p>
         <div className="flex items-center justify-between mb-2">
           <span className="text-lg font-bold text-primary-600">
@@ -131,7 +138,7 @@ const FilterSidebar: React.FC<{
   isOpen: boolean;
   onClose: () => void;
 }> = ({ filters, setFilters, filterOptions, isOpen, onClose }) => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const [expandedSections, setExpandedSections] = useState({
     category: true,
     material: false,
@@ -480,7 +487,7 @@ const FilterSidebar: React.FC<{
 };
 
 const Catalogue: React.FC = () => {
-  const { t } = useTranslation();
+  const { t } = useI18nTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('created_at');
