@@ -1,3 +1,4 @@
+// client/src/types/index.ts (Updated)
 export interface ProductImage {
   id: string;
   image: string;
@@ -13,6 +14,9 @@ export interface Category {
   description: string;
   parent_category: number | null;
   subcategories: Category[];
+  // Localized fields
+  localized_name?: string;
+  localized_description?: string;
 }
 
 export interface Product {
@@ -37,6 +41,12 @@ export interface Product {
   images: ProductImage[];
   created_at: string;
   updated_at: string;
+  // Localized fields
+  localized_name?: string;
+  localized_description?: string;
+  localized_short_description?: string;
+  localized_specifications?: string;
+  localized_care_instructions?: string;
 }
 
 export interface ProductListItem {
@@ -52,6 +62,10 @@ export interface ProductListItem {
   featured: boolean;
   is_in_stock: boolean;
   created_at: string;
+  // Localized fields
+  localized_name?: string;
+  localized_description?: string;
+  localized_short_description?: string;
 }
 
 export interface HomeSlider {

@@ -12,7 +12,7 @@ export const api = axios.create({
 
 // Add request interceptor to include language in requests
 api.interceptors.request.use((config) => {
-  // Get current language from localStorage or context
+  // Get current language from localStorage
   const currentLanguage = localStorage.getItem('language') || 'en';
   
   // Add language as query parameter
@@ -22,11 +22,20 @@ api.interceptors.request.use((config) => {
     config.params = { lang: currentLanguage };
   }
   
-  // Also add as header
+  // Also add as header for backend processing
   config.headers['Accept-Language'] = currentLanguage;
   
   return config;
 });
+
+// Add response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', error);
+    return Promise.reject(error);
+  }
+);
 
 export const endpoints = {
   products: '/products/',

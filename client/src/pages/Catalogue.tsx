@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Filter, Grid, List, Search, X, ChevronDown, ChevronRight } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { useTranslation as useI18nTranslation } from 'react-i18next'; // Renamed to avoid conflict
-import { useTranslation } from '../hooks/useTranslation'; // Our custom hook
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslation as useI18nTranslation } from 'react-i18next';
+import { useLanguage } from '../contexts/LanguageContext'; // Import language context
 import { api, endpoints } from '../utils/api';
 import type { ProductListItem, Category, ApiResponse } from '../types';
 
@@ -28,14 +28,12 @@ const ProductCard: React.FC<{ product: ProductListItem; viewMode: 'grid' | 'list
   product, 
   viewMode 
 }) => {
-  const { t } = useI18nTranslation(); // For general UI translations
-  const { getLocalizedProduct } = useTranslation(); // For product data localization
+  const { t } = useI18nTranslation();
 
-  // Get localized product data
-  const localizedProduct = getLocalizedProduct(product);
+  // Use localized fields from backend
+  const productName = product.localized_name || product.name;
+  const productDescription = product.localized_short_description || product.short_description;
 
-  // ... rest of your ProductCard component code stays the same
-  
   if (viewMode === 'list') {
     return (
       <Link
@@ -46,39 +44,39 @@ const ProductCard: React.FC<{ product: ProductListItem; viewMode: 'grid' | 'list
           {product.primary_image ? (
             <img
               src={product.primary_image.image}
-              alt={product.primary_image.alt_text || localizedProduct.name}
+              alt={product.primary_image.alt_text || productName}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
             <div className="w-full h-full bg-neutral-200 flex items-center justify-center">
-              <span className="text-neutral-400">{t('catalogue.noImage')}</span>
+              <span className="text-neutral-400">No Image</span>
             </div>
           )}
         </div>
         <div className="p-6 flex-1">
           <div className="flex items-start justify-between mb-2">
             <h3 className="font-semibold text-xl text-neutral-900 group-hover:text-primary-600 transition-colors duration-200">
-              {localizedProduct.name}
+              {productName}
             </h3>
             <span className="text-2xl font-bold text-primary-600">
               ${product.price}
             </span>
           </div>
           <p className="text-neutral-600 mb-4">
-            {localizedProduct.short_description}
+            {productDescription}
           </p>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4 text-sm text-neutral-500">
-              <span>{t('catalogue.category')}: {product.category_name}</span>
-              <span>{t('catalogue.material')}: {product.materials}</span>
-              <span>{t('catalogue.color')}: {product.colors}</span>
+              <span>Category: {product.category_name}</span>
+              <span>Material: {product.materials}</span>
+              <span>Color: {product.colors}</span>
             </div>
             <span className={`text-xs px-3 py-1 rounded-full ${
               product.is_in_stock 
                 ? 'bg-green-100 text-green-800' 
                 : 'bg-red-100 text-red-800'
             }`}>
-              {product.is_in_stock ? t('catalogue.inStock') : t('catalogue.outOfStock')}
+              {product.is_in_stock ? t('product.inStock') : t('product.outOfStock')}
             </span>
           </div>
         </div>
@@ -95,21 +93,21 @@ const ProductCard: React.FC<{ product: ProductListItem; viewMode: 'grid' | 'list
         {product.primary_image ? (
           <img
             src={product.primary_image.image}
-            alt={product.primary_image.alt_text || localizedProduct.name}
+            alt={product.primary_image.alt_text || productName}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
           <div className="w-full h-full bg-neutral-200 flex items-center justify-center">
-            <span className="text-neutral-400">{t('catalogue.noImage')}</span>
+            <span className="text-neutral-400">No Image</span>
           </div>
         )}
       </div>
       <div className="p-4">
         <h3 className="font-semibold text-neutral-900 mb-2 group-hover:text-primary-600 transition-colors duration-200">
-          {localizedProduct.name}
+          {productName}
         </h3>
         <p className="text-sm text-neutral-600 mb-3 line-clamp-2">
-          {localizedProduct.short_description}
+          {productDescription}
         </p>
         <div className="flex items-center justify-between mb-2">
           <span className="text-lg font-bold text-primary-600">
@@ -120,7 +118,7 @@ const ProductCard: React.FC<{ product: ProductListItem; viewMode: 'grid' | 'list
               ? 'bg-green-100 text-green-800' 
               : 'bg-red-100 text-red-800'
           }`}>
-            {product.is_in_stock ? t('catalogue.inStock') : t('catalogue.outOfStock')}
+            {product.is_in_stock ? t('product.inStock') : t('product.outOfStock')}
           </span>
         </div>
         <div className="text-xs text-neutral-500">
@@ -138,7 +136,8 @@ const FilterSidebar: React.FC<{
   isOpen: boolean;
   onClose: () => void;
 }> = ({ filters, setFilters, filterOptions, isOpen, onClose }) => {
-  // const { t } = useTranslation();
+  const { t } = useI18nTranslation();
+  const { currentLanguage } = useLanguage();
   const [expandedSections, setExpandedSections] = useState({
     category: true,
     material: false,
@@ -181,7 +180,6 @@ const FilterSidebar: React.FC<{
 
   // Separate parent categories and subcategories
   const parentCategories = filterOptions?.categories?.filter(cat => !cat.parent_category) || [];
-  const subcategories = filterOptions?.categories?.filter(cat => cat.parent_category) || [];
 
   const handleCategorySelect = (categoryId: string) => {
     setFilters(prev => ({ 
@@ -193,6 +191,12 @@ const FilterSidebar: React.FC<{
 
   const handleSubcategorySelect = (subcategoryId: string) => {
     setFilters(prev => ({ ...prev, subcategory: subcategoryId }));
+  };
+
+  // Helper function to get localized category name
+  const getCategoryName = (category: Category) => {
+    if (currentLanguage === 'en') return category.name;
+    return category.localized_name || category.name;
   };
 
   return (
@@ -217,7 +221,7 @@ const FilterSidebar: React.FC<{
       `}>
         {/* Mobile header */}
         <div className="flex items-center justify-between mb-6 lg:hidden">
-          <h3 className="text-xl font-bold text-neutral-900">Filters</h3>
+          <h3 className="text-xl font-bold text-neutral-900">{t('catalogue.filters')}</h3>
           <button 
             onClick={onClose} 
             className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
@@ -233,7 +237,7 @@ const FilterSidebar: React.FC<{
               onClick={clearFilters}
               className="w-full px-4 py-3 text-sm font-medium text-white bg-gradient-to-r from-red-500 to-red-600 rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-sm hover:shadow-md"
             >
-              Clear All Filters
+              {t('catalogue.clearFilters')}
             </button>
           </div>
         )}
@@ -246,7 +250,7 @@ const FilterSidebar: React.FC<{
               type="text"
               value={filters.search}
               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-              placeholder="Search products..."
+              placeholder={t('catalogue.searchPlaceholder')}
               className="w-full pl-12 pr-4 py-3.5 bg-neutral-50 border-0 rounded-xl text-sm placeholder:text-neutral-400 focus:bg-white focus:ring-2 focus:ring-primary-200 focus:outline-none transition-all duration-200 shadow-sm"
             />
             {filters.search && (
@@ -268,7 +272,7 @@ const FilterSidebar: React.FC<{
           >
             <span className="flex items-center">
               <div className="w-2 h-2 bg-primary-500 rounded-full mr-3"></div>
-              Categories
+              {t('catalogue.categories')}
             </span>
             <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${
               expandedSections.category ? 'rotate-180' : ''
@@ -287,7 +291,7 @@ const FilterSidebar: React.FC<{
                   onChange={(e) => handleCategorySelect(e.target.value)}
                   className="mr-3 w-4 h-4 text-primary-600 focus:ring-primary-500 focus:ring-2"
                 />
-                <span className="text-sm font-medium text-neutral-700 group-hover:text-primary-700">All Categories</span>
+                <span className="text-sm font-medium text-neutral-700 group-hover:text-primary-700">{t('catalogue.allCategories')}</span>
               </label>
 
               {/* Parent Categories */}
@@ -303,7 +307,9 @@ const FilterSidebar: React.FC<{
                         onChange={(e) => handleCategorySelect(e.target.value)}
                         className="mr-3 w-4 h-4 text-primary-600 focus:ring-primary-500 focus:ring-2"
                       />
-                      <span className="text-sm font-semibold text-neutral-800 group-hover:text-primary-700">{category.name}</span>
+                      <span className="text-sm font-semibold text-neutral-800 group-hover:text-primary-700">
+                        {getCategoryName(category)}
+                      </span>
                     </label>
                     
                     {/* Toggle button for subcategories */}
@@ -337,7 +343,9 @@ const FilterSidebar: React.FC<{
                             onChange={(e) => handleSubcategorySelect(e.target.value)}
                             className="mr-3 w-4 h-4 text-blue-600 focus:ring-blue-500 focus:ring-2"
                           />
-                          <span className="text-sm text-neutral-600 group-hover:text-blue-700">{subcategory.name}</span>
+                          <span className="text-sm text-neutral-600 group-hover:text-blue-700">
+                            {getCategoryName(subcategory)}
+                          </span>
                         </label>
                       ))}
                     </div>
@@ -488,6 +496,8 @@ const FilterSidebar: React.FC<{
 
 const Catalogue: React.FC = () => {
   const { t } = useI18nTranslation();
+  const { currentLanguage } = useLanguage();
+  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('created_at');
@@ -505,9 +515,21 @@ const Catalogue: React.FC = () => {
     search: searchParams.get('search') || ''
   });
 
+  // Listen for language changes and invalidate queries
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      console.log('Language changed, invalidating queries...');
+      // Invalidate all queries to refetch with new language
+      queryClient.invalidateQueries();
+    };
+
+    window.addEventListener('languageChanged', handleLanguageChange);
+    return () => window.removeEventListener('languageChanged', handleLanguageChange);
+  }, [queryClient]);
+
   // Fetch filter options
   const { data: filterOptions } = useQuery<FilterOptions>({
-    queryKey: ['filter-options'],
+    queryKey: ['filter-options', currentLanguage],
     queryFn: async () => {
       const response = await api.get(endpoints.filters);
       return response.data;
@@ -526,14 +548,16 @@ const Catalogue: React.FC = () => {
     if (filters.search) params.append('search', filters.search);
     if (sortBy) params.append('ordering', sortBy);
     params.append('page', currentPage.toString());
+    // Language is automatically added by the axios interceptor
     return params.toString();
   };
 
   // Fetch products
   const { data: productsData, isLoading } = useQuery<ApiResponse<ProductListItem>>({
-    queryKey: ['products', filters, sortBy, currentPage],
+    queryKey: ['products', filters, sortBy, currentPage, currentLanguage],
     queryFn: async () => {
       const queryString = buildQueryParams();
+      console.log('Fetching products with query:', queryString);
       const response = await api.get(`${endpoints.products}?${queryString}`);
       return response.data;
     }
@@ -565,7 +589,7 @@ const Catalogue: React.FC = () => {
             {t('catalogue.title')}
           </h1>
           <p className="text-lg text-neutral-600">
-            {t('catalogue.description')}
+            {t('catalogue.subtitle')}
           </p>
         </div>
 
@@ -598,7 +622,7 @@ const Catalogue: React.FC = () => {
             <div className="flex items-center justify-between mb-6 bg-white p-4 rounded-lg border border-neutral-200">
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-neutral-600">
-                  {productsData ? t('catalogue.productsFound', { count: productsData.count }) : t('catalogue.loading')}
+                  {productsData ? `${productsData.count} ${t('catalogue.productsFound')}` : t('common.loading')}
                 </span>
               </div>
               
@@ -609,12 +633,12 @@ const Catalogue: React.FC = () => {
                   onChange={(e) => setSortBy(e.target.value)}
                   className="px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
-                  <option value="created_at">{t('catalogue.sort.newestFirst')}</option>
-                  <option value="-created_at">{t('catalogue.sort.oldestFirst')}</option>
-                  <option value="price">{t('catalogue.sort.priceLowToHigh')}</option>
-                  <option value="-price">{t('catalogue.sort.priceHighToLow')}</option>
-                  <option value="name">{t('catalogue.sort.nameAtoZ')}</option>
-                  <option value="-name">{t('catalogue.sort.nameZtoA')}</option>
+                  <option value="created_at">{t('catalogue.newestFirst')}</option>
+                  <option value="-created_at">{t('catalogue.oldestFirst')}</option>
+                  <option value="price">{t('catalogue.priceLowHigh')}</option>
+                  <option value="-price">{t('catalogue.priceHighLow')}</option>
+                  <option value="name">{t('catalogue.nameAZ')}</option>
+                  <option value="-name">{t('catalogue.nameZA')}</option>
                 </select>
                 
                 {/* View Mode */}
@@ -677,7 +701,7 @@ const Catalogue: React.FC = () => {
                           onClick={() => setCurrentPage(currentPage - 1)}
                           className="px-4 py-2 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors duration-200"
                         >
-                          {t('catalogue.pagination.previous')}
+                          {t('common.previous')}
                         </button>
                       )}
                       
@@ -708,7 +732,7 @@ const Catalogue: React.FC = () => {
                           onClick={() => setCurrentPage(currentPage + 1)}
                           className="px-4 py-2 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors duration-200"
                         >
-                          {t('catalogue.pagination.next')}
+                          {t('common.next')}
                         </button>
                       )}
                     </div>
@@ -724,7 +748,7 @@ const Catalogue: React.FC = () => {
                   {t('catalogue.noProductsFound')}
                 </h3>
                 <p className="text-neutral-600">
-                  {t('catalogue.noProductsFoundDescription')}
+                  {t('catalogue.adjustFilters')}
                 </p>
               </div>
             )}

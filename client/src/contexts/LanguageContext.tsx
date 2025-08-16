@@ -1,4 +1,4 @@
-// client/src/contexts/LanguageContext.tsx (Updated)
+// client/src/contexts/LanguageContext.tsx (Fixed)
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -60,9 +60,9 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // Store in localStorage
     localStorage.setItem('language', lang);
     
-    // Trigger a page refresh to reload API data with new language
-    // This ensures all product/category data is fetched with new translations
-    window.location.reload();
+    // Force re-render of components that use API data
+    // This will trigger a re-fetch with the new language
+    window.dispatchEvent(new CustomEvent('languageChanged', { detail: { language: lang } }));
   };
 
   return (
