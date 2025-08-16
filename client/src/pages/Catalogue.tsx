@@ -129,6 +129,7 @@ const ProductCard: React.FC<{ product: ProductListItem; viewMode: 'grid' | 'list
   );
 };
 
+
 const FilterSidebar: React.FC<{
   filters: FilterState;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;

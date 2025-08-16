@@ -34,7 +34,6 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { i18n } = useTranslation();
   const [currentLanguage, setCurrentLanguage] = useState(() => {
-    // Get language from localStorage or default to 'en'
     return localStorage.getItem('language') || 'en';
   });
 
@@ -49,7 +48,8 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [i18n.language]);
 
   const changeLanguage = (lang: string) => {
-    console.log('Changing language to:', lang);
+    console.log('=== LANGUAGE CHANGE DEBUG ===');
+    console.log('Changing language from:', currentLanguage, 'to:', lang);
     
     // Update i18n
     i18n.changeLanguage(lang);
@@ -60,9 +60,14 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // Store in localStorage
     localStorage.setItem('language', lang);
     
-    // Force re-render of components that use API data
-    // This will trigger a re-fetch with the new language
-    window.dispatchEvent(new CustomEvent('languageChanged', { detail: { language: lang } }));
+    console.log('Language stored in localStorage:', localStorage.getItem('language'));
+    
+    // Force re-render and API refetch
+    window.dispatchEvent(new CustomEvent('languageChanged', { 
+      detail: { language: lang, timestamp: Date.now() } 
+    }));
+    
+    console.log('languageChanged event dispatched');
   };
 
   return (

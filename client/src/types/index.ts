@@ -41,6 +41,21 @@ export interface Product {
   images: ProductImage[];
   created_at: string;
   updated_at: string;
+  // Additional fields from ProductDetailSerializer
+  specifications?: string;
+  care_instructions?: string;
+  current_price: number;
+  discount_percentage: number;
+  is_low_stock: boolean;
+  requires_assembly: boolean;
+  assembly_time_minutes?: number;
+  assembly_difficulty?: string;
+  requires_shipping: boolean;
+  free_shipping: boolean;
+  average_rating?: number;
+  review_count: number;
+  rating_distribution?: Record<string, number>;
+  related_products?: ProductListItem[];
   // Localized fields
   localized_name?: string;
   localized_description?: string;

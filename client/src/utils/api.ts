@@ -1,4 +1,3 @@
-// client/src/utils/api.ts (Updated)
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8000/api';
@@ -15,6 +14,8 @@ api.interceptors.request.use((config) => {
   // Get current language from localStorage
   const currentLanguage = localStorage.getItem('language') || 'en';
   
+  console.log('API Request - Current language:', currentLanguage); // Debug log
+  
   // Add language as query parameter
   if (config.params) {
     config.params.lang = currentLanguage;
@@ -30,7 +31,10 @@ api.interceptors.request.use((config) => {
 
 // Add response interceptor for error handling
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('API Response received:', response.config.url); // Debug log
+    return response;
+  },
   (error) => {
     console.error('API Error:', error);
     return Promise.reject(error);

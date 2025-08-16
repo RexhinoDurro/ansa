@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ArrowLeft, Heart, Share2, Truck, Shield, RotateCcw } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useLanguage } from '../contexts/LanguageContext'; // Import language context
 import { api, endpoints } from '../utils/api';
 import type { Product, ProductListItem } from '../types';
 
@@ -160,8 +161,10 @@ const RelatedProducts: React.FC<{ category: string; currentProductId: string }> 
   category, 
   currentProductId 
 }) => {
+  const { currentLanguage } = useLanguage(); // Add language context
+  
   const { data: relatedProducts } = useQuery<ProductListItem[]>({
-    queryKey: ['related-products', category, currentProductId],
+    queryKey: ['related-products', category, currentProductId, currentLanguage], // Include language in query key
     queryFn: async () => {
       const response = await api.get(`${endpoints.products}?category=${category}&limit=4`);
       const products = response.data.results || response.data;
@@ -175,35 +178,40 @@ const RelatedProducts: React.FC<{ category: string; currentProductId: string }> 
     <section className="mt-16">
       <h2 className="text-2xl font-serif font-bold mb-8">Related Products</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {relatedProducts.slice(0, 4).map((product) => (
-          <Link
-            key={product.id}
-            to={`/product/${product.slug}`}
-            className="group bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden"
-          >
-            <div className="aspect-square overflow-hidden bg-neutral-100">
-              {product.primary_image ? (
-                <img
-                  src={product.primary_image.image}
-                  alt={product.primary_image.alt_text || product.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              ) : (
-                <div className="w-full h-full bg-neutral-200 flex items-center justify-center">
-                  <span className="text-neutral-400">No Image</span>
-                </div>
-              )}
-            </div>
-            <div className="p-4">
-              <h3 className="font-semibold text-neutral-900 mb-2 group-hover:text-primary-600 transition-colors duration-200">
-                {product.name}
-              </h3>
-              <p className="text-lg font-bold text-primary-600">
-                ${product.price}
-              </p>
-            </div>
-          </Link>
-        ))}
+        {relatedProducts.slice(0, 4).map((product) => {
+          // Use localized fields from backend
+          const productName = product.localized_name || product.name;
+          
+          return (
+            <Link
+              key={product.id}
+              to={`/product/${product.slug}`}
+              className="group bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden"
+            >
+              <div className="aspect-square overflow-hidden bg-neutral-100">
+                {product.primary_image ? (
+                  <img
+                    src={product.primary_image.image}
+                    alt={product.primary_image.alt_text || productName}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-neutral-200 flex items-center justify-center">
+                    <span className="text-neutral-400">No Image</span>
+                  </div>
+                )}
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-neutral-900 mb-2 group-hover:text-primary-600 transition-colors duration-200">
+                  {productName}
+                </h3>
+                <p className="text-lg font-bold text-primary-600">
+                  ${product.price}
+                </p>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );
@@ -211,14 +219,41 @@ const RelatedProducts: React.FC<{ category: string; currentProductId: string }> 
 
 const ProductDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { currentLanguage } = useLanguage(); // Add language context
+  const queryClient = useQueryClient();
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
 
+  // Listen for language changes and invalidate queries
+  useEffect(() => {
+    const handleLanguageChange = (event: CustomEvent) => {
+      console.log('=== PRODUCT DETAIL LANGUAGE CHANGE ===');
+      console.log('Event received:', event.detail);
+      console.log('Invalidating product detail queries...');
+      
+      // Invalidate all queries to refetch with new language
+      queryClient.invalidateQueries();
+      
+      // Force a small delay to ensure localStorage is updated
+      setTimeout(() => {
+        console.log('Refetching product detail after language change...');
+      }, 100);
+    };
+
+    window.addEventListener('languageChanged', handleLanguageChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('languageChanged', handleLanguageChange as EventListener);
+    };
+  }, [queryClient]);
+
   const { data: product, isLoading, error } = useQuery<Product>({
-    queryKey: ['product', slug],
+    queryKey: ['product', slug, currentLanguage], // Include language in query key
     queryFn: async () => {
       if (!slug) throw new Error('Product slug is required');
+      console.log('Fetching product detail with language:', currentLanguage);
       const response = await api.get(`${endpoints.products}${slug}/`);
+      console.log('Product detail response:', response.data);
       return response.data;
     },
     enabled: !!slug
@@ -227,9 +262,13 @@ const ProductDetail: React.FC = () => {
   const handleShare = async () => {
     if (navigator.share && product) {
       try {
+        // Use localized fields for sharing
+        const productName = product.localized_name || product.name;
+        const productDescription = product.localized_short_description || product.short_description;
+        
         await navigator.share({
-          title: product.name,
-          text: product.short_description,
+          title: productName,
+          text: productDescription,
           url: window.location.href,
         });
       } catch (error) {
@@ -289,6 +328,16 @@ const ProductDetail: React.FC = () => {
     );
   }
 
+  // Use localized fields from backend
+  const productName = product.localized_name || product.name;
+  const productDescription = product.localized_description || product.description;
+  const productShortDescription = product.localized_short_description || product.short_description;
+  const productSpecifications = product.localized_specifications || product.specifications;
+  const productCareInstructions = product.localized_care_instructions || product.care_instructions;
+  
+  // Use localized category name
+  const categoryName = product.category.localized_name || product.category.name;
+
   return (
     <div className="pt-20">
       <div className="container mx-auto px-4 lg:px-8 py-8">
@@ -300,10 +349,10 @@ const ProductDetail: React.FC = () => {
             <Link to="/catalogue" className="hover:text-primary-600">Catalogue</Link>
             <span>/</span>
             <Link to={`/catalogue?category=${product.category.id}`} className="hover:text-primary-600">
-              {product.category.name}
+              {categoryName}
             </Link>
             <span>/</span>
-            <span className="text-neutral-900">{product.name}</span>
+            <span className="text-neutral-900">{productName}</span>
           </div>
         </nav>
 
@@ -327,10 +376,10 @@ const ProductDetail: React.FC = () => {
           <div className="space-y-6">
             <div>
               <h1 className="text-3xl lg:text-4xl font-serif font-bold text-neutral-900 mb-2">
-                {product.name}
+                {productName}
               </h1>
               <p className="text-xl text-neutral-600">
-                {product.short_description}
+                {productShortDescription}
               </p>
             </div>
 
@@ -359,7 +408,7 @@ const ProductDetail: React.FC = () => {
             <div className="grid grid-cols-2 gap-4 py-6 border-t border-b border-neutral-200">
               <div>
                 <span className="text-sm text-neutral-600">Category</span>
-                <p className="font-medium">{product.category.name}</p>
+                <p className="font-medium">{categoryName}</p>
               </div>
               <div>
                 <span className="text-sm text-neutral-600">Material</span>
@@ -452,13 +501,49 @@ const ProductDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* Product Description */}
+        {/* Product Description and Specifications Tabs */}
         <div className="mb-16">
-          <h2 className="text-2xl font-serif font-bold mb-6">Product Description</h2>
+          <div className="border-b border-neutral-200 mb-6">
+            <nav className="flex space-x-8">
+              <button className="border-b-2 border-primary-600 text-primary-600 py-2 px-1 text-sm font-medium">
+                Description
+              </button>
+              {productSpecifications && (
+                <button className="border-b-2 border-transparent text-neutral-500 hover:text-neutral-700 py-2 px-1 text-sm font-medium">
+                  Specifications
+                </button>
+              )}
+              {productCareInstructions && (
+                <button className="border-b-2 border-transparent text-neutral-500 hover:text-neutral-700 py-2 px-1 text-sm font-medium">
+                  Care Instructions
+                </button>
+              )}
+            </nav>
+          </div>
+          
           <div className="prose max-w-none">
+            <h2 className="text-2xl font-serif font-bold mb-6">Product Description</h2>
             <p className="text-neutral-700 leading-relaxed whitespace-pre-line">
-              {product.description}
+              {productDescription}
             </p>
+            
+            {productSpecifications && (
+              <div className="mt-8">
+                <h3 className="text-xl font-semibold mb-4">Specifications</h3>
+                <p className="text-neutral-700 leading-relaxed whitespace-pre-line">
+                  {productSpecifications}
+                </p>
+              </div>
+            )}
+            
+            {productCareInstructions && (
+              <div className="mt-8">
+                <h3 className="text-xl font-semibold mb-4">Care Instructions</h3>
+                <p className="text-neutral-700 leading-relaxed whitespace-pre-line">
+                  {productCareInstructions}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
