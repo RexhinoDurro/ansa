@@ -1,39 +1,22 @@
-name: Deploy to VPS
+name: Simple SSH Test
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  deploy:
+  test:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Deploy to VPS
+    - name: Test SSH Connection
       uses: appleboy/ssh-action@v0.1.7
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USERNAME }}
         key: ${{ secrets.VPS_SSH_KEY }}
-        debug: true
         script: |
-          echo "=== SSH Connection Successful ==="
+          echo "SSH connection successful!"
           whoami
-          pwd
-          echo "=== SSH Connection Successful ==="
-          whoami
-          pwd
-          echo "=== Testing Git Clone ==="
-          # Create directory and navigate to it
-          sudo mkdir -p /var/www/mobileriansa.com
-          sudo chown ubuntu:ubuntu /var/www/mobileriansa.com
-          cd /var/www/mobileriansa.com
-          
-          # Clone repo on first run, pull on subsequent runs
-          if [ ! -d ".git" ]; then
-            git clone https://github.com/RexhinoDurro/ansa.git .
-            echo "Repository cloned successfully!"
-          else
-            git pull origin main
-            echo "Repository updated successfully!"
-          fi
+          hostname
+          date
