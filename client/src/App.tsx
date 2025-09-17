@@ -18,7 +18,7 @@ import CustomRequestPage from './pages/CustomRequestPage';
 // Admin components
 import { AdminProvider } from './contexts/AdminContext';
 import AdminLogin from './components/admin/AdminLogin';
-import AdminLayout from './components/admin/AdminLayout';
+import AdminLayout from './components/admin/AdminLayout'; 
 import ProtectedRoute from './components/admin/ProtectedRoute';
 import Dashboard from './components/admin/Dashboard';
 import ProductManager from './components/admin/ProductManager';
