@@ -341,7 +341,7 @@ const ProductManager: React.FC = () => {
               </button>
               <button
                 onClick={() => setShowModal(true)}
-                className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-semibold"
+                className="bg-blue-600 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors duration-200 font-semibold"
               >
                 Create First Product
               </button>
@@ -738,7 +738,7 @@ const ProductManager: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isLoading || categories.length === 0}
-                  className="bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-300 text-white font-semibold px-8 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+                  className="bg-blue-600 hover:bg-blue-600 disabled:bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
                 >
                   {isLoading ? 'Saving...' : editingProduct ? 'Update Product' : 'Create Product'}
                 </button>

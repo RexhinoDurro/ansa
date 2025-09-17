@@ -240,12 +240,12 @@ const CategoryManager: React.FC = () => {
           <p className="text-neutral-600 mt-1">Manage product categories and subcategories</p>
         </div>
         <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Category
-        </button>
+  onClick={() => setShowModal(true)}
+  className="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+>
+  <Plus className="w-4 h-4 mr-2" />
+  Add Category
+</button>
       </div>
 
       {error && (
@@ -366,7 +366,7 @@ const CategoryManager: React.FC = () => {
                 </h3>
                 <button
                   onClick={closeModal}
-                  className="p-2 hover:bg-neutral-100 rounded-lg transition-colors duration-200"
+                  className="p-2 hover:bg-neutral-100  rounded-lg transition-colors duration-200"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -482,7 +482,7 @@ const CategoryManager: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="bg-primary-600 hover:bg-primary-700 disabled:bg-neutral-300 text-white font-semibold px-6 py-2 rounded-lg transition-colors duration-200"
+                  className="bg-blue-600 hover:bg-primary-700 disabled:bg-blue-600 text-white font-semibold px-6 py-2 rounded-lg transition-colors duration-200"
                 >
                   {isLoading ? 'Saving...' : editingCategory ? 'Update Category' : 'Create Category'}
                 </button>
