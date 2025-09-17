@@ -12,9 +12,7 @@ import {
   Check,
   Clock,
   Mail,
-  Phone,
-  MapPin
-} from 'lucide-react';
+  Phone} from 'lucide-react';
 
 interface CustomRequest {
   id: string;

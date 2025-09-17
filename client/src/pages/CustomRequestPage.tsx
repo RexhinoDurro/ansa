@@ -1,6 +1,6 @@
 // client/src/pages/CustomRequestPage.tsx (Complete File with Translation Support)
 import React, { useState } from 'react';
-import { ChevronDown, X, Palette, Send, Globe } from 'lucide-react';
+import { ChevronDown, Palette, Send, Globe } from 'lucide-react';
 
 // Translation interface
 interface Translations {

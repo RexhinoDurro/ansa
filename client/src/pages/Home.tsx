@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { api, endpoints } from '../utils/api';
-import type { HomeSlider, ProductListItem } from '../types';
+import type { HomeSlider } from '../types';
 
 // Update the HeroSlider component
 const HeroSlider: React.FC = () => {

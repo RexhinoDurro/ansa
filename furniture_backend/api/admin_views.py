@@ -87,7 +87,7 @@ class AdminGalleryProjectViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet
         
         try:
             # Extract data
-            data = request.data.copy()
+            data = request.data
             images = request.FILES.getlist('images')
             
             print("Extracted data:", data)
@@ -157,15 +157,14 @@ class AdminGalleryProjectViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        
         # Extract data
-        data = request.data.copy()
+        data = request.data
         images = request.FILES.getlist('images')
-        
+
         # Convert featured checkbox
         if data.get('featured'):
             data['featured'] = data['featured'].lower() in ['true', '1', 'on']
-        
+
         serializer = self.get_serializer(instance, data=data, partial=partial)
         if serializer.is_valid():
             project = serializer.save()
@@ -177,7 +176,7 @@ class AdminGalleryProjectViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet
                     max_order = GalleryImage.objects.filter(gallery_project=project).aggregate(
                         max_order=models.Max('order')
                     )['max_order'] or -1
-                    
+
                     GalleryImage.objects.create(
                         gallery_project=project,
                         image=image,
@@ -331,7 +330,7 @@ class AdminProductViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
         
         try:
             # Extract data
-            data = request.data.copy()
+            data = request.data
             images = request.FILES.getlist('images')
             
             # Validate required fields
@@ -428,11 +427,10 @@ class AdminProductViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        
         # Extract data
-        data = request.data.copy()
+        data = request.data
         images = request.FILES.getlist('images')
-        
+
         # Convert string values to proper types
         try:
             if data.get('price'):
@@ -448,7 +446,7 @@ class AdminProductViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
                 {'error': f'Invalid data format: {str(e)}'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         serializer = self.get_serializer(instance, data=data, partial=partial)
         if serializer.is_valid():
             product = serializer.save()
@@ -465,11 +463,11 @@ class AdminProductViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
                         'specifications': product.specifications,
                         'care_instructions': product.care_instructions,
                     })
-                    
+
                     # Save updated translations
                     product.save_translations(translations)
                     print("Translations updated successfully")
-                    
+
                 except Exception as translation_error:
                     print(f"Translation update error: {str(translation_error)}")
 
@@ -479,7 +477,7 @@ class AdminProductViewSet(AdminAuthenticationMixin, viewsets.ModelViewSet):
                     max_order = ProductImage.objects.filter(product=product).aggregate(
                         max_order=models.Max('order')
                     )['max_order'] or -1
-                    
+
                     ProductImage.objects.create(
                         product=product,
                         image=image,

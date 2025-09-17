@@ -63,11 +63,9 @@ const Navbar: React.FC = () => {
                 key={item.name}
                 to={item.path}
                 className={`relative font-medium transition-all duration-200 hover:text-primary-600 ${
-                  isActivePath(item.path)
-                    ? 'text-primary-600'
-                    : scrolled 
-                      ? 'text-neutral-700' 
-                      : 'text-white'
+                    isActivePath(item.path)
+                      ? 'text-primary-600'
+                      : 'text-neutral-700'
                 } group`}
               >
                 {item.name}
@@ -107,11 +105,9 @@ const Navbar: React.FC = () => {
                   key={item.name}
                   to={item.path}
                   className={`font-medium transition-colors duration-200 hover:text-primary-600 ${
-                    isActivePath(item.path)
-                      ? 'text-primary-600'
-                      : scrolled 
-                        ? 'text-neutral-700' 
-                        : 'text-white'
+                      isActivePath(item.path)
+                        ? 'text-primary-600'
+                        : 'text-neutral-700'
                   }`}
                 >
                   {item.name}

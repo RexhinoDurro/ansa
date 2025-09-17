@@ -310,7 +310,7 @@ const ProductManager: React.FC = () => {
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center bg-primary-600 hover:bg-primary-700 bg-blue-500 hover:bg-blue-600 font-medium rounded-lg transition-colors duration-200  px-6 py-3 rounded-lg transition-colors duration-200 font-semibold shadow-md hover:shadow-lg"
+          className="flex items-center bg-primary-600 hover:bg-primary-700 bg-blue-500 hover:bg-blue-600 font-medium rounded-lg transition-colors duration-200  px-6 py-3 shadow-md hover:shadow-lg"
         >
           <Plus className="w-5 h-5 mr-2" />
           Add Product

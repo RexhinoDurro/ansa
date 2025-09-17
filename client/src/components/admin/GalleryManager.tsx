@@ -699,7 +699,7 @@ const GalleryManager: React.FC = () => {
   const [editingCategory, setEditingCategory] = useState<GalleryCategory | null>(null);
   const [editingProject, setEditingProject] = useState<GalleryProject | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-  const [isLoading, setIsLoading] = useState(false);
+  const [] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

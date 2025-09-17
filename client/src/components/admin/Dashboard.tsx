@@ -3,9 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { 
   BarChart3, 
   Package, 
-  Users, 
-  ShoppingCart, 
-  TrendingUp, 
   AlertTriangle,
   Eye,
   MessageSquare,

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Users, Award, Leaf, Heart, ArrowRight, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next'; // Add this import
 
 const About = () => {
   const { t } = useTranslation('common'); // Add this hook
   const [isVisible, setIsVisible] = useState(false);
-  const [activeTab, setActiveTab] = useState('story');
+  const [] = useState('story');
 
   useEffect(() => {
     setIsVisible(true);
