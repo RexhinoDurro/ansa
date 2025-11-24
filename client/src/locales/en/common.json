@@ -163,5 +163,25 @@
     "close": "Close",
     "yes": "Yes",
     "no": "No"
+  },
+  "whyChoose": {
+    "title": "Why Choose Ansa Furniture",
+    "subtitle": "Discover what sets us apart in the world of fine furniture.",
+    "quality": {
+      "title": "Quality",
+      "description": "We use premium materials and craftsmanship to ensure every piece lasts for generations."
+    },
+    "design": {
+      "title": "Design",
+      "description": "Our furniture blends modern minimalism with everyday comfort."
+    },
+    "sustainability": {
+      "title": "Sustainability",
+      "description": "We source eco-friendly materials and minimize waste."
+    },
+    "support": {
+      "title": "Customer Support",
+      "description": "From order to delivery, our team ensures a seamless experience."
+    }
   }
 } 

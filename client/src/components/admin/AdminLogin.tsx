@@ -1,6 +1,6 @@
 // client/src/components/admin/AdminLogin.tsx (Fixed)
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useAdmin } from '../../contexts/AdminContext';
 
 interface LoginData {
@@ -9,7 +9,7 @@ interface LoginData {
 }
 
 const AdminLogin: React.FC = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { login } = useAdmin();
   const [formData, setFormData] = useState<LoginData>({
     username: '',
@@ -49,9 +49,9 @@ const AdminLogin: React.FC = () => {
         
         // Use the context login function
         login(data.user);
-        
+
         // Navigate to admin dashboard
-        navigate('/admin/dashboard');
+        router.push('/admin/dashboard');
         
       } else {
         setError(data.error || 'Login failed');

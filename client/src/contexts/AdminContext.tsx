@@ -39,9 +39,10 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
   const checkAuth = async () => {
     try {
       const response = await fetch('http://localhost:8000/api/admin/profile/', {
-        credentials: 'include'
+        credentials: 'include',
+        signal: AbortSignal.timeout(3000) // 3 second timeout
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setUser(data.user);
@@ -49,7 +50,7 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
         setUser(null);
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
+      // Silently handle network errors when backend is not available
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -64,10 +65,11 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
     try {
       await fetch('http://localhost:8000/api/admin/logout/', {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
+        signal: AbortSignal.timeout(3000) // 3 second timeout
       });
     } catch (error) {
-      console.error('Logout error:', error);
+      // Silently handle network errors when backend is not available
     } finally {
       setUser(null);
     }

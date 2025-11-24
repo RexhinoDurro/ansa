@@ -1,15 +1,18 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import logo from '../../assets/logo.png';
 import LanguageSwitcher from '../LanguageSwitcher';
 
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const location = useLocation();
+  const pathname = usePathname();
+  const router = useRouter();
   const { t } = useTranslation('common');
 
   useEffect(() => {
@@ -23,21 +26,53 @@ const Navbar: React.FC = () => {
   // Close mobile menu when route changes
   useEffect(() => {
     setIsOpen(false);
-  }, [location]);
+  }, [pathname]);
 
-  const navItems = [
+  const navItems: Array<{ name: string; path: string; isSection?: boolean }> = [
     { name: t('navigation.home'), path: '/' },
     { name: t('navigation.catalogue'), path: '/catalogue' },
-    { name: t('navigation.about'), path: '/about' },
+    { name: t('navigation.about'), path: '/about', isSection: true },
     { name: t('navigation.contact'), path: '/contact' },
     { name: t('navigation.gallery'), path: '/gallery' },
     { name: t('navigation.custom'), path: '/custom-request-page' },
   ];
 
   const isActivePath = (path: string) => {
-    if (path === '/' && location.pathname === '/') return true;
-    if (path !== '/' && location.pathname.startsWith(path)) return true;
+    if (path === '/' && pathname === '/') return true;
+    if (path !== '/' && pathname.startsWith(path)) return true;
     return false;
+  };
+
+  const handleAboutClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    setIsOpen(false);
+
+    if (pathname === '/') {
+      // Already on homepage, just scroll
+      const section = document.getElementById('about-us');
+      if (section) {
+        const navbarHeight = 80; // Approximate navbar height
+        const sectionTop = section.offsetTop - navbarHeight;
+        window.scrollTo({
+          top: sectionTop,
+          behavior: 'smooth'
+        });
+      }
+    } else {
+      // Navigate to homepage first, then scroll
+      router.push('/#about-us');
+      setTimeout(() => {
+        const section = document.getElementById('about-us');
+        if (section) {
+          const navbarHeight = 80;
+          const sectionTop = section.offsetTop - navbarHeight;
+          window.scrollTo({
+            top: sectionTop,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+    }
   };
 
   return (
@@ -49,11 +84,11 @@ const Navbar: React.FC = () => {
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
-          <Link 
-            to="/" 
+          <Link
+            href="/"
             className="text-2xl lg:text-3xl font-serif font-bold text-primary-700 hover:text-primary-800 transition-colors duration-200"
           >
-            <img src={logo} alt="Furniture Ansa" />
+            Furniture Ansa
           </Link>
           
           {/* Desktop Navigation */}
@@ -61,7 +96,8 @@ const Navbar: React.FC = () => {
             {navItems.map((item) => (
               <Link
                 key={item.name}
-                to={item.path}
+                href={item.path}
+                onClick={item.isSection ? handleAboutClick : undefined}
                 className={`relative font-medium transition-all duration-200 hover:text-primary-600 ${
                     isActivePath(item.path)
                       ? 'text-primary-600'
@@ -74,7 +110,7 @@ const Navbar: React.FC = () => {
                 }`}></span>
               </Link>
             ))}
-            
+
             {/* Language Switcher */}
             <LanguageSwitcher />
           </div>
@@ -103,7 +139,8 @@ const Navbar: React.FC = () => {
               {navItems.map((item) => (
                 <Link
                   key={item.name}
-                  to={item.path}
+                  href={item.path}
+                  onClick={item.isSection ? handleAboutClick : undefined}
                   className={`font-medium transition-colors duration-200 hover:text-primary-600 ${
                       isActivePath(item.path)
                         ? 'text-primary-600'

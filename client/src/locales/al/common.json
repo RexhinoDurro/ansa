@@ -163,5 +163,25 @@
     "close": "Mbyll",
     "yes": "Po",
     "no": "Jo"
+  },
+  "whyChoose": {
+    "title": "Pse të Zgjidhni Ansa Furniture",
+    "subtitle": "Zbuloni çfarë na dallon në botën e mobiljeve të cilësisë së lartë.",
+    "quality": {
+      "title": "Cilësia",
+      "description": "Ne përdorim materiale premium dhe zejtari të shkëlqyer për të siguruar që çdo copë të zgjasë për breza."
+    },
+    "design": {
+      "title": "Dizajni",
+      "description": "Mobiljet tona kombinojnë minimalizmit modern me rehati të përditshme."
+    },
+    "sustainability": {
+      "title": "Qëndrueshmëria",
+      "description": "Ne përdorim materiale miqësore me mjedisin dhe minimizojmë mbeturinat."
+    },
+    "support": {
+      "title": "Mbështetja e Klientit",
+      "description": "Nga porosia në dorëzim, ekipi ynë siguron një përvojë të qetë."
+    }
   }
 } 

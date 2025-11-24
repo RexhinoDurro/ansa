@@ -33,7 +33,7 @@ i18n
     defaultNS: 'common',
     
     // Debug mode (set to false in production)
-    debug: import.meta.env.MODE === 'development',
+    debug: process.env.NODE_ENV === 'development',
     
     // Language detection options
     detection: {

@@ -34,13 +34,18 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { i18n } = useTranslation();
   const [currentLanguage, setCurrentLanguage] = useState(() => {
-    return localStorage.getItem('language') || 'en';
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('language') || 'en';
+    }
+    return 'en';
   });
 
   useEffect(() => {
     // Set initial language
     i18n.changeLanguage(currentLanguage);
-    localStorage.setItem('language', currentLanguage);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('language', currentLanguage);
+    }
   }, []);
 
   useEffect(() => {
@@ -56,16 +61,17 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     
     // Update local state
     setCurrentLanguage(lang);
-    
-    // Store in localStorage
-    localStorage.setItem('language', lang);
-    
-    console.log('Language stored in localStorage:', localStorage.getItem('language'));
-    
-    // Force re-render and API refetch
-    window.dispatchEvent(new CustomEvent('languageChanged', { 
-      detail: { language: lang, timestamp: Date.now() } 
-    }));
+
+    // Store in localStorage (client-side only)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('language', lang);
+      console.log('Language stored in localStorage:', localStorage.getItem('language'));
+
+      // Force re-render and API refetch
+      window.dispatchEvent(new CustomEvent('languageChanged', {
+        detail: { language: lang, timestamp: Date.now() }
+      }));
+    }
     
     console.log('languageChanged event dispatched');
   };

@@ -1,5 +1,7 @@
+'use client';
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { 
   MapPin, 
   Phone, 
@@ -109,7 +111,7 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="lg:col-span-1">
-            <Link to="/" className="inline-block mb-6">
+            <Link href="/" className="inline-block mb-6">
               <h3 className="text-3xl font-serif font-bold text-white">
                 Furniture Co.
               </h3>
@@ -144,7 +146,7 @@ const Footer: React.FC = () => {
               {quickLinks.map((link, index) => (
                 <li key={index}>
                   <Link
-                    to={link.path}
+                    href={link.path}
                     className="text-neutral-300 hover:text-primary-400 transition-colors duration-200 flex items-center group"
                   >
                     <span className="group-hover:translate-x-1 transition-transform duration-200">
@@ -163,7 +165,7 @@ const Footer: React.FC = () => {
               {categories.map((category, index) => (
                 <li key={index}>
                   <Link
-                    to={category.path}
+                    href={category.path}
                     className="text-neutral-300 hover:text-primary-400 transition-colors duration-200 flex items-center group"
                   >
                     <span className="group-hover:translate-x-1 transition-transform duration-200">
@@ -235,25 +237,25 @@ const Footer: React.FC = () => {
             
             <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-6 text-sm">
               <Link 
-                to="/privacy" 
+                href="/privacy" 
                 className="text-neutral-400 hover:text-primary-400 transition-colors duration-200"
               >
                 Privacy Policy
               </Link>
               <Link 
-                to="/terms" 
+                href="/terms" 
                 className="text-neutral-400 hover:text-primary-400 transition-colors duration-200"
               >
                 Terms of Service
               </Link>
               <Link 
-                to="/cookies" 
+                href="/cookies" 
                 className="text-neutral-400 hover:text-primary-400 transition-colors duration-200"
               >
                 Cookie Policy
               </Link>
               <Link 
-                to="/sitemap" 
+                href="/sitemap" 
                 className="text-neutral-400 hover:text-primary-400 transition-colors duration-200"
               >
                 Sitemap

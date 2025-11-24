@@ -1,6 +1,8 @@
 // client/src/components/admin/ProtectedRoute.tsx
-import React from 'react';
-import { Navigate } from 'react-router-dom';
+'use client';
+
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAdmin } from '../../contexts/AdminContext';
 
 interface ProtectedRouteProps {
@@ -9,6 +11,13 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAdmin();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/admin/login');
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   if (isLoading) {
     return (
@@ -22,7 +31,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/admin/login" replace />;
+    return null;
   }
 
   return <>{children}</>;

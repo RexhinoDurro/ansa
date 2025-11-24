@@ -163,5 +163,25 @@
     "close": "Chiudi",
     "yes": "Sì",
     "no": "No"
+  },
+  "whyChoose": {
+    "title": "Perché Scegliere Ansa Furniture",
+    "subtitle": "Scopri cosa ci distingue nel mondo dei mobili di qualità.",
+    "quality": {
+      "title": "Qualità",
+      "description": "Utilizziamo materiali premium e maestria artigianale per garantire che ogni pezzo duri per generazioni."
+    },
+    "design": {
+      "title": "Design",
+      "description": "I nostri mobili fondono il minimalismo moderno con il comfort quotidiano."
+    },
+    "sustainability": {
+      "title": "Sostenibilità",
+      "description": "Utilizziamo materiali ecologici e riduciamo al minimo gli sprechi."
+    },
+    "support": {
+      "title": "Assistenza Clienti",
+      "description": "Dall'ordine alla consegna, il nostro team garantisce un'esperienza senza interruzioni."
+    }
   }
 }
