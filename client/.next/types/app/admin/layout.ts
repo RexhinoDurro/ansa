@@ -1,4 +1,4 @@
-// File: C:\Users\Admin\Documents\GitHub\ansa-1\client\src\app\admin\layout.tsx
+// File: /Users/MacOs/Documents/GitHub/ansa/client/src/app/admin/layout.tsx
 import * as entry from '../../../../src/app/admin/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

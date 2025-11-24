@@ -1,25 +1,59 @@
 @theme {
-  --color-primary-50: #fef3f2;
-  --color-primary-100: #fee4e2;
-  --color-primary-200: #fecdca;
-  --color-primary-300: #fda29b;
-  --color-primary-400: #f97066;
-  --color-primary-500: #f04438;
-  --color-primary-600: #d92d20;
-  --color-primary-700: #b42318;
-  --color-primary-800: #912018;
-  --color-primary-900: #7a271a;
+  /* Premium Custom Furniture Studio Colors - Cream */
+  --color-cream-50: #FAFAF7;
+  --color-cream-100: #F7F3EE;
+  --color-cream-200: #F0EAE3;
+  --color-cream-300: #E8E0D5;
+  --color-cream-400: #D9CDC0;
+  --color-cream-500: #C9BAA9;
 
-  --color-neutral-50: #f9fafb;
-  --color-neutral-100: #f3f4f6;
-  --color-neutral-200: #e5e7eb;
-  --color-neutral-300: #d1d5db;
-  --color-neutral-400: #9ca3af;
-  --color-neutral-500: #6b7280;
-  --color-neutral-600: #4b5563;
-  --color-neutral-700: #374151;
-  --color-neutral-800: #1f2937;
-  --color-neutral-900: #111827;
+  /* Browns */
+  --color-brown-900: #241D1A;
+  --color-brown-800: #1F2933;
+  --color-brown-700: #3E3632;
+  --color-brown-600: #57534E;
+
+  /* Deep Green Accent */
+  --color-accent-50: #F0F7F4;
+  --color-accent-100: #D6E9DE;
+  --color-accent-200: #9FCFB8;
+  --color-accent-300: #5EA989;
+  --color-accent-400: #2D6B4F;
+  --color-accent-500: #1F4D3A;
+  --color-accent-600: #163A2C;
+  --color-accent-700: #0F2A1F;
+  --color-accent-800: #0A1C15;
+  --color-accent-900: #050E0A;
+  --color-accent: #1F4D3A;
+  --color-accent-dark: #163A2C;
+  --color-accent-light: #2D6B4F;
+
+  /* Terracotta Alternative */
+  --color-terracotta-50: #FBF3ED;
+  --color-terracotta-100: #F6E3D5;
+  --color-terracotta-200: #EDCAB3;
+  --color-terracotta-300: #E1A987;
+  --color-terracotta-400: #D68655;
+  --color-terracotta-500: #C46A3C;
+  --color-terracotta-600: #A05530;
+  --color-terracotta-700: #7C4024;
+  --color-terracotta-800: #58301B;
+  --color-terracotta-900: #351D10;
+  --color-terracotta: #C46A3C;
+  --color-terracotta-dark: #A05530;
+  --color-terracotta-light: #D68655;
+
+  /* Neutral (for compatibility) */
+  --color-neutral-50: #fafaf9;
+  --color-neutral-100: #f5f5f4;
+  --color-neutral-200: #e7e5e4;
+  --color-neutral-300: #d6d3d1;
+  --color-neutral-400: #a8a29e;
+  --color-neutral-500: #78716c;
+  --color-neutral-600: #57534e;
+  --color-neutral-700: #44403c;
+  --color-neutral-800: #292524;
+  --color-neutral-900: #1c1917;
 
   --animate-text-gradient: text-gradient 3s ease infinite;
   --animate-pulse-slow: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;

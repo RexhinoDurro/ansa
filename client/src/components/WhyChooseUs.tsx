@@ -43,13 +43,13 @@ const WhyChooseUs: React.FC = () => {
   };
 
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-cream-50">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="mb-16">
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-neutral-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-serif font-bold text-brown-900 mb-4">
             {t('whyChoose.title', 'Why Choose Ansa Furniture')}
           </h2>
-          <p className="text-xl text-neutral-600 max-w-2xl">
+          <p className="text-xl text-brown-800 max-w-2xl">
             {t('whyChoose.subtitle', 'Discover what sets us apart in the world of fine furniture.')}
           </p>
         </div>
@@ -62,8 +62,8 @@ const WhyChooseUs: React.FC = () => {
             return (
               <div
                 key={choice.id}
-                className={`group relative overflow-hidden rounded-lg transition-all duration-500 ${
-                  isExpanded ? 'bg-neutral-50' : 'bg-white'
+                className={`group relative overflow-hidden rounded-card transition-all duration-500 ${
+                  isExpanded ? 'bg-white shadow-card' : 'bg-white border border-cream-200'
                 }`}
                 style={{
                   transform: isHovered ? 'translateX(8px)' : 'translateX(0)',
@@ -80,7 +80,7 @@ const WhyChooseUs: React.FC = () => {
                 >
                   {/* Left border animation */}
                   <div
-                    className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary-600 to-primary-400 transition-all duration-300 ${
+                    className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-accent to-accent-light transition-all duration-300 ${
                       isHovered || isExpanded ? 'opacity-100' : 'opacity-0'
                     }`}
                     style={{
@@ -94,8 +94,8 @@ const WhyChooseUs: React.FC = () => {
                     <div
                       className={`w-10 h-10 flex items-center justify-center rounded-full font-bold text-sm transition-all duration-300 ${
                         isHovered || isExpanded
-                          ? 'bg-primary-600 text-white scale-110'
-                          : 'bg-neutral-100 text-neutral-400'
+                          ? 'bg-accent text-white scale-110'
+                          : 'bg-cream-200 text-brown-700'
                       }`}
                     >
                       {index + 1}
@@ -103,8 +103,8 @@ const WhyChooseUs: React.FC = () => {
                     <h3
                       className={`text-2xl font-bold transition-all duration-300 ${
                         isHovered || isExpanded
-                          ? 'text-primary-600 translate-x-2'
-                          : 'text-neutral-900'
+                          ? 'text-accent translate-x-2'
+                          : 'text-brown-900'
                       }`}
                     >
                       {choice.title}
@@ -114,7 +114,7 @@ const WhyChooseUs: React.FC = () => {
                   {/* Chevron with rotation */}
                   <ChevronDown
                     className={`w-6 h-6 transition-all duration-300 ${
-                      isHovered || isExpanded ? 'text-primary-600' : 'text-neutral-400'
+                      isHovered || isExpanded ? 'text-accent' : 'text-brown-700'
                     } ${
                       isExpanded ? 'rotate-180' : ''
                     }`}
@@ -125,7 +125,7 @@ const WhyChooseUs: React.FC = () => {
 
                   {/* Bottom border glow effect */}
                   <div
-                    className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary-400 to-transparent"
+                    className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent to-transparent"
                     style={{
                       opacity: isHovered ? 0.5 : 0,
                       transition: 'opacity 0.3s ease-out'
@@ -149,7 +149,7 @@ const WhyChooseUs: React.FC = () => {
                       transition: 'transform 0.5s ease-out'
                     }}
                   >
-                    <p className="text-neutral-600 text-lg leading-relaxed">
+                    <p className="text-brown-800 text-lg leading-relaxed">
                       {choice.description}
                     </p>
                   </div>
@@ -157,7 +157,7 @@ const WhyChooseUs: React.FC = () => {
 
                 {/* Background gradient on hover */}
                 <div
-                  className="absolute inset-0 bg-gradient-to-r from-primary-50/0 via-primary-50/20 to-primary-50/0 pointer-events-none"
+                  className="absolute inset-0 bg-gradient-to-r from-accent-50/0 via-accent-50/20 to-accent-50/0 pointer-events-none"
                   style={{
                     opacity: isHovered ? 1 : 0,
                     transition: 'opacity 0.3s ease-out'

@@ -1,162 +1,17 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.text import slugify
-from django.urls import reverse
 from django.contrib.auth.models import User
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import GenericForeignKey
 import uuid
 import os
 
 
-# Translation Models (moved from api app)
-class Translation(models.Model):
-    """Store translations for any model field"""
-    
-    # Generic foreign key to link to any model
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.CharField(max_length=100)  # Use CharField to support UUID
-    content_object = GenericForeignKey('content_type', 'object_id')
-    
-    # Translation details
-    field_name = models.CharField(max_length=100)  # e.g., 'name', 'description'
-    language_code = models.CharField(max_length=5)  # e.g., 'en', 'it', 'al'
-    translated_text = models.TextField()
-    
-    # Timestamps
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        unique_together = ['content_type', 'object_id', 'field_name', 'language_code']
-        indexes = [
-            models.Index(fields=['content_type', 'object_id', 'language_code']),
-        ]
-    
-    def __str__(self):
-        return f"{self.content_object} - {self.field_name} ({self.language_code})"
-
-class TranslatableModelMixin:
-    """Mixin to add translation functionality to models"""
-    
-    def get_translation(self, field_name: str, language_code: str) -> str:
-        """Get translated text for a specific field and language"""
-        try:
-            content_type = ContentType.objects.get_for_model(self)
-            translation = Translation.objects.get(
-                content_type=content_type,
-                object_id=str(self.pk),
-                field_name=field_name,
-                language_code=language_code
-            )
-            return translation.translated_text
-        except Translation.DoesNotExist:
-            # Return original field value if no translation exists
-            return getattr(self, field_name, '')
-    
-    def set_translation(self, field_name: str, language_code: str, translated_text: str):
-        """Set translation for a specific field and language"""
-        content_type = ContentType.objects.get_for_model(self)
-        translation, created = Translation.objects.update_or_create(
-            content_type=content_type,
-            object_id=str(self.pk),
-            field_name=field_name,
-            language_code=language_code,
-            defaults={'translated_text': translated_text}
-        )
-        return translation
-    
-    def get_all_translations(self, language_code: str) -> dict:
-        """Get all translations for this object in a specific language"""
-        content_type = ContentType.objects.get_for_model(self)
-        translations = Translation.objects.filter(
-            content_type=content_type,
-            object_id=str(self.pk),
-            language_code=language_code
-        )
-        
-        return {
-            translation.field_name: translation.translated_text
-            for translation in translations
-        }
-    
-    def save_translations(self, translations_data: dict):
-        """Save multiple translations for this object"""
-        for language_code, fields in translations_data.items():
-            for field_name, translated_text in fields.items():
-                if translated_text:  # Only save non-empty translations
-                    self.set_translation(field_name, language_code, translated_text)
-
-def product_image_path(instance, filename):
-    """Generate upload path for product images"""
-    ext = filename.split('.')[-1]
-    filename = f'{uuid.uuid4()}.{ext}'
-    return os.path.join('products', str(instance.product.created_at.year), 
-                       str(instance.product.created_at.month), filename)
-
-def slider_image_path(instance, filename):
-    """Generate upload path for slider images"""
-    ext = filename.split('.')[-1]
-    filename = f'{uuid.uuid4()}.{ext}'
-    return os.path.join('slider', filename)
-
-class Category(TranslatableModelMixin, models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(max_length=100, unique=True, blank=True)
-    description = models.TextField(blank=True)
-    parent_category = models.ForeignKey(
-        'self', 
-        on_delete=models.CASCADE, 
-        blank=True, 
-        null=True, 
-        related_name='subcategories'
-    )
-    image = models.ImageField(upload_to='categories/', blank=True, null=True)
-    is_active = models.BooleanField(default=True)
-    sort_order = models.PositiveIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        verbose_name_plural = "Categories"
-        ordering = ['sort_order', 'name']
-    
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
-    
-    def __str__(self):
-        if self.parent_category:
-            return f"{self.parent_category.name} > {self.name}"
-        return self.name
-    
-    @property
-    def get_full_path(self):
-        """Get the full category path"""
-        if self.parent_category:
-            return f"{self.parent_category.get_full_path} > {self.name}"
-        return self.name
-    
-    # Translation helper methods
-    def get_localized_name(self, language_code: str = 'en') -> str:
-        """Get localized name"""
-        if language_code == 'en':
-            return self.name
-        return self.get_translation('name', language_code) or self.name
-    
-    def get_localized_description(self, language_code: str = 'en') -> str:
-        """Get localized description"""
-        if language_code == 'en':
-            return self.description
-        return self.get_translation('description', language_code) or self.description
-
-
+# Helper function for gallery images
 def gallery_image_path(instance, filename):
     """Generate upload path for gallery images"""
     ext = filename.split('.')[-1]
     filename = f'{uuid.uuid4()}.{ext}'
-    
+
     # Use current date if project doesn't have created_at yet
     from datetime import datetime
     try:
@@ -169,16 +24,17 @@ def gallery_image_path(instance, filename):
         year = now.year
         month = now.month
         category_id = getattr(instance.gallery_project, 'gallery_category_id', 'unknown')
-    
-    return os.path.join('gallery', 
-                       str(category_id), 
-                       str(year), 
-                       str(month), 
+
+    return os.path.join('gallery',
+                       str(category_id),
+                       str(year),
+                       str(month),
                        filename)
 
 
+# Gallery Models - Main Portfolio System
 class GalleryCategory(models.Model):
-    """Gallery categories (e.g., Living Room, Bedroom, etc.)"""
+    """Gallery categories for portfolio projects"""
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True, blank=True)
     description = models.TextField(blank=True)
@@ -187,35 +43,29 @@ class GalleryCategory(models.Model):
     sort_order = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         verbose_name_plural = "Gallery Categories"
         ordering = ['sort_order', 'name']
-    
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
-    
+
     def __str__(self):
         return self.name
-    
+
     @property
     def project_count(self):
         return self.gallery_projects.filter(is_active=True).count()
-    
-    @property
-    def total_images(self):
-        return GalleryImage.objects.filter(
-            gallery_project__gallery_category=self,
-            gallery_project__is_active=True
-        ).count()
+
 
 class GalleryProject(models.Model):
-    """Gallery projects/subcategories (e.g., Red Pattern Sofa, Modern Coffee Table, etc.)"""
+    """Gallery projects - shown in portfolio"""
     gallery_category = models.ForeignKey(
-        GalleryCategory, 
-        on_delete=models.CASCADE, 
+        GalleryCategory,
+        on_delete=models.CASCADE,
         related_name='gallery_projects'
     )
     title = models.CharField(max_length=200)
@@ -227,7 +77,7 @@ class GalleryProject(models.Model):
     materials_used = models.CharField(max_length=300, blank=True)
     dimensions = models.CharField(max_length=100, blank=True)
     price_range = models.CharField(
-        max_length=50, 
+        max_length=50,
         choices=[
             ('under-1000', 'Under €1,000'),
             ('1000-5000', '€1,000 - €5,000'),
@@ -242,40 +92,41 @@ class GalleryProject(models.Model):
     sort_order = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         ordering = ['sort_order', '-created_at']
         unique_together = ['gallery_category', 'slug']
-    
+
     def save(self, *args, **kwargs):
         if not self.slug:
             base_slug = slugify(self.title)
             self.slug = base_slug
             counter = 1
             while GalleryProject.objects.filter(
-                gallery_category=self.gallery_category, 
+                gallery_category=self.gallery_category,
                 slug=self.slug
             ).exclude(pk=self.pk).exists():
                 self.slug = f"{base_slug}-{counter}"
                 counter += 1
         super().save(*args, **kwargs)
-    
+
     def __str__(self):
         return f"{self.gallery_category.name} - {self.title}"
-    
+
     @property
     def primary_image(self):
         return self.images.filter(is_primary=True).first()
-    
+
     @property
     def image_count(self):
         return self.images.count()
 
+
 class GalleryImage(models.Model):
     """Individual images in gallery projects"""
     gallery_project = models.ForeignKey(
-        GalleryProject, 
-        on_delete=models.CASCADE, 
+        GalleryProject,
+        on_delete=models.CASCADE,
         related_name='images'
     )
     image = models.ImageField(upload_to=gallery_image_path)
@@ -287,481 +138,122 @@ class GalleryImage(models.Model):
     tags = models.CharField(max_length=300, blank=True, help_text="Comma-separated tags")
     order = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         ordering = ['order', 'created_at']
         indexes = [
             models.Index(fields=['gallery_project', 'is_primary']),
         ]
-    
+
     def save(self, *args, **kwargs):
         # Ensure only one primary image per project
         if self.is_primary:
             GalleryImage.objects.filter(
-                gallery_project=self.gallery_project, 
+                gallery_project=self.gallery_project,
                 is_primary=True
             ).update(is_primary=False)
         super().save(*args, **kwargs)
-    
+
     def __str__(self):
         return f"{self.gallery_project.title} - {self.title or f'Image {self.order}'}"
-    
+
+
+# Contact & Custom Request Models
+def contact_image_path(instance, filename):
+    """Generate upload path for contact request images"""
+    ext = filename.split('.')[-1]
+    filename = f'{uuid.uuid4()}.{ext}'
+    return os.path.join('contact', str(instance.contact_request.created_at.year),
+                       str(instance.contact_request.created_at.month), filename)
+
+
 class CustomRequest(models.Model):
-    STYLE_CHOICES = [
-        ('modern', 'Modern'),
-        ('minimal', 'Minimal'),
-        ('classic', 'Classic'),
-        ('traditional', 'Traditional'),
-        ('contemporary', 'Contemporary'),
-        ('rustic', 'Rustic'),
-        ('scandinavian', 'Scandinavian'),
+    """Custom furniture requests from contact form"""
+    ROOM_TYPE_CHOICES = [
+        ('kitchen', 'Kitchen'),
+        ('living_room', 'Living Room'),
+        ('bedroom', 'Bedroom'),
+        ('wardrobe', 'Wardrobe'),
+        ('office', 'Office'),
+        ('other', 'Other'),
     ]
-    
+
     BUDGET_CHOICES = [
-        ('under-500', 'Under €500'),
-        ('500-1000', '€500 - €1,000'),
-        ('1000-2500', '€1,000 - €2,500'),
-        ('2500-5000', '€2,500 - €5,000'),
-        ('over-5000', 'Over €5,000'),
+        ('under-1000', 'Under €1,000'),
+        ('1000-3000', '€1,000 - €3,000'),
+        ('3000-6000', '€3,000 - €6,000'),
+        ('over-6000', 'Over €6,000'),
     ]
-    
-    CONTACT_METHOD_CHOICES = [
-        ('email', 'Email'),
-        ('phone', 'Phone'),
-        ('both', 'Both Email & Phone'),
-    ]
-    
+
     STATUS_CHOICES = [
-        ('pending', 'Pending Review'),
-        ('reviewing', 'Under Review'),
-        ('quoted', 'Quote Sent'),
-        ('approved', 'Approved'),
+        ('new', 'New'),
         ('in_progress', 'In Progress'),
-        ('completed', 'Completed'),
-        ('cancelled', 'Cancelled'),
+        ('done', 'Done'),
     ]
-    
-    # Project Details
-    title = models.CharField(max_length=200, help_text="Project title")
-    description = models.TextField(help_text="Detailed project description")
-    width = models.CharField(max_length=50, blank=True, help_text="Width dimension")
-    height = models.CharField(max_length=50, blank=True, help_text="Height dimension")
-    primary_color = models.CharField(max_length=7, default='#3b82f6', help_text="Hex color code")
-    style = models.CharField(max_length=20, choices=STYLE_CHOICES, blank=True)
-    deadline = models.DateField(blank=True, null=True, help_text="Preferred completion date")
-    budget = models.CharField(max_length=20, choices=BUDGET_CHOICES, blank=True)
-    additional = models.TextField(blank=True, help_text="Additional requirements or notes")
-    
+
     # Contact Information
     name = models.CharField(max_length=100)
     email = models.EmailField()
-    phone = models.CharField(max_length=20, blank=True)
-    contact_method = models.CharField(max_length=10, choices=CONTACT_METHOD_CHOICES, default='email')
-    
+    phone = models.CharField(max_length=20, blank=True, null=True)
+
+    # Project Details
+    room_type = models.CharField(max_length=20, choices=ROOM_TYPE_CHOICES, default='kitchen')
+    budget_range = models.CharField(max_length=20, choices=BUDGET_CHOICES, blank=True)
+    message = models.TextField()
+
     # Admin fields
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
     admin_notes = models.TextField(blank=True, help_text="Internal admin notes")
-    estimated_price = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
-        blank=True, 
-        null=True,
-        help_text="Estimated price for the custom request"
-    )
-    assigned_to = models.ForeignKey(
-        User, 
-        on_delete=models.SET_NULL, 
-        blank=True, 
-        null=True,
-        help_text="Admin user assigned to this request"
-    )
-    
+
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    reviewed_at = models.DateTimeField(blank=True, null=True)
-    completed_at = models.DateTimeField(blank=True, null=True)
-    
+
     class Meta:
         ordering = ['-created_at']
         verbose_name = "Custom Request"
         verbose_name_plural = "Custom Requests"
-    
+
     def __str__(self):
-        return f"{self.name} - {self.title}"
-    
+        return f"{self.name} - {self.get_room_type_display()}"
+
     @property
     def budget_display(self):
         """Convert budget code to readable format"""
-        if not self.budget:
+        if not self.budget_range:
             return "Not specified"
-        return dict(self.BUDGET_CHOICES).get(self.budget, self.budget)
-    
-    @property
-    def dimensions_display(self):
-        """Display dimensions in readable format"""
-        if self.width and self.height:
-            return f"{self.width} × {self.height}"
-        elif self.width:
-            return f"Width: {self.width}"
-        elif self.height:
-            return f"Height: {self.height}"
-        return "Not specified"
-    
-    
-class Brand(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(max_length=100, unique=True, blank=True)
-    description = models.TextField(blank=True)
-    logo = models.ImageField(upload_to='brands/', blank=True, null=True)
-    website = models.URLField(blank=True)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        ordering = ['name']
-    
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        super().save(*args, **kwargs)
-    
-    def __str__(self):
-        return self.name
+        return dict(self.BUDGET_CHOICES).get(self.budget_range, self.budget_range)
 
-class Product(TranslatableModelMixin, models.Model):
-    COLOR_CHOICES = [
-        ('white', 'White'), ('black', 'Black'), ('brown', 'Brown'), ('gray', 'Gray'),
-        ('beige', 'Beige'), ('blue', 'Blue'), ('green', 'Green'), ('red', 'Red'),
-        ('natural', 'Natural Wood'), ('oak', 'Oak'), ('walnut', 'Walnut'),
-        ('pine', 'Pine'), ('mahogany', 'Mahogany'), ('cherry', 'Cherry'),
-        ('gold', 'Gold'), ('silver', 'Silver'), ('bronze', 'Bronze'),
-        ('cream', 'Cream'), ('navy', 'Navy'), ('burgundy', 'Burgundy'),
-        ('other', 'Other'),
-    ]
-    
-    MATERIAL_CHOICES = [
-        ('wood', 'Wood'), ('metal', 'Metal'), ('fabric', 'Fabric'), ('leather', 'Leather'),
-        ('glass', 'Glass'), ('plastic', 'Plastic'), ('composite', 'Composite'),
-        ('rattan', 'Rattan'), ('bamboo', 'Bamboo'), ('marble', 'Marble'),
-        ('stone', 'Stone'), ('ceramic', 'Ceramic'), ('wicker', 'Wicker'),
-        ('velvet', 'Velvet'), ('linen', 'Linen'), ('cotton', 'Cotton'),
-        ('polyester', 'Polyester'), ('microfiber', 'Microfiber'),
-    ]
-    
-    CONDITION_CHOICES = [
-        ('new', 'New'),
-        ('refurbished', 'Refurbished'),
-        ('vintage', 'Vintage'),
-        ('antique', 'Antique'),
-    ]
-    
-    STATUS_CHOICES = [
-        ('draft', 'Draft'),
-        ('active', 'Active'),
-        ('inactive', 'Inactive'),
-        ('discontinued', 'Discontinued'),
-    ]
-    
-    # Basic Information
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200, unique=True, blank=True)
-    sku = models.CharField(max_length=50, unique=True, blank=True)
-    
-    # Descriptions
-    short_description = models.CharField(max_length=300, blank=True)
-    description = models.TextField()
-    specifications = models.TextField(blank=True, help_text="Technical specifications and details")
-    care_instructions = models.TextField(blank=True, help_text="Care and maintenance instructions")
-    
-    # Categorization
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
-    subcategory = models.ForeignKey(
-        Category, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True, 
-        related_name='subcategory_products'
-    )
-    brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True)
-    
-    # Pricing
-    price = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
-        validators=[MinValueValidator(0)],
-        help_text="Regular price"
-    )
-    sale_price = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
-        blank=True, 
-        null=True,
-        validators=[MinValueValidator(0)],
-        help_text="Sale price (optional)"
-    )
-    cost_price = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
-        blank=True, 
-        null=True,
-        validators=[MinValueValidator(0)],
-        help_text="Cost price for internal use"
-    )
-    
-    # Physical Properties
-    materials = models.CharField(max_length=50, choices=MATERIAL_CHOICES, default='wood')
-    colors = models.CharField(max_length=50, choices=COLOR_CHOICES, default='natural')
-    condition = models.CharField(max_length=20, choices=CONDITION_CHOICES, default='new')
-    
-    # Dimensions (in centimeters)
-    dimensions_length = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, 
-        help_text="Length in cm"
-    )
-    dimensions_width = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, 
-        help_text="Width in cm"
-    )
-    dimensions_height = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, 
-        help_text="Height in cm"
-    )
-    weight = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True, 
-        help_text="Weight in kg"
-    )
-    
-    # Inventory
-    stock_quantity = models.PositiveIntegerField(default=0)
-    min_stock_level = models.PositiveIntegerField(default=5, help_text="Minimum stock level for alerts")
-    track_inventory = models.BooleanField(default=True)
-    
-    # Status and Visibility
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
-    featured = models.BooleanField(default=False)
-    is_bestseller = models.BooleanField(default=False)
-    is_new_arrival = models.BooleanField(default=False)
-    allow_backorder = models.BooleanField(default=False)
-    
-    # SEO
-    meta_title = models.CharField(max_length=160, blank=True)
-    meta_description = models.CharField(max_length=320, blank=True)
-    meta_keywords = models.CharField(max_length=255, blank=True)
-    
-    # Shipping
-    requires_shipping = models.BooleanField(default=True)
-    shipping_weight = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True,
-        help_text="Shipping weight in kg (may differ from actual weight)"
-    )
-    free_shipping = models.BooleanField(default=False)
-    
-    # Assembly
-    requires_assembly = models.BooleanField(default=False)
-    assembly_time_minutes = models.PositiveIntegerField(blank=True, null=True)
-    assembly_difficulty = models.CharField(
-        max_length=20,
-        choices=[
-            ('easy', 'Easy'),
-            ('medium', 'Medium'),
-            ('hard', 'Hard'),
-            ('professional', 'Professional Required'),
-        ],
-        blank=True
-    )
-    
-    # Timestamps
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    published_at = models.DateTimeField(blank=True, null=True)
-    
-    # Analytics
-    view_count = models.PositiveIntegerField(default=0)
-    purchase_count = models.PositiveIntegerField(default=0)
-    
-    class Meta:
-        ordering = ['-created_at']
-        indexes = [
-            models.Index(fields=['status', 'featured']),
-            models.Index(fields=['category', 'status']),
-            models.Index(fields=['created_at']),
-            models.Index(fields=['price']),
-        ]
-    
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        if not self.sku:
-            self.sku = f"FUR-{self.category.name[:3].upper()}-{uuid.uuid4().hex[:8].upper()}"
-        super().save(*args, **kwargs)
-    
-    def __str__(self):
-        return self.name
-    
-    @property
-    def is_active(self):
-        return self.status == 'active'
-    
-    @property
-    def current_price(self):
-        """Return sale price if available, otherwise regular price"""
-        return self.sale_price if self.sale_price else self.price
-    
-    @property
-    def discount_percentage(self):
-        """Calculate discount percentage if on sale"""
-        if self.sale_price and self.sale_price < self.price:
-            return round((1 - (self.sale_price / self.price)) * 100)
-        return 0
-    
-    @property
-    def primary_image(self):
-        return self.images.filter(is_primary=True).first()
-    
-    @property
-    def dimensions_display(self):
-        if self.dimensions_length and self.dimensions_width and self.dimensions_height:
-            return f"{self.dimensions_length} × {self.dimensions_width} × {self.dimensions_height} cm"
-        return "Dimensions not specified"
-    
-    @property
-    def is_in_stock(self):
-        if not self.track_inventory:
-            return True
-        return self.stock_quantity > 0 or self.allow_backorder
-    
-    @property
-    def is_low_stock(self):
-        if not self.track_inventory:
-            return False
-        return self.stock_quantity <= self.min_stock_level
-    
-    def get_absolute_url(self):
-        return reverse('product-detail', kwargs={'slug': self.slug})
-    
-    def get_localized_name(self, language_code: str = 'en') -> str:
-        """Get localized name"""
-        if language_code == 'en':
-            return self.name
-        return self.get_translation('name', language_code) or self.name
-    
-    def get_localized_description(self, language_code: str = 'en') -> str:
-        """Get localized description"""
-        if language_code == 'en':
-            return self.description
-        return self.get_translation('description', language_code) or self.description
-    
-    def get_localized_short_description(self, language_code: str = 'en') -> str:
-        """Get localized short description"""
-        if language_code == 'en':
-            return self.short_description
-        return self.get_translation('short_description', language_code) or self.short_description
-    
-    def get_localized_specifications(self, language_code: str = 'en') -> str:
-        """Get localized specifications"""
-        if language_code == 'en':
-            return self.specifications
-        return self.get_translation('specifications', language_code) or self.specifications
-    
-    def get_localized_care_instructions(self, language_code: str = 'en') -> str:
-        """Get localized care instructions"""
-        if language_code == 'en':
-            return self.care_instructions
-        return self.get_translation('care_instructions', language_code) or self.care_instructions
 
-class ProductImage(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to=product_image_path)
+class ContactImage(models.Model):
+    """Images uploaded with contact requests"""
+    contact_request = models.ForeignKey(
+        CustomRequest,
+        on_delete=models.CASCADE,
+        related_name='images'
+    )
+    image = models.ImageField(upload_to=contact_image_path)
     alt_text = models.CharField(max_length=200, blank=True)
-    is_primary = models.BooleanField(default=False)
-    order = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        ordering = ['order', 'created_at']
-        indexes = [
-            models.Index(fields=['product', 'is_primary']),
-        ]
-    
-    def save(self, *args, **kwargs):
-        # Ensure only one primary image per product
-        if self.is_primary:
-            ProductImage.objects.filter(product=self.product, is_primary=True).update(is_primary=False)
-        super().save(*args, **kwargs)
-    
-    def __str__(self):
-        return f"{self.product.name} - Image {self.order}"
 
-class ProductReview(models.Model):
-    RATING_CHOICES = [(i, i) for i in range(1, 6)]
-    
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
-    name = models.CharField(max_length=100)
-    email = models.EmailField()
-    rating = models.IntegerField(choices=RATING_CHOICES, validators=[MinValueValidator(1), MaxValueValidator(5)])
-    title = models.CharField(max_length=200)
-    comment = models.TextField()
-    is_verified_purchase = models.BooleanField(default=False)
-    is_approved = models.BooleanField(default=False)
-    helpful_count = models.PositiveIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
     class Meta:
-        ordering = ['-created_at']
-        indexes = [
-            models.Index(fields=['product', 'is_approved']),
-        ]
-    
-    def __str__(self):
-        return f"{self.name} - {self.product.name} ({self.rating}/5)"
+        ordering = ['created_at']
 
-class HomeSlider(models.Model):
-    title = models.CharField(max_length=200)
-    subtitle = models.CharField(max_length=300, blank=True)
-    description = models.TextField(blank=True)
-    image = models.ImageField(upload_to=slider_image_path)
-    mobile_image = models.ImageField(upload_to=slider_image_path, blank=True, null=True)
-    link_url = models.URLField(blank=True)
-    link_text = models.CharField(max_length=100, blank=True, default="Shop Now")
-    background_color = models.CharField(max_length=7, blank=True, help_text="Hex color code")
-    text_color = models.CharField(max_length=7, default="#FFFFFF", help_text="Hex color code")
-    text_position = models.CharField(
-        max_length=20,
-        choices=[
-            ('left', 'Left'),
-            ('center', 'Center'),
-            ('right', 'Right'),
-        ],
-        default='left'
-    )
-    order = models.PositiveIntegerField(default=0)
-    is_active = models.BooleanField(default=True)
-    start_date = models.DateTimeField(blank=True, null=True)
-    end_date = models.DateTimeField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        ordering = ['order', 'created_at']
-    
     def __str__(self):
-        return self.title
+        return f"Image for {self.contact_request.name} - {self.contact_request.room_type}"
 
+
+# Contact Messages
 class ContactMessage(models.Model):
+    """General contact messages"""
     SUBJECT_CHOICES = [
         ('general', 'General Inquiry'),
-        ('product', 'Product Question'),
         ('custom', 'Custom Order'),
-        ('shipping', 'Shipping & Delivery'),
-        ('returns', 'Returns & Exchanges'),
-        ('support', 'Technical Support'),
+        ('support', 'Support'),
         ('feedback', 'Feedback'),
         ('other', 'Other'),
     ]
-    
+
     name = models.CharField(max_length=100)
     email = models.EmailField()
     phone = models.CharField(max_length=20, blank=True)
@@ -774,74 +266,146 @@ class ContactMessage(models.Model):
     replied_at = models.DateTimeField(blank=True, null=True)
     replied_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['is_read', 'created_at']),
         ]
-    
+
     def __str__(self):
         subject_display = self.custom_subject if self.subject == 'other' and self.custom_subject else self.get_subject_display()
         return f"{self.name} - {subject_display}"
 
-class Newsletter(models.Model):
-    email = models.EmailField(unique=True)
-    name = models.CharField(max_length=100, blank=True)
-    is_active = models.BooleanField(default=True)
-    subscribed_at = models.DateTimeField(auto_now_add=True)
-    unsubscribed_at = models.DateTimeField(blank=True, null=True)
-    
-    class Meta:
-        ordering = ['-subscribed_at']
-    
-    def __str__(self):
-        return self.email
 
-class ProductCollection(models.Model):
-    """Collections/Sets of products that go together"""
-    name = models.CharField(max_length=200)
+# Services offered
+def service_image_path(instance, filename):
+    """Generate upload path for service images"""
+    ext = filename.split('.')[-1]
+    filename = f'{uuid.uuid4()}.{ext}'
+    return os.path.join('services', filename)
+
+
+class Service(models.Model):
+    """Services offered by the furniture studio"""
+    title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
+    short_description = models.TextField()
     description = models.TextField()
-    image = models.ImageField(upload_to='collections/')
-    products = models.ManyToManyField(Product, related_name='collections')
+    image = models.ImageField(upload_to=service_image_path, blank=True, null=True)
+    icon = models.CharField(max_length=50, blank=True, help_text="Icon name or class")
     is_active = models.BooleanField(default=True)
-    featured = models.BooleanField(default=False)
+    sort_order = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+    updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
-        ordering = ['-created_at']
-    
+        ordering = ['sort_order', 'title']
+        verbose_name = "Service"
+        verbose_name_plural = "Services"
+
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            self.slug = slugify(self.title)
         super().save(*args, **kwargs)
-    
-    def __str__(self):
-        return self.name
 
-class Wishlist(models.Model):
-    """User wishlist functionality"""
-    session_key = models.CharField(max_length=40, db_index=True)  # For anonymous users
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    def __str__(self):
+        return self.title
+
+
+# Materials for projects
+def material_image_path(instance, filename):
+    """Generate upload path for material images"""
+    ext = filename.split('.')[-1]
+    filename = f'{uuid.uuid4()}.{ext}'
+    return os.path.join('materials', instance.type, filename)
+
+
+class Material(models.Model):
+    """Materials and finishes available"""
+    MATERIAL_TYPE_CHOICES = [
+        ('wood', 'Wood'),
+        ('fabric', 'Fabric / Leather'),
+        ('hardware', 'Hardware'),
+        ('other', 'Other'),
+    ]
+
+    name = models.CharField(max_length=200)
+    type = models.CharField(max_length=20, choices=MATERIAL_TYPE_CHOICES, default='wood')
+    description = models.TextField()
+    image = models.ImageField(upload_to=material_image_path)
+    is_active = models.BooleanField(default=True)
+    sort_order = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        unique_together = ['session_key', 'product']
-        ordering = ['-created_at']
-    
-    def __str__(self):
-        return f"Wishlist - {self.product.name}"
+    updated_at = models.DateTimeField(auto_now=True)
 
-class RecentlyViewed(models.Model):
-    """Track recently viewed products"""
-    session_key = models.CharField(max_length=40, db_index=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    viewed_at = models.DateTimeField(auto_now_add=True)
-    
     class Meta:
-        unique_together = ['session_key', 'product']
-        ordering = ['-viewed_at']
-    
+        ordering = ['type', 'sort_order', 'name']
+        verbose_name = "Material"
+        verbose_name_plural = "Materials"
+
     def __str__(self):
-        return f"Recently viewed - {self.product.name}"
+        return f"{self.name} ({self.get_type_display()})"
+
+
+# Testimonials
+class Testimonial(models.Model):
+    """Client testimonials"""
+    client_name = models.CharField(max_length=100)
+    text = models.TextField()
+    project = models.ForeignKey(
+        GalleryProject,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='testimonials'
+    )
+    location = models.CharField(max_length=100, blank=True, help_text="Client location (optional)")
+    rating = models.PositiveIntegerField(
+        default=5,
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        help_text="Rating out of 5"
+    )
+    is_featured = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Testimonial"
+        verbose_name_plural = "Testimonials"
+
+    def __str__(self):
+        return f"{self.client_name} - {self.rating}/5"
+
+
+# FAQ
+class FAQ(models.Model):
+    """Frequently Asked Questions"""
+    question = models.CharField(max_length=300)
+    answer = models.TextField()
+    category = models.CharField(
+        max_length=50,
+        choices=[
+            ('general', 'General'),
+            ('process', 'Process'),
+            ('materials', 'Materials'),
+            ('delivery', 'Delivery & Installation'),
+            ('pricing', 'Pricing'),
+            ('maintenance', 'Maintenance'),
+        ],
+        default='general'
+    )
+    is_active = models.BooleanField(default=True)
+    sort_order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['category', 'sort_order', 'created_at']
+        verbose_name = "FAQ"
+        verbose_name_plural = "FAQs"
+
+    def __str__(self):
+        return self.question

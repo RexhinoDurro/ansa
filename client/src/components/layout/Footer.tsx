@@ -30,20 +30,18 @@ const Footer: React.FC = () => {
 
   const quickLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Catalogue', path: '/catalogue' },
-    { name: 'About Us', path: '/about' },
+    { name: 'Portfolio', path: '/portfolio' },
+    { name: 'Services', path: '/services' },
     { name: 'Contact', path: '/contact' },
-    { name: 'FAQ', path: '/faq' },
-    { name: 'Shipping Info', path: '/shipping' },
   ];
 
   const categories = [
-    { name: 'Living Room', path: '/catalogue?category=living-room' },
-    { name: 'Bedroom', path: '/catalogue?category=bedroom' },
-    { name: 'Dining Room', path: '/catalogue?category=dining-room' },
-    { name: 'Office', path: '/catalogue?category=office' },
-    { name: 'Storage', path: '/catalogue?category=storage' },
-    { name: 'Outdoor', path: '/catalogue?category=outdoor' },
+    { name: 'Kitchens', path: '/portfolio' },
+    { name: 'Wardrobes', path: '/portfolio' },
+    { name: 'Living Rooms', path: '/portfolio' },
+    { name: 'Bedrooms', path: '/portfolio' },
+    { name: 'Offices', path: '/portfolio' },
+    { name: 'Custom Request', path: '/contact' },
   ];
 
   const features = [
@@ -54,21 +52,21 @@ const Footer: React.FC = () => {
   ];
 
   return (
-    <footer className="bg-neutral-900 text-white">
+    <footer className="bg-brown-900 text-white">
       {/* Features Bar */}
-      <div className="border-b border-neutral-800">
+      <div className="border-b border-brown-800">
         <div className="container mx-auto px-4 lg:px-8 py-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
                 <div key={index} className="flex items-center space-x-4">
-                  <div className="bg-primary-600 p-3 rounded-lg">
+                  <div className="bg-accent p-3 rounded-lg">
                     <Icon className="w-6 h-6" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-white">{feature.title}</h3>
-                    <p className="text-sm text-neutral-300">{feature.description}</p>
+                    <p className="text-sm text-cream-200">{feature.description}</p>
                   </div>
                 </div>
               );
@@ -78,13 +76,13 @@ const Footer: React.FC = () => {
       </div>
 
       {/* Newsletter Section */}
-      <div className="border-b border-neutral-800">
+      <div className="border-b border-brown-800">
         <div className="container mx-auto px-4 lg:px-8 py-12">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl font-serif font-bold mb-4">
               Stay Updated with Our Latest Collections
             </h2>
-            <p className="text-neutral-300 mb-8 text-lg">
+            <p className="text-cream-200 mb-8 text-lg">
               Subscribe to our newsletter and be the first to know about new arrivals, 
               exclusive offers, and design tips.
             </p>
@@ -92,14 +90,14 @@ const Footer: React.FC = () => {
               <input
                 type="email"
                 placeholder="Enter your email address"
-                className="flex-1 px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-white placeholder-neutral-400"
+                className="flex-1 px-4 py-3 bg-brown-800 border border-brown-700 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-white placeholder-cream-300"
               />
-              <button className="flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200 group">
+              <button className="flex items-center justify-center bg-accent hover:bg-accent-dark text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200 group">
                 Subscribe
                 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
               </button>
             </div>
-            <p className="text-xs text-neutral-400 mt-4">
+            <p className="text-xs text-cream-300 mt-4">
               By subscribing, you agree to our Privacy Policy and Terms of Service.
             </p>
           </div>
@@ -113,12 +111,12 @@ const Footer: React.FC = () => {
           <div className="lg:col-span-1">
             <Link href="/" className="inline-block mb-6">
               <h3 className="text-3xl font-serif font-bold text-white">
-                Furniture Co.
+                Ansa Furniture
               </h3>
             </Link>
-            <p className="text-neutral-300 mb-6 leading-relaxed">
-              Crafting beautiful, functional furniture since 1990. We believe every piece 
-              should tell a story and enhance the way you live.
+            <p className="text-cream-200 mb-6 leading-relaxed">
+              Crafting custom furniture with passion, precision, and commitment to quality since 2015.
+              Every piece is made to fit your unique space and style.
             </p>
             
             {/* Social Links */}
@@ -130,7 +128,7 @@ const Footer: React.FC = () => {
                     key={index}
                     href={social.href}
                     aria-label={social.label}
-                    className="bg-neutral-800 hover:bg-primary-600 p-3 rounded-lg transition-colors duration-200 group"
+                    className="bg-brown-800 hover:bg-accent p-3 rounded-lg transition-colors duration-200 group"
                   >
                     <Icon className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
                   </a>
@@ -147,7 +145,7 @@ const Footer: React.FC = () => {
                 <li key={index}>
                   <Link
                     href={link.path}
-                    className="text-neutral-300 hover:text-primary-400 transition-colors duration-200 flex items-center group"
+                    className="text-cream-200 hover:text-accent-light transition-colors duration-200 flex items-center group"
                   >
                     <span className="group-hover:translate-x-1 transition-transform duration-200">
                       {link.name}
@@ -166,7 +164,7 @@ const Footer: React.FC = () => {
                 <li key={index}>
                   <Link
                     href={category.path}
-                    className="text-neutral-300 hover:text-primary-400 transition-colors duration-200 flex items-center group"
+                    className="text-cream-200 hover:text-accent-light transition-colors duration-200 flex items-center group"
                   >
                     <span className="group-hover:translate-x-1 transition-transform duration-200">
                       {category.name}
@@ -182,42 +180,42 @@ const Footer: React.FC = () => {
             <h4 className="font-semibold text-white mb-6 text-lg">Get in Touch</h4>
             <div className="space-y-4">
               <div className="flex items-start space-x-3">
-                <MapPin className="w-5 h-5 text-primary-400 mt-1 flex-shrink-0" />
+                <MapPin className="w-5 h-5 text-accent-light mt-1 flex-shrink-0" />
                 <div>
-                  <p className="text-neutral-300">
-                    123 Furniture Street<br />
-                    Design District<br />
-                    City, State 12345
+                  <p className="text-cream-200">
+                    Rruga e Elbasanit<br />
+                    Tirana<br />
+                    Albania
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-3">
-                <Phone className="w-5 h-5 text-primary-400 flex-shrink-0" />
-                <a 
-                  href="tel:+1234567890"
-                  className="text-neutral-300 hover:text-primary-400 transition-colors duration-200"
+                <Phone className="w-5 h-5 text-accent-light flex-shrink-0" />
+                <a
+                  href="tel:+355XXXXXXXX"
+                  className="text-cream-200 hover:text-accent-light transition-colors duration-200"
                 >
-                  (555) 123-4567
+                  +355 XX XXX XXXX
                 </a>
               </div>
-              
+
               <div className="flex items-center space-x-3">
-                <Mail className="w-5 h-5 text-primary-400 flex-shrink-0" />
-                <a 
-                  href="mailto:info@furnitureco.com"
-                  className="text-neutral-300 hover:text-primary-400 transition-colors duration-200"
+                <Mail className="w-5 h-5 text-accent-light flex-shrink-0" />
+                <a
+                  href="mailto:info@ansafurniture.al"
+                  className="text-cream-200 hover:text-accent-light transition-colors duration-200"
                 >
-                  info@furnitureco.com
+                  info@ansafurniture.al
                 </a>
               </div>
-              
+
               <div className="flex items-start space-x-3">
-                <Clock className="w-5 h-5 text-primary-400 mt-1 flex-shrink-0" />
-                <div className="text-neutral-300">
-                  <p className="font-medium text-white mb-1">Store Hours:</p>
-                  <p className="text-sm">Mon-Fri: 9AM-8PM</p>
-                  <p className="text-sm">Sat-Sun: 10AM-6PM</p>
+                <Clock className="w-5 h-5 text-accent-light mt-1 flex-shrink-0" />
+                <div className="text-cream-200">
+                  <p className="font-medium text-white mb-1">Workshop Hours:</p>
+                  <p className="text-sm">Mon-Fri: 9AM-6PM</p>
+                  <p className="text-sm">Saturday: 10AM-4PM</p>
                 </div>
               </div>
             </div>
@@ -226,37 +224,37 @@ const Footer: React.FC = () => {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-neutral-800">
+      <div className="border-t border-brown-800">
         <div className="container mx-auto px-4 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
             <div className="text-center md:text-left">
-              <p className="text-neutral-400 text-sm">
-                © {currentYear} Furniture Co. All rights reserved.
+              <p className="text-cream-300 text-sm">
+                © {currentYear} Ansa Furniture. All rights reserved.
               </p>
             </div>
             
             <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-6 text-sm">
               <Link 
                 href="/privacy" 
-                className="text-neutral-400 hover:text-primary-400 transition-colors duration-200"
+                className="text-cream-300 hover:text-accent-light transition-colors duration-200"
               >
                 Privacy Policy
               </Link>
               <Link 
                 href="/terms" 
-                className="text-neutral-400 hover:text-primary-400 transition-colors duration-200"
+                className="text-cream-300 hover:text-accent-light transition-colors duration-200"
               >
                 Terms of Service
               </Link>
               <Link 
                 href="/cookies" 
-                className="text-neutral-400 hover:text-primary-400 transition-colors duration-200"
+                className="text-cream-300 hover:text-accent-light transition-colors duration-200"
               >
                 Cookie Policy
               </Link>
               <Link 
                 href="/sitemap" 
-                className="text-neutral-400 hover:text-primary-400 transition-colors duration-200"
+                className="text-cream-300 hover:text-accent-light transition-colors duration-200"
               >
                 Sitemap
               </Link>
@@ -264,7 +262,7 @@ const Footer: React.FC = () => {
             
             {/* Payment Methods */}
             <div className="flex items-center space-x-2">
-              <span className="text-neutral-400 text-sm mr-2">We Accept:</span>
+              <span className="text-cream-300 text-sm mr-2">We Accept:</span>
               <div className="flex space-x-2 opacity-60">
                 <div className="w-8 h-5 bg-blue-600 rounded flex items-center justify-center">
                   <span className="text-white text-xs font-bold">V</span>

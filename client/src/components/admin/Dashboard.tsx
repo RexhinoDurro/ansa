@@ -1,35 +1,38 @@
-// client/src/components/admin/Dashboard.tsx (Fixed)
+// client/src/components/admin/Dashboard.tsx
 import React, { useState, useEffect } from 'react';
-import { 
-  BarChart3, 
-  Package, 
-  AlertTriangle,
+import {
+  Image as ImageIcon,
+  Inbox,
+  CheckCircle,
   Eye,
   MessageSquare,
-  Star
+  Star,
+  Clock,
+  TrendingUp
 } from 'lucide-react';
 
 interface DashboardStats {
-  products: {
+  gallery_projects: {
     total: number;
     active: number;
-    draft: number;
     featured: number;
-    low_stock: number;
     recent: number;
   };
-  categories: {
+  gallery_categories: {
     total: number;
     active: number;
   };
-  messages: {
+  custom_requests: {
+    total: number;
+    new: number;
+    in_progress: number;
+    completed: number;
+    recent: number;
+  };
+  contact_messages: {
     total: number;
     unread: number;
     recent: number;
-  };
-  reviews: {
-    total: number;
-    pending: number;
   };
 }
 
@@ -97,26 +100,27 @@ const AdminDashboard: React.FC = () => {
       setError('Failed to load dashboard stats');
       // Set default stats to show something
       setStats({
-        products: {
+        gallery_projects: {
           total: 0,
           active: 0,
-          draft: 0,
           featured: 0,
-          low_stock: 0,
           recent: 0
         },
-        categories: {
+        gallery_categories: {
           total: 0,
           active: 0
         },
-        messages: {
+        custom_requests: {
+          total: 0,
+          new: 0,
+          in_progress: 0,
+          completed: 0,
+          recent: 0
+        },
+        contact_messages: {
           total: 0,
           unread: 0,
           recent: 0
-        },
-        reviews: {
-          total: 0,
-          pending: 0
         }
       });
     } finally {
@@ -159,42 +163,42 @@ const AdminDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Message */}
-      <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg p-6 text-white">
-        <h1 className="text-2xl font-bold mb-2">Welcome to your Dashboard</h1>
-        <p className="text-primary-100">
-          Here's what's happening with your furniture store today.
+      <div className="bg-gradient-to-r from-accent to-accent-dark rounded-lg p-6 text-white">
+        <h1 className="text-2xl font-bold mb-2">Welcome to ANSA Studio Dashboard</h1>
+        <p className="text-cream-100">
+          Manage your custom furniture portfolio, client requests, and showcase your craftsmanship.
         </p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Total Products"
-          value={stats?.products?.total || 0}
-          change={`${stats?.products?.recent || 0} added this week`}
-          icon={Package}
+          title="Portfolio Projects"
+          value={stats?.gallery_projects?.total || 0}
+          change={`${stats?.gallery_projects?.recent || 0} added recently`}
+          icon={ImageIcon}
           color="primary"
         />
         <StatCard
-          title="Active Products"
-          value={stats?.products?.active || 0}
-          change={`${stats?.products?.draft || 0} in draft`}
+          title="New Requests"
+          value={stats?.custom_requests?.new || 0}
+          change={`${stats?.custom_requests?.recent || 0} this week`}
+          icon={Inbox}
+          color="orange"
+        />
+        <StatCard
+          title="Active Projects"
+          value={stats?.gallery_projects?.active || 0}
+          change={`${stats?.gallery_projects?.featured || 0} featured`}
           icon={Eye}
           color="green"
         />
         <StatCard
-          title="Categories"
-          value={stats?.categories?.total || 0}
-          change={`${stats?.categories?.active || 0} active`}
-          icon={BarChart3}
-          color="blue"
-        />
-        <StatCard
           title="Unread Messages"
-          value={stats?.messages?.unread || 0}
-          change={`${stats?.messages?.recent || 0} this week`}
+          value={stats?.contact_messages?.unread || 0}
+          change={`${stats?.contact_messages?.recent || 0} this week`}
           icon={MessageSquare}
-          color="orange"
+          color="blue"
         />
       </div>
 
@@ -202,64 +206,117 @@ const AdminDashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-neutral-900">Featured Products</h3>
+            <h3 className="text-lg font-semibold text-brown-900">Featured Projects</h3>
             <Star className="w-5 h-5 text-yellow-500" />
           </div>
-          <p className="text-3xl font-bold text-neutral-900 mb-2">{stats?.products?.featured || 0}</p>
-          <p className="text-sm text-neutral-600">Products marked as featured</p>
+          <p className="text-3xl font-bold text-brown-900 mb-2">{stats?.gallery_projects?.featured || 0}</p>
+          <p className="text-sm text-brown-600">Projects showcased on homepage</p>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-neutral-900">Low Stock Alert</h3>
-            <AlertTriangle className="w-5 h-5 text-red-500" />
+            <h3 className="text-lg font-semibold text-brown-900">In Progress</h3>
+            <Clock className="w-5 h-5 text-orange-500" />
           </div>
-          <p className="text-3xl font-bold text-red-600 mb-2">{stats?.products?.low_stock || 0}</p>
-          <p className="text-sm text-neutral-600">Products running low</p>
+          <p className="text-3xl font-bold text-orange-600 mb-2">{stats?.custom_requests?.in_progress || 0}</p>
+          <p className="text-sm text-brown-600">Custom requests being worked on</p>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-sm border border-neutral-200">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-neutral-900">Pending Reviews</h3>
-            <MessageSquare className="w-5 h-5 text-blue-500" />
+            <h3 className="text-lg font-semibold text-brown-900">Completed</h3>
+            <CheckCircle className="w-5 h-5 text-green-500" />
           </div>
-          <p className="text-3xl font-bold text-blue-600 mb-2">{stats?.reviews?.pending || 0}</p>
-          <p className="text-sm text-neutral-600">Reviews awaiting approval</p>
+          <p className="text-3xl font-bold text-green-600 mb-2">{stats?.custom_requests?.completed || 0}</p>
+          <p className="text-sm text-brown-600">Successfully delivered projects</p>
         </div>
       </div>
 
       {/* Quick Actions */}
       <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
-        <h3 className="text-lg font-semibold text-neutral-900 mb-4">Quick Actions</h3>
+        <h3 className="text-lg font-semibold text-brown-900 mb-4">Quick Actions</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <button 
-            onClick={() => window.open('/admin/products', '_self')}
-            className="flex items-center justify-center px-4 py-3 bg-primary-50 hover:bg-primary-100 text-primary-700 rounded-lg transition-colors duration-200"
+          <button
+            onClick={() => window.location.href = '/admin/gallery'}
+            className="flex items-center justify-center px-4 py-3 bg-accent/10 hover:bg-accent/20 text-accent rounded-lg transition-colors duration-200"
           >
-            <Package className="w-5 h-5 mr-2" />
-            Add Product
+            <ImageIcon className="w-5 h-5 mr-2" />
+            Manage Gallery
           </button>
-          <button 
-            onClick={() => window.open('/admin/categories', '_self')}
-            className="flex items-center justify-center px-4 py-3 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors duration-200"
-          >
-            <BarChart3 className="w-5 h-5 mr-2" />
-            Add Category
-          </button>
-          <button 
-            onClick={() => window.open('/admin/messages', '_self')}
-            className="flex items-center justify-center px-4 py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors duration-200"
-          >
-            <MessageSquare className="w-5 h-5 mr-2" />
-            View Messages
-          </button>
-          <button 
-            onClick={() => window.open('/', '_blank')}
+          <button
+            onClick={() => window.location.href = '/admin/orders'}
             className="flex items-center justify-center px-4 py-3 bg-orange-50 hover:bg-orange-100 text-orange-700 rounded-lg transition-colors duration-200"
           >
-            <Eye className="w-5 h-5 mr-2" />
-            View Store
+            <Inbox className="w-5 h-5 mr-2" />
+            View Requests
           </button>
+          <button
+            onClick={() => window.location.href = 'http://localhost:8000/admin/'}
+            className="flex items-center justify-center px-4 py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors duration-200"
+          >
+            <TrendingUp className="w-5 h-5 mr-2" />
+            Django Admin
+          </button>
+          <button
+            onClick={() => window.open('/', '_blank')}
+            className="flex items-center justify-center px-4 py-3 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors duration-200"
+          >
+            <Eye className="w-5 h-5 mr-2" />
+            View Website
+          </button>
+        </div>
+      </div>
+
+      {/* Recent Activity Preview */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Custom Requests */}
+        <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-brown-900">Recent Requests</h3>
+            <button
+              onClick={() => window.location.href = '/admin/orders'}
+              className="text-sm text-accent hover:underline"
+            >
+              View all
+            </button>
+          </div>
+          <div className="space-y-3">
+            {stats?.custom_requests?.new > 0 ? (
+              <div className="p-4 bg-cream-50 rounded-lg border border-cream-200">
+                <p className="text-brown-900 font-medium">{stats.custom_requests.new} new custom requests</p>
+                <p className="text-sm text-brown-600 mt-1">Awaiting your review</p>
+              </div>
+            ) : (
+              <p className="text-brown-600 text-sm">No new requests at the moment</p>
+            )}
+          </div>
+        </div>
+
+        {/* Portfolio Stats */}
+        <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-brown-900">Portfolio Overview</h3>
+            <button
+              onClick={() => window.location.href = '/admin/gallery'}
+              className="text-sm text-accent hover:underline"
+            >
+              Manage
+            </button>
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-brown-700">Total Projects</span>
+              <span className="font-semibold text-brown-900">{stats?.gallery_projects?.total || 0}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-brown-700">Categories</span>
+              <span className="font-semibold text-brown-900">{stats?.gallery_categories?.total || 0}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-brown-700">Featured</span>
+              <span className="font-semibold text-accent">{stats?.gallery_projects?.featured || 0}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

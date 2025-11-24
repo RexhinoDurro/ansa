@@ -1,46 +1,40 @@
 // client/src/components/admin/CustomRequestManager.tsx
 import React, { useState, useEffect } from 'react';
-import { 
-  Eye, 
-  User, 
-  Calendar, 
-  DollarSign, 
-  Palette, 
-  MessageSquare, 
+import {
+  Eye,
+  User,
+  Calendar,
+  MessageSquare,
   ChevronRight,
   X,
-  Check,
-  Clock,
   Mail,
-  Phone} from 'lucide-react';
+  Phone,
+  Image as ImageIcon
+} from 'lucide-react';
+
+interface ContactImage {
+  id: number;
+  image: string;
+  alt_text: string;
+  created_at: string;
+}
 
 interface CustomRequest {
   id: string;
-  title: string;
-  description: string;
-  width: string;
-  height: string;
-  primary_color: string;
-  style: string;
-  deadline: string;
-  budget: string;
-  budget_display: string;
-  additional: string;
   name: string;
   email: string;
   phone: string;
-  contact_method: string;
+  room_type: string;
+  room_type_display: string;
+  budget_range: string;
+  budget_display: string;
+  message: string;
   status: string;
   status_display: string;
   admin_notes: string;
-  estimated_price: number | null;
-  assigned_to: number | null;
-  assigned_to_name: string;
-  dimensions_display: string;
+  images: ContactImage[];
   created_at: string;
   updated_at: string;
-  reviewed_at: string | null;
-  completed_at: string | null;
 }
 
 const CustomRequestManager: React.FC = () => {
@@ -49,6 +43,7 @@ const CustomRequestManager: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState('all');
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchRequests();
@@ -63,7 +58,7 @@ const CustomRequestManager: React.FC = () => {
           'Content-Type': 'application/json',
         }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setRequests(data.results || data || []);
@@ -81,8 +76,8 @@ const CustomRequestManager: React.FC = () => {
 
   const updateStatus = async (requestId: string, newStatus: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/custom-requests/${requestId}/update_status/`, {
-        method: 'POST',
+      const response = await fetch(`http://localhost:8000/api/admin/custom-requests/${requestId}/`, {
+        method: 'PATCH',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -110,13 +105,9 @@ const CustomRequestManager: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     const colors = {
-      'pending': 'bg-yellow-100 text-yellow-800',
-      'reviewing': 'bg-blue-100 text-blue-800',
-      'quoted': 'bg-purple-100 text-purple-800',
-      'approved': 'bg-green-100 text-green-800',
-      'in_progress': 'bg-indigo-100 text-indigo-800',
-      'completed': 'bg-gray-100 text-gray-800',
-      'cancelled': 'bg-red-100 text-red-800'
+      'new': 'bg-blue-100 text-blue-800',
+      'in_progress': 'bg-yellow-100 text-yellow-800',
+      'done': 'bg-green-100 text-green-800'
     };
     return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
@@ -156,8 +147,8 @@ const CustomRequestManager: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Custom Requests</h2>
-          <p className="text-gray-600 mt-1">Manage customer custom furniture requests</p>
+          <h2 className="text-2xl font-bold text-gray-900">Custom Furniture Requests</h2>
+          <p className="text-gray-600 mt-1">Manage customer custom furniture inquiries</p>
         </div>
       </div>
 
@@ -172,10 +163,9 @@ const CustomRequestManager: React.FC = () => {
         <div className="flex space-x-4">
           {[
             { key: 'all', label: 'All Requests' },
-            { key: 'pending', label: 'Pending' },
-            { key: 'reviewing', label: 'Under Review' },
+            { key: 'new', label: 'New' },
             { key: 'in_progress', label: 'In Progress' },
-            { key: 'completed', label: 'Completed' }
+            { key: 'done', label: 'Done' }
           ].map((tab) => (
             <button
               key={tab.key}
@@ -203,15 +193,15 @@ const CustomRequestManager: React.FC = () => {
               Requests ({filteredRequests.length})
             </h3>
           </div>
-          
-          <div className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
+
+          <div className="divide-y divide-gray-200 max-h-[600px] overflow-y-auto">
             {filteredRequests.length === 0 ? (
               <div className="p-8 text-center">
                 <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No requests found</h3>
                 <p className="text-gray-600">
-                  {filter === 'all' 
-                    ? 'No custom requests have been submitted yet.' 
+                  {filter === 'all'
+                    ? 'No custom requests have been submitted yet.'
                     : `No requests with status "${filter}".`
                   }
                 </p>
@@ -227,34 +217,39 @@ const CustomRequestManager: React.FC = () => {
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2 mb-1">
+                      <div className="flex items-center space-x-2 mb-2">
                         <h4 className="text-sm font-medium text-gray-900 truncate">
-                          {request.title}
+                          {request.name}
                         </h4>
                         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
                           {request.status_display}
                         </span>
                       </div>
-                      
-                      <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
-                        <User className="w-4 h-4" />
-                        <span className="truncate">{request.name}</span>
-                      </div>
-                      
-                      <div className="flex items-center space-x-4 text-xs text-gray-500">
-                        <span className="flex items-center">
-                          <Calendar className="w-3 h-3 mr-1" />
-                          {formatDate(request.created_at)}
-                        </span>
-                        {request.budget_display && (
-                          <span className="flex items-center">
-                            <DollarSign className="w-3 h-3 mr-1" />
-                            {request.budget_display}
-                          </span>
+
+                      <div className="space-y-1 text-sm text-gray-600 mb-2">
+                        <div className="flex items-center">
+                          <span className="font-medium">{request.room_type_display}</span>
+                          {request.budget_display && (
+                            <>
+                              <span className="mx-2">•</span>
+                              <span>{request.budget_display}</span>
+                            </>
+                          )}
+                        </div>
+                        {request.images && request.images.length > 0 && (
+                          <div className="flex items-center text-blue-600">
+                            <ImageIcon className="w-3 h-3 mr-1" />
+                            <span>{request.images.length} image{request.images.length !== 1 ? 's' : ''}</span>
+                          </div>
                         )}
                       </div>
+
+                      <div className="flex items-center text-xs text-gray-500">
+                        <Calendar className="w-3 h-3 mr-1" />
+                        {formatDate(request.created_at)}
+                      </div>
                     </div>
-                    
+
                     <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
                   </div>
                 </div>
@@ -272,7 +267,7 @@ const CustomRequestManager: React.FC = () => {
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">
-                      {selectedRequest.title}
+                      {selectedRequest.room_type_display} Project
                     </h3>
                     <p className="text-sm text-gray-600 mt-1">
                       Request ID: {selectedRequest.id}
@@ -288,7 +283,7 @@ const CustomRequestManager: React.FC = () => {
               </div>
 
               {/* Content */}
-              <div className="p-4 space-y-6 max-h-96 overflow-y-auto">
+              <div className="p-4 space-y-6 max-h-[600px] overflow-y-auto">
                 {/* Status and Actions */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -297,166 +292,135 @@ const CustomRequestManager: React.FC = () => {
                       {selectedRequest.status_display}
                     </span>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-2">
-                    {selectedRequest.status === 'pending' && (
-                      <button
-                        onClick={() => updateStatus(selectedRequest.id, 'reviewing')}
-                        className="px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition-colors duration-200"
-                      >
-                        Start Review
-                      </button>
-                    )}
-                    {selectedRequest.status === 'reviewing' && (
-                      <button
-                        onClick={() => updateStatus(selectedRequest.id, 'quoted')}
-                        className="px-3 py-2 bg-purple-600 text-white text-sm font-medium rounded hover:bg-purple-700 transition-colors duration-200"
-                      >
-                        Send Quote
-                      </button>
-                    )}
-                    {selectedRequest.status === 'quoted' && (
-                      <button
-                        onClick={() => updateStatus(selectedRequest.id, 'approved')}
-                        className="px-3 py-2 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 transition-colors duration-200"
-                      >
-                        Approve
-                      </button>
-                    )}
-                    {selectedRequest.status === 'approved' && (
+                    {selectedRequest.status === 'new' && (
                       <button
                         onClick={() => updateStatus(selectedRequest.id, 'in_progress')}
-                        className="px-3 py-2 bg-indigo-600 text-white text-sm font-medium rounded hover:bg-indigo-700 transition-colors duration-200"
+                        className="px-3 py-2 bg-yellow-600 text-white text-sm font-medium rounded hover:bg-yellow-700 transition-colors duration-200"
                       >
-                        Start Work
+                        Start Processing
                       </button>
                     )}
                     {selectedRequest.status === 'in_progress' && (
                       <button
-                        onClick={() => updateStatus(selectedRequest.id, 'completed')}
-                        className="px-3 py-2 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 transition-colors duration-200"
+                        onClick={() => updateStatus(selectedRequest.id, 'done')}
+                        className="px-3 py-2 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 transition-colors duration-200"
                       >
-                        Complete
+                        Mark as Done
+                      </button>
+                    )}
+                    {selectedRequest.status === 'done' && (
+                      <button
+                        onClick={() => updateStatus(selectedRequest.id, 'new')}
+                        className="px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition-colors duration-200"
+                      >
+                        Reopen
                       </button>
                     )}
                   </div>
                 </div>
 
                 {/* Contact Information */}
-                <div className="space-y-3">
-                  <h4 className="font-medium text-gray-900">Contact Information</h4>
+                <div className="space-y-3 bg-blue-50 p-4 rounded-lg border border-blue-100">
+                  <h4 className="font-semibold text-gray-900 mb-3">Contact Information</h4>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2 text-sm">
-                      <User className="w-4 h-4 text-gray-400" />
-                      <span className="font-medium">{selectedRequest.name}</span>
+                      <User className="w-4 h-4 text-blue-600" />
+                      <span className="font-medium text-gray-900">{selectedRequest.name}</span>
                     </div>
                     <div className="flex items-center space-x-2 text-sm">
-                      <Mail className="w-4 h-4 text-gray-400" />
-                      <a 
+                      <Mail className="w-4 h-4 text-blue-600" />
+                      <a
                         href={`mailto:${selectedRequest.email}`}
-                        className="text-blue-600 hover:text-blue-800"
+                        className="text-blue-600 hover:text-blue-800 hover:underline"
                       >
                         {selectedRequest.email}
                       </a>
                     </div>
                     {selectedRequest.phone && (
                       <div className="flex items-center space-x-2 text-sm">
-                        <Phone className="w-4 h-4 text-gray-400" />
-                        <a 
+                        <Phone className="w-4 h-4 text-blue-600" />
+                        <a
                           href={`tel:${selectedRequest.phone}`}
-                          className="text-blue-600 hover:text-blue-800"
+                          className="text-blue-600 hover:text-blue-800 hover:underline"
                         >
                           {selectedRequest.phone}
                         </a>
                       </div>
                     )}
-                    <div className="flex items-center space-x-2 text-sm">
-                      <MessageSquare className="w-4 h-4 text-gray-400" />
-                      <span className="capitalize">{selectedRequest.contact_method}</span>
-                    </div>
                   </div>
                 </div>
 
                 {/* Project Details */}
                 <div className="space-y-3">
-                  <h4 className="font-medium text-gray-900">Project Details</h4>
-                  <div className="space-y-2">
-                    <p className="text-sm text-gray-700">
-                      <strong>Description:</strong> {selectedRequest.description}
-                    </p>
-                    
-                    {selectedRequest.dimensions_display && (
-                      <p className="text-sm text-gray-700">
-                        <strong>Dimensions:</strong> {selectedRequest.dimensions_display}
-                      </p>
-                    )}
-                    
-                    <div className="flex items-center space-x-2 text-sm">
-                      <Palette className="w-4 h-4 text-gray-400" />
-                      <span>Color: </span>
-                      <div 
-                        className="w-4 h-4 rounded border border-gray-300"
-                        style={{ backgroundColor: selectedRequest.primary_color }}
-                      />
-                      <span>{selectedRequest.primary_color}</span>
+                  <h4 className="font-semibold text-gray-900">Project Details</h4>
+                  <div className="space-y-3">
+                    <div className="bg-gray-50 p-3 rounded">
+                      <p className="text-xs text-gray-600 mb-1">Room Type</p>
+                      <p className="text-sm font-medium text-gray-900">{selectedRequest.room_type_display}</p>
                     </div>
-                    
-                    {selectedRequest.style && (
-                      <p className="text-sm text-gray-700">
-                        <strong>Style:</strong> <span className="capitalize">{selectedRequest.style}</span>
-                      </p>
-                    )}
-                    
+
                     {selectedRequest.budget_display && (
-                      <div className="flex items-center space-x-2 text-sm">
-                        <DollarSign className="w-4 h-4 text-gray-400" />
-                        <span>Budget: {selectedRequest.budget_display}</span>
+                      <div className="bg-gray-50 p-3 rounded">
+                        <p className="text-xs text-gray-600 mb-1">Budget Range</p>
+                        <p className="text-sm font-medium text-gray-900">{selectedRequest.budget_display}</p>
                       </div>
                     )}
-                    
-                    {selectedRequest.deadline && (
-                      <div className="flex items-center space-x-2 text-sm">
-                        <Calendar className="w-4 h-4 text-gray-400" />
-                        <span>Deadline: {new Date(selectedRequest.deadline).toLocaleDateString()}</span>
-                      </div>
-                    )}
-                    
-                    {selectedRequest.additional && (
-                      <p className="text-sm text-gray-700">
-                        <strong>Additional Notes:</strong> {selectedRequest.additional}
+
+                    <div className="bg-gray-50 p-3 rounded">
+                      <p className="text-xs text-gray-600 mb-1">Message</p>
+                      <p className="text-sm text-gray-900 whitespace-pre-wrap leading-relaxed">
+                        {selectedRequest.message}
                       </p>
-                    )}
+                    </div>
                   </div>
                 </div>
 
-                {/* Timestamps */}
-                <div className="space-y-3">
-                  <h4 className="font-medium text-gray-900">Timeline</h4>
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <div className="flex items-center space-x-2">
-                      <Clock className="w-4 h-4" />
-                      <span>Created: {formatDate(selectedRequest.created_at)}</span>
+                {/* Inspiration Images */}
+                {selectedRequest.images && selectedRequest.images.length > 0 && (
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900">
+                      Inspiration Photos ({selectedRequest.images.length})
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {selectedRequest.images.map((image) => (
+                        <div
+                          key={image.id}
+                          className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity duration-200 group"
+                          onClick={() => setLightboxImage(image.image)}
+                        >
+                          <img
+                            src={image.image}
+                            alt={image.alt_text || 'Inspiration image'}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+                            <Eye className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    {selectedRequest.reviewed_at && (
-                      <div className="flex items-center space-x-2">
-                        <Eye className="w-4 h-4" />
-                        <span>Reviewed: {formatDate(selectedRequest.reviewed_at)}</span>
-                      </div>
-                    )}
-                    {selectedRequest.completed_at && (
-                      <div className="flex items-center space-x-2">
-                        <Check className="w-4 h-4" />
-                        <span>Completed: {formatDate(selectedRequest.completed_at)}</span>
-                      </div>
-                    )}
+                  </div>
+                )}
+
+                {/* Timestamps */}
+                <div className="space-y-2 text-sm text-gray-600 border-t border-gray-200 pt-4">
+                  <div className="flex items-center justify-between">
+                    <span>Created:</span>
+                    <span className="font-medium">{formatDate(selectedRequest.created_at)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Last Updated:</span>
+                    <span className="font-medium">{formatDate(selectedRequest.updated_at)}</span>
                   </div>
                 </div>
 
                 {/* Admin Notes */}
                 {selectedRequest.admin_notes && (
                   <div className="space-y-3">
-                    <h4 className="font-medium text-gray-900">Admin Notes</h4>
-                    <div className="bg-gray-50 p-3 rounded text-sm text-gray-700 whitespace-pre-wrap">
+                    <h4 className="font-semibold text-gray-900">Admin Notes</h4>
+                    <div className="bg-yellow-50 p-3 rounded text-sm text-gray-700 whitespace-pre-wrap border border-yellow-200">
                       {selectedRequest.admin_notes}
                     </div>
                   </div>
@@ -474,6 +438,27 @@ const CustomRequestManager: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Image Lightbox */}
+      {lightboxImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
+          onClick={() => setLightboxImage(null)}
+        >
+          <button
+            onClick={() => setLightboxImage(null)}
+            className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors duration-200"
+          >
+            <X className="w-8 h-8" />
+          </button>
+          <img
+            src={lightboxImage}
+            alt="Full size"
+            className="max-w-full max-h-full object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 };

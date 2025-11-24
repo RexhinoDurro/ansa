@@ -1,32 +1,17 @@
-# furniture_backend/api/serializers.py (Complete File)
 from rest_framework import serializers
-from django.db.models import Avg, Count
 from furniture.models import (
-    Product, ProductImage, ProductReview, Category, Brand, 
-    HomeSlider, ContactMessage, Newsletter, ProductCollection,
-    Wishlist, RecentlyViewed, CustomRequest
+    GalleryCategory, GalleryProject, GalleryImage,
+    CustomRequest, ContactMessage, ContactImage,
+    Service, Material, Testimonial, FAQ
 )
-from furniture.models import GalleryCategory, GalleryProject, GalleryImage
-from django.utils.translation import get_language
 
 
-class ProductImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductImage
-        fields = ['id', 'image', 'alt_text', 'is_primary', 'order']
-
-
-class BrandSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Brand
-        fields = ['id', 'name', 'slug', 'description', 'logo', 'website']
-
-
+# Gallery Serializers
 class GalleryImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = GalleryImage
         fields = [
-            'id', 'image', 'title', 'description', 'alt_text', 
+            'id', 'image', 'title', 'description', 'alt_text',
             'is_primary', 'is_before_image', 'tags', 'order', 'created_at'
         ]
 
@@ -35,11 +20,11 @@ class GalleryProjectListSerializer(serializers.ModelSerializer):
     primary_image = GalleryImageSerializer(read_only=True)
     image_count = serializers.IntegerField(read_only=True)
     category_name = serializers.CharField(source='gallery_category.name', read_only=True)
-    
+
     class Meta:
         model = GalleryProject
         fields = [
-            'id', 'title', 'slug', 'description', 'client_name', 
+            'id', 'title', 'slug', 'description', 'client_name',
             'project_date', 'location', 'materials_used', 'dimensions',
             'price_range', 'featured', 'primary_image', 'image_count',
             'category_name', 'created_at'
@@ -50,7 +35,7 @@ class GalleryProjectDetailSerializer(serializers.ModelSerializer):
     images = GalleryImageSerializer(many=True, read_only=True)
     gallery_category = serializers.StringRelatedField(read_only=True)
     image_count = serializers.IntegerField(read_only=True)
-    
+
     class Meta:
         model = GalleryProject
         fields = [
@@ -65,21 +50,21 @@ class GalleryCategorySerializer(serializers.ModelSerializer):
     projects = serializers.SerializerMethodField()
     project_count = serializers.IntegerField(read_only=True)
     total_images = serializers.IntegerField(read_only=True)
-    
+
     class Meta:
         model = GalleryCategory
         fields = [
             'id', 'name', 'slug', 'description', 'cover_image',
             'projects', 'project_count', 'total_images', 'created_at'
         ]
-    
+
     def get_projects(self, obj):
         # Only include projects if specifically requested
         if self.context.get('include_projects', False):
             projects = obj.gallery_projects.filter(is_active=True)
             return GalleryProjectListSerializer(
-                projects, 
-                many=True, 
+                projects,
+                many=True,
                 context=self.context
             ).data
         return []
@@ -96,7 +81,7 @@ class AdminGalleryProjectSerializer(serializers.ModelSerializer):
     images = AdminGalleryImageSerializer(many=True, read_only=True)
     category_name = serializers.CharField(source='gallery_category.name', read_only=True)
     image_count = serializers.IntegerField(read_only=True)
-    
+
     class Meta:
         model = GalleryProject
         fields = [
@@ -115,7 +100,7 @@ class AdminGalleryCategorySerializer(serializers.ModelSerializer):
     projects = AdminGalleryProjectSerializer(source='gallery_projects', many=True, read_only=True)
     project_count = serializers.IntegerField(read_only=True)
     total_images = serializers.IntegerField(read_only=True)
-    
+
     class Meta:
         model = GalleryCategory
         fields = [
@@ -128,332 +113,18 @@ class AdminGalleryCategorySerializer(serializers.ModelSerializer):
         }
 
 
-class CategorySerializer(serializers.ModelSerializer):
-    subcategories = serializers.SerializerMethodField()
-    product_count = serializers.SerializerMethodField()
-    # Add localized fields
-    localized_name = serializers.SerializerMethodField()
-    localized_description = serializers.SerializerMethodField()
-    
+# Contact & Custom Request Serializers
+class ContactImageSerializer(serializers.ModelSerializer):
+    """Serializer for ContactImage model"""
     class Meta:
-        model = Category
-        fields = [
-            'id', 'name', 'slug', 'description', 'parent_category', 
-            'image', 'subcategories', 'product_count',
-            'localized_name', 'localized_description'
-        ]
-    
-    def get_subcategories(self, obj):
-        if obj.subcategories.filter(is_active=True).exists():
-            return CategorySerializer(
-                obj.subcategories.filter(is_active=True), 
-                many=True, 
-                context=self.context
-            ).data
-        return []
-    
-    def get_product_count(self, obj):
-        return obj.products.filter(status='active').count()
-    
-    def get_localized_name(self, obj):
-        """Get localized name based on request language"""
-        request = self.context.get('request')
-        if request:
-            # Check query params first (lang=it), then headers
-            lang = request.GET.get('lang')
-            if not lang:
-                # Parse Accept-Language header
-                accept_lang = request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')
-                lang = accept_lang[:2] if accept_lang else 'en'
-            
-            print(f"CategorySerializer - Language: {lang}")  # Debug log
-            
-            if lang in ['it', 'al']:
-                translated = obj.get_localized_name(lang)
-                print(f"Category {obj.name} - Translated name ({lang}): {translated}")  # Debug log
-                return translated
-        
-        print(f"Category {obj.name} - Returning original name")  # Debug log
-        return obj.name
-    
-    def get_localized_description(self, obj):
-        """Get localized description based on request language"""
-        request = self.context.get('request')
-        if request:
-            # Check query params first (lang=it), then headers
-            lang = request.GET.get('lang')
-            if not lang:
-                # Parse Accept-Language header
-                accept_lang = request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')
-                lang = accept_lang[:2] if accept_lang else 'en'
-            
-            if lang in ['it', 'al']:
-                translated = obj.get_localized_description(lang)
-                print(f"Category {obj.name} - Translated description ({lang}): {translated[:50]}...")  # Debug log
-                return translated
-        
-        return obj.description
-
-
-class ProductReviewSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductReview
-        fields = [
-            'id', 'name', 'rating', 'title', 'comment', 
-            'is_verified_purchase', 'helpful_count', 'created_at'
-        ]
-
-
-class ProductListSerializer(serializers.ModelSerializer):
-    primary_image = ProductImageSerializer(read_only=True)
-    category_name = serializers.CharField(source='category.name', read_only=True)
-    brand_name = serializers.CharField(source='brand.name', read_only=True)
-    current_price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
-    discount_percentage = serializers.IntegerField(read_only=True)
-    average_rating = serializers.SerializerMethodField()
-    review_count = serializers.SerializerMethodField()
-    # Add localized fields
-    localized_name = serializers.SerializerMethodField()
-    localized_description = serializers.SerializerMethodField()
-    localized_short_description = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = Product
-        fields = [
-            'id', 'name', 'slug', 'short_description', 'price', 'sale_price',
-            'current_price', 'discount_percentage', 'primary_image', 
-            'category_name', 'brand_name', 'colors', 'materials', 'condition',
-            'featured', 'is_bestseller', 'is_new_arrival', 'is_in_stock', 
-            'is_low_stock', 'average_rating', 'review_count', 'created_at',
-            'localized_name', 'localized_description', 'localized_short_description'
-        ]
-    
-    def get_average_rating(self, obj):
-        avg_rating = obj.reviews.filter(is_approved=True).aggregate(
-            avg_rating=Avg('rating')
-        )['avg_rating']
-        return round(avg_rating, 1) if avg_rating else None
-    
-    def get_review_count(self, obj):
-        return obj.reviews.filter(is_approved=True).count()
-    
-    def get_localized_name(self, obj):
-        """Get localized name based on request language"""
-        request = self.context.get('request')
-        if request:
-            # Check query params first (lang=it), then headers
-            lang = request.GET.get('lang')
-            if not lang:
-                # Parse Accept-Language header
-                accept_lang = request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')
-                lang = accept_lang[:2] if accept_lang else 'en'
-            
-            print(f"ProductListSerializer - Language: {lang}")  # Debug log
-            
-            if lang in ['it', 'al']:
-                translated = obj.get_localized_name(lang)
-                print(f"Product {obj.name} - Translated name ({lang}): {translated}")  # Debug log
-                return translated
-        
-        print(f"Product {obj.name} - Returning original name")  # Debug log
-        return obj.name
-    
-    def get_localized_description(self, obj):
-        """Get localized description based on request language"""
-        request = self.context.get('request')
-        if request:
-            lang = request.GET.get('lang')
-            if not lang:
-                accept_lang = request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')
-                lang = accept_lang[:2] if accept_lang else 'en'
-            
-            if lang in ['it', 'al']:
-                translated = obj.get_localized_description(lang)
-                print(f"Product {obj.name} - Translated description ({lang}): {translated[:50]}...")  # Debug log
-                return translated
-        
-        return obj.description
-    
-    def get_localized_short_description(self, obj):
-        """Get localized short description based on request language"""
-        request = self.context.get('request')
-        if request:
-            lang = request.GET.get('lang')
-            if not lang:
-                accept_lang = request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')
-                lang = accept_lang[:2] if accept_lang else 'en'
-            
-            if lang in ['it', 'al']:
-                translated = obj.get_localized_short_description(lang)
-                print(f"Product {obj.name} - Translated short desc ({lang}): {translated[:30]}...")  # Debug log
-                return translated
-        
-        return obj.short_description
-
-
-class ProductDetailSerializer(serializers.ModelSerializer):
-    images = ProductImageSerializer(many=True, read_only=True)
-    category = CategorySerializer(read_only=True)
-    subcategory = CategorySerializer(read_only=True)
-    brand = BrandSerializer(read_only=True)
-    dimensions_display = serializers.CharField(read_only=True)
-    current_price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
-    discount_percentage = serializers.IntegerField(read_only=True)
-    is_in_stock = serializers.BooleanField(read_only=True)
-    is_low_stock = serializers.BooleanField(read_only=True)
-    reviews = ProductReviewSerializer(many=True, read_only=True)
-    average_rating = serializers.SerializerMethodField()
-    review_count = serializers.SerializerMethodField()
-    rating_distribution = serializers.SerializerMethodField()
-    related_products = serializers.SerializerMethodField()
-    # Add localized fields
-    localized_name = serializers.SerializerMethodField()
-    localized_description = serializers.SerializerMethodField()
-    localized_short_description = serializers.SerializerMethodField()
-    localized_specifications = serializers.SerializerMethodField()
-    localized_care_instructions = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = Product
-        fields = [
-            'id', 'name', 'slug', 'sku', 'description', 'short_description',
-            'specifications', 'care_instructions', 'price', 'sale_price',
-            'current_price', 'discount_percentage', 'category', 'subcategory',
-            'brand', 'materials', 'colors', 'condition', 'dimensions_length',
-            'dimensions_width', 'dimensions_height', 'dimensions_display',
-            'weight', 'stock_quantity', 'min_stock_level', 'featured',
-            'is_bestseller', 'is_new_arrival', 'is_in_stock', 'is_low_stock',
-            'requires_assembly', 'assembly_time_minutes', 'assembly_difficulty',
-            'requires_shipping', 'free_shipping', 'images', 'reviews',
-            'average_rating', 'review_count', 'rating_distribution',
-            'related_products', 'created_at', 'updated_at',
-            'localized_name', 'localized_description', 'localized_short_description',
-            'localized_specifications', 'localized_care_instructions'
-        ]
-    
-    def get_average_rating(self, obj):
-        avg_rating = obj.reviews.filter(is_approved=True).aggregate(
-            avg_rating=Avg('rating')
-        )['avg_rating']
-        return round(avg_rating, 1) if avg_rating else None
-    
-    def get_review_count(self, obj):
-        return obj.reviews.filter(is_approved=True).count()
-    
-    def get_rating_distribution(self, obj):
-        """Get distribution of ratings (1-5 stars)"""
-        distribution = {}
-        for i in range(1, 6):
-            count = obj.reviews.filter(is_approved=True, rating=i).count()
-            distribution[str(i)] = count
-        return distribution
-    
-    def get_related_products(self, obj):
-        """Get related products from same category"""
-        related = Product.objects.filter(
-            category=obj.category,
-            status='active'
-        ).exclude(id=obj.id)[:4]
-        
-        return ProductListSerializer(
-            related, 
-            many=True, 
-            context=self.context
-        ).data
-    
-    def get_localized_name(self, obj):
-        """Get localized name based on request language"""
-        request = self.context.get('request')
-        if request:
-            lang = request.GET.get('lang')
-            if not lang:
-                accept_lang = request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')
-                lang = accept_lang[:2] if accept_lang else 'en'
-            
-            print(f"ProductDetailSerializer - Language: {lang}")  # Debug log
-            
-            if lang in ['it', 'al']:
-                translated = obj.get_localized_name(lang)
-                print(f"Product Detail {obj.name} - Translated name ({lang}): {translated}")  # Debug log
-                return translated
-        
-        return obj.name
-    
-    def get_localized_description(self, obj):
-        """Get localized description based on request language"""
-        request = self.context.get('request')
-        if request:
-            lang = request.GET.get('lang')
-            if not lang:
-                accept_lang = request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')
-                lang = accept_lang[:2] if accept_lang else 'en'
-            
-            if lang in ['it', 'al']:
-                translated = obj.get_localized_description(lang)
-                print(f"Product Detail {obj.name} - Translated description ({lang}): {translated[:50]}...")  # Debug log
-                return translated
-        
-        return obj.description
-    
-    def get_localized_short_description(self, obj):
-        """Get localized short description based on request language"""
-        request = self.context.get('request')
-        if request:
-            lang = request.GET.get('lang')
-            if not lang:
-                accept_lang = request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')
-                lang = accept_lang[:2] if accept_lang else 'en'
-            
-            if lang in ['it', 'al']:
-                translated = obj.get_localized_short_description(lang)
-                return translated
-        
-        return obj.short_description
-    
-    def get_localized_specifications(self, obj):
-        """Get localized specifications based on request language"""
-        request = self.context.get('request')
-        if request:
-            lang = request.GET.get('lang')
-            if not lang:
-                accept_lang = request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')
-                lang = accept_lang[:2] if accept_lang else 'en'
-            
-            if lang in ['it', 'al']:
-                translated = obj.get_localized_specifications(lang)
-                return translated
-        
-        return obj.specifications
-    
-    def get_localized_care_instructions(self, obj):
-        """Get localized care instructions based on request language"""
-        request = self.context.get('request')
-        if request:
-            lang = request.GET.get('lang')
-            if not lang:
-                accept_lang = request.META.get('HTTP_ACCEPT_LANGUAGE', 'en')
-                lang = accept_lang[:2] if accept_lang else 'en'
-            
-            if lang in ['it', 'al']:
-                translated = obj.get_localized_care_instructions(lang)
-                return translated
-        
-        return obj.care_instructions
-
-
-class HomeSliderSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = HomeSlider
-        fields = [
-            'id', 'title', 'subtitle', 'description', 'image', 
-            'mobile_image', 'link_url', 'link_text', 'background_color',
-            'text_color', 'text_position', 'order'
-        ]
+        model = ContactImage
+        fields = ['id', 'image', 'alt_text', 'created_at']
+        read_only_fields = ['created_at']
 
 
 class ContactMessageSerializer(serializers.ModelSerializer):
     subject_display = serializers.CharField(source='get_subject_display', read_only=True)
-    
+
     class Meta:
         model = ContactMessage
         fields = [
@@ -464,7 +135,7 @@ class ContactMessageSerializer(serializers.ModelSerializer):
             'id': {'read_only': True},
             'created_at': {'read_only': True},
         }
-    
+
     def create(self, validated_data):
         # You could add email notification logic here
         return super().create(validated_data)
@@ -474,7 +145,7 @@ class ContactMessageDetailSerializer(serializers.ModelSerializer):
     """Detailed serializer for admin use"""
     subject_display = serializers.CharField(source='get_subject_display', read_only=True)
     replied_by_name = serializers.CharField(source='replied_by.get_full_name', read_only=True)
-    
+
     class Meta:
         model = ContactMessage
         fields = [
@@ -484,245 +155,88 @@ class ContactMessageDetailSerializer(serializers.ModelSerializer):
         ]
 
 
-class NewsletterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Newsletter
-        fields = ['email', 'name']
-    
-    def create(self, validated_data):
-        # Handle existing subscriptions
-        newsletter, created = Newsletter.objects.get_or_create(
-            email=validated_data['email'],
-            defaults=validated_data
-        )
-        
-        if not created and not newsletter.is_active:
-            # Reactivate if previously unsubscribed
-            newsletter.is_active = True
-            newsletter.unsubscribed_at = None
-            newsletter.save()
-        
-        return newsletter
-
-
-class ProductCollectionSerializer(serializers.ModelSerializer):
-    products = ProductListSerializer(many=True, read_only=True)
-    product_count = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = ProductCollection
-        fields = [
-            'id', 'name', 'slug', 'description', 'image',
-            'products', 'product_count', 'featured', 'created_at'
-        ]
-    
-    def get_product_count(self, obj):
-        return obj.products.filter(status='active').count()
-
-
-class WishlistSerializer(serializers.ModelSerializer):
-    product = ProductListSerializer(read_only=True)
-    product_id = serializers.UUIDField(write_only=True)
-    
-    class Meta:
-        model = Wishlist
-        fields = ['id', 'product', 'product_id', 'created_at']
-        extra_kwargs = {
-            'id': {'read_only': True},
-            'created_at': {'read_only': True},
-        }
-    
-    def create(self, validated_data):
-        session_key = self.context['request'].session.session_key
-        if not session_key:
-            self.context['request'].session.create()
-            session_key = self.context['request'].session.session_key
-        
-        validated_data['session_key'] = session_key
-        
-        # Get or create wishlist item
-        wishlist_item, created = Wishlist.objects.get_or_create(
-            session_key=session_key,
-            product_id=validated_data['product_id']
-        )
-        
-        return wishlist_item
-
-
-class RecentlyViewedSerializer(serializers.ModelSerializer):
-    product = ProductListSerializer(read_only=True)
-    
-    class Meta:
-        model = RecentlyViewed
-        fields = ['id', 'product', 'viewed_at']
-
-
-# Filter serializers for providing filter options
-class FilterOptionsSerializer(serializers.Serializer):
-    categories = CategorySerializer(many=True, read_only=True)
-    brands = BrandSerializer(many=True, read_only=True)
-    materials = serializers.SerializerMethodField()
-    colors = serializers.SerializerMethodField()
-    conditions = serializers.SerializerMethodField()
-    price_range = serializers.SerializerMethodField()
-    
-    def get_materials(self, obj):
-        return [{'value': value, 'label': label} for value, label in Product.MATERIAL_CHOICES]
-    
-    def get_colors(self, obj):
-        return [{'value': value, 'label': label} for value, label in Product.COLOR_CHOICES]
-    
-    def get_conditions(self, obj):
-        return [{'value': value, 'label': label} for value, label in Product.CONDITION_CHOICES]
-    
-    def get_price_range(self, obj):
-        from django.db.models import Min, Max
-        price_range = Product.objects.filter(status='active').aggregate(
-            min_price=Min('price'),
-            max_price=Max('price')
-        )
-        return {
-            'min': float(price_range['min_price'] or 0),
-            'max': float(price_range['max_price'] or 0)
-        }
-
-
-# Admin dashboard serializers
-class AdminStatsSerializer(serializers.Serializer):
-    total_products = serializers.IntegerField()
-    active_products = serializers.IntegerField()
-    total_orders = serializers.IntegerField()
-    total_customers = serializers.IntegerField()
-    total_revenue = serializers.DecimalField(max_digits=12, decimal_places=2)
-    monthly_revenue = serializers.ListField(child=serializers.DecimalField(max_digits=10, decimal_places=2))
-    low_stock_products = serializers.IntegerField()
-    pending_reviews = serializers.IntegerField()
-    unread_messages = serializers.IntegerField()
-
-
-class ProductCreateUpdateSerializer(serializers.ModelSerializer):
-    """Serializer for creating and updating products"""
-    
-    class Meta:
-        model = Product
-        fields = [
-            'name', 'description', 'short_description',
-            'category', 'subcategory', 'brand',
-            'price', 'sale_price', 'materials', 'colors',
-            'stock_quantity', 'status', 'featured'
-        ]
-    
-    def validate(self, data):
-        # Custom validation logic
-        if data.get('sale_price') and data.get('price'):
-            if data['sale_price'] >= data['price']:
-                raise serializers.ValidationError("Sale price must be lower than regular price")
-        
-        # Validate category exists
-        if data.get('category'):
-            try:
-                Category.objects.get(id=data['category'].id if hasattr(data['category'], 'id') else data['category'])
-            except Category.DoesNotExist:
-                raise serializers.ValidationError("Selected category does not exist")
-        
-        # Validate subcategory belongs to category if provided
-        if data.get('subcategory') and data.get('category'):
-            try:
-                subcategory = Category.objects.get(
-                    id=data['subcategory'].id if hasattr(data['subcategory'], 'id') else data['subcategory']
-                )
-                category = data['category']
-                if hasattr(category, 'id'):
-                    category_id = category.id
-                else:
-                    category_id = category
-                
-                if str(subcategory.parent_category.id) != str(category_id):
-                    raise serializers.ValidationError("Subcategory must belong to the selected category")
-            except Category.DoesNotExist:
-                raise serializers.ValidationError("Selected subcategory does not exist")
-        
-        return data
-    
-    def create(self, validated_data):
-        """Create a new product"""
-        print("Creating product with data:", validated_data)
-        
-        # Set defaults for optional fields
-        validated_data.setdefault('materials', 'wood')
-        validated_data.setdefault('colors', 'natural')
-        validated_data.setdefault('status', 'active')
-        validated_data.setdefault('featured', False)
-        validated_data.setdefault('stock_quantity', 0)
-        
-        # Create the product
-        product = Product.objects.create(**validated_data)
-        print(f"Created product: {product.name} with ID: {product.id}")
-        
-        return product
-    
-    def update(self, instance, validated_data):
-        """Update an existing product"""
-        print("Updating product with data:", validated_data)
-        
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        
-        instance.save()
-        print(f"Updated product: {instance.name}")
-        
-        return instance
-
-
 class CustomRequestSerializer(serializers.ModelSerializer):
+    """CustomRequest serializer for custom furniture studio"""
+    images = ContactImageSerializer(many=True, read_only=True)
+    room_type_display = serializers.CharField(source='get_room_type_display', read_only=True)
     budget_display = serializers.CharField(read_only=True)
-    dimensions_display = serializers.CharField(read_only=True)
-    
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
     class Meta:
         model = CustomRequest
         fields = [
-            'title', 'description', 'width', 'height', 'primary_color',
-            'style', 'deadline', 'budget', 'budget_display', 'additional',
-            'name', 'email', 'phone', 'contact_method', 'dimensions_display'
+            'id', 'name', 'email', 'phone', 'room_type', 'room_type_display',
+            'budget_range', 'budget_display', 'message', 'status', 'status_display',
+            'images', 'admin_notes', 'created_at', 'updated_at'
         ]
-        extra_kwargs = {
-            'deadline': {'input_formats': ['%Y-%m-%d']},
-        }
-    
+        read_only_fields = ['status', 'admin_notes', 'created_at', 'updated_at']
+
     def create(self, validated_data):
-        # You could add email notification logic here
+        """Create a new custom request"""
         custom_request = CustomRequest.objects.create(**validated_data)
         return custom_request
 
 
 class AdminCustomRequestSerializer(serializers.ModelSerializer):
-    """Admin serializer for custom requests with all fields"""
+    """Admin serializer for custom requests with full access"""
+    images = ContactImageSerializer(many=True, read_only=True)
+    room_type_display = serializers.CharField(source='get_room_type_display', read_only=True)
     budget_display = serializers.CharField(read_only=True)
-    dimensions_display = serializers.CharField(read_only=True)
-    assigned_to_name = serializers.CharField(source='assigned_to.get_full_name', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
-    
+
     class Meta:
         model = CustomRequest
         fields = [
-            'id', 'title', 'description', 'width', 'height', 'primary_color',
-            'style', 'deadline', 'budget', 'budget_display', 'additional',
-            'name', 'email', 'phone', 'contact_method', 'status', 'status_display',
-            'admin_notes', 'estimated_price', 'assigned_to', 'assigned_to_name',
-            'dimensions_display', 'created_at', 'updated_at', 'reviewed_at', 'completed_at'
+            'id', 'name', 'email', 'phone', 'room_type', 'room_type_display',
+            'budget_range', 'budget_display', 'message', 'status', 'status_display',
+            'admin_notes', 'images', 'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at']
 
 
-class ReviewCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating product reviews"""
-    
+# Service & Material Serializers
+class ServiceSerializer(serializers.ModelSerializer):
+    """Serializer for Service model"""
     class Meta:
-        model = ProductReview
-        fields = ['name', 'email', 'rating', 'title', 'comment']
-    
-    def create(self, validated_data):
-        # Add the product from URL parameter
-        product_id = self.context['view'].kwargs.get('product_pk')
-        validated_data['product_id'] = product_id
-        return super().create(validated_data)
+        model = Service
+        fields = [
+            'id', 'title', 'slug', 'short_description', 'description',
+            'image', 'icon', 'is_active', 'sort_order', 'created_at'
+        ]
+
+
+class MaterialSerializer(serializers.ModelSerializer):
+    """Serializer for Material model"""
+    type_display = serializers.CharField(source='get_type_display', read_only=True)
+
+    class Meta:
+        model = Material
+        fields = [
+            'id', 'name', 'type', 'type_display', 'description', 'image',
+            'is_active', 'sort_order', 'created_at'
+        ]
+
+
+class TestimonialSerializer(serializers.ModelSerializer):
+    """Serializer for Testimonial model"""
+    project_title = serializers.CharField(source='project.title', read_only=True)
+    project_slug = serializers.CharField(source='project.slug', read_only=True)
+
+    class Meta:
+        model = Testimonial
+        fields = [
+            'id', 'client_name', 'text', 'project', 'project_title', 'project_slug',
+            'location', 'rating', 'is_featured', 'created_at'
+        ]
+
+
+class FAQSerializer(serializers.ModelSerializer):
+    """Serializer for FAQ model"""
+    category_display = serializers.CharField(source='get_category_display', read_only=True)
+
+    class Meta:
+        model = FAQ
+        fields = [
+            'id', 'question', 'answer', 'category', 'category_display',
+            'is_active', 'sort_order', 'created_at'
+        ]

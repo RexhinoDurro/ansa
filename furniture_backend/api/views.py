@@ -1,90 +1,20 @@
-from django.shortcuts import get_object_or_404
-from django.db.models import Avg, Count, Min, Max, F
-from rest_framework import viewsets, status, generics
+from rest_framework import viewsets, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter, OrderingFilter
-
-from furniture.models import GalleryCategory, GalleryProject, GalleryImage
-from .serializers import (
-    GalleryCategorySerializer, GalleryProjectListSerializer, 
-    GalleryProjectDetailSerializer
-)
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from furniture.models import (
-    Product, Category, Brand, HomeSlider, ContactMessage, 
-    Newsletter, ProductCollection, ProductReview
+    GalleryCategory, GalleryProject, GalleryImage,
+    CustomRequest, ContactMessage, ContactImage,
+    Service, Material, Testimonial, FAQ
 )
 from .serializers import (
-    ProductListSerializer, ProductDetailSerializer, CategorySerializer,
-    HomeSliderSerializer, ContactMessageSerializer, NewsletterSerializer,
-    FilterOptionsSerializer, AdminStatsSerializer, ProductCreateUpdateSerializer,
-    ReviewCreateSerializer
+    GalleryCategorySerializer, GalleryProjectListSerializer,
+    GalleryProjectDetailSerializer, ContactMessageSerializer,
+    CustomRequestSerializer, ServiceSerializer,
+    MaterialSerializer, TestimonialSerializer, FAQSerializer
 )
-from .filters import ProductFilter
-from furniture.models import CustomRequest
-from .serializers import CustomRequestSerializer
 
-
-class ProductViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for Product model with full CRUD operations
-    """
-    queryset = Product.objects.filter(status='active').select_related('category', 'brand').prefetch_related('images')
-    serializer_class = ProductListSerializer
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_class = ProductFilter
-    search_fields = ['name', 'description', 'short_description']
-    ordering_fields = ['name', 'price', 'created_at']
-    ordering = ['-created_at']
-    lookup_field = 'slug'
-
-    def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return ProductDetailSerializer
-        elif self.action in ['create', 'update', 'partial_update']:
-            return ProductCreateUpdateSerializer
-        return ProductListSerializer
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        
-        # Filter by category if provided
-        category_id = self.request.query_params.get('category')
-        if category_id:
-            queryset = queryset.filter(category_id=category_id)
-        
-        # Filter by price range
-        min_price = self.request.query_params.get('price__gte')
-        max_price = self.request.query_params.get('price__lte')
-        if min_price:
-            queryset = queryset.filter(price__gte=min_price)
-        if max_price:
-            queryset = queryset.filter(price__lte=max_price)
-        
-        # Filter by materials
-        materials = self.request.query_params.get('materials')
-        if materials:
-            queryset = queryset.filter(materials=materials)
-        
-        # Filter by colors
-        colors = self.request.query_params.get('colors')
-        if colors:
-            queryset = queryset.filter(colors=colors)
-        
-        return queryset
-
-    @action(detail=True, methods=['post'])
-    def add_review(self, request, slug=None):
-        """Add a review to a product"""
-        product = self.get_object()
-        serializer = ReviewCreateSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(product=product)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class GalleryCategoryViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -105,14 +35,15 @@ class GalleryCategoryViewSet(viewsets.ReadOnlyModelViewSet):
         """Get all projects for a specific category"""
         category = self.get_object()
         projects = category.gallery_projects.filter(is_active=True).order_by('sort_order', '-created_at')
-        
+
         # Apply filters
         featured_only = request.query_params.get('featured', '').lower() == 'true'
         if featured_only:
             projects = projects.filter(featured=True)
-        
+
         serializer = GalleryProjectListSerializer(projects, many=True, context={'request': request})
         return Response(serializer.data)
+
 
 class GalleryProjectViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -121,88 +52,71 @@ class GalleryProjectViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = GalleryProject.objects.filter(is_active=True).select_related('gallery_category').prefetch_related('images')
     serializer_class = GalleryProjectListSerializer
     lookup_field = 'slug'
-    
+
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return GalleryProjectDetailSerializer
         return GalleryProjectListSerializer
-    
+
     def get_queryset(self):
         queryset = super().get_queryset()
-        
+
         # Filter by category
         category_slug = self.request.query_params.get('category')
         if category_slug:
             queryset = queryset.filter(gallery_category__slug=category_slug)
-        
+
         # Filter featured projects
         featured_only = self.request.query_params.get('featured', '').lower() == 'true'
         if featured_only:
             queryset = queryset.filter(featured=True)
-        
+
         return queryset.order_by('sort_order', '-created_at')
+
 
 class FeaturedGalleryProjectsView(generics.ListAPIView):
     """
     List featured gallery projects
     """
     queryset = GalleryProject.objects.filter(
-        is_active=True, 
+        is_active=True,
         featured=True
     ).select_related('gallery_category').prefetch_related('images').order_by('sort_order', '-created_at')
     serializer_class = GalleryProjectListSerializer
-    
+
+
 class CustomRequestView(generics.CreateAPIView):
     """
-    Create a new custom request
+    Create a new custom request with optional image uploads
     """
     queryset = CustomRequest.objects.all()
     serializer_class = CustomRequestSerializer
+    parser_classes = [MultiPartParser, FormParser]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         custom_request = serializer.save()
-        
+
+        # Handle multiple image uploads (inspiration photos)
+        images = request.FILES.getlist('images')
+        for image in images:
+            ContactImage.objects.create(
+                contact_request=custom_request,
+                image=image
+            )
+
         # You can add email notification logic here
         # send_custom_request_notification_email(custom_request)
-        
+
         return Response(
             {
                 'message': 'Thank you for your custom request! We will review it and get back to you soon.',
                 'request_id': custom_request.id
             },
-            status=status.HTTP_201_CREATED
+            status=201
         )
-        
-class ProductDetailView(generics.RetrieveAPIView):
-    """
-    Retrieve a single product by slug
-    """
-    queryset = Product.objects.filter(status='active').select_related('category', 'subcategory', 'brand').prefetch_related('images', 'reviews')
-    serializer_class = ProductDetailSerializer
-    lookup_field = 'slug'
 
-class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    ViewSet for Category model (read-only)
-    """
-    queryset = Category.objects.filter(is_active=True).order_by('sort_order', 'name')
-    serializer_class = CategorySerializer
-
-class FeaturedProductsView(generics.ListAPIView):
-    """
-    List featured products
-    """
-    queryset = Product.objects.filter(status='active', featured=True).select_related('category', 'brand').prefetch_related('images')
-    serializer_class = ProductListSerializer
-
-class HomeSliderView(generics.ListAPIView):
-    """
-    List active home slider items
-    """
-    queryset = HomeSlider.objects.filter(is_active=True).order_by('order')
-    serializer_class = HomeSliderSerializer
 
 class ContactMessageView(generics.CreateAPIView):
     """
@@ -215,100 +129,96 @@ class ContactMessageView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        
+
         # You can add email notification logic here
         # send_contact_notification_email(serializer.instance)
-        
+
         return Response(
             {'message': 'Thank you for your message. We will get back to you soon!'},
-            status=status.HTTP_201_CREATED
+            status=201
         )
 
-class NewsletterView(generics.CreateAPIView):
-    """
-    Subscribe to newsletter
-    """
-    queryset = Newsletter.objects.all()
-    serializer_class = NewsletterSerializer
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        newsletter = serializer.save()
-        
-        if newsletter:  # Newsletter was created or reactivated
-            return Response(
-                {'message': 'Successfully subscribed to newsletter!'},
-                status=status.HTTP_201_CREATED
-            )
-        return Response(
-            {'message': 'Email already subscribed!'},
-            status=status.HTTP_200_OK
-        )
+class ServiceViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for Services (read-only for public)
+    """
+    queryset = Service.objects.filter(is_active=True).order_by('sort_order', 'title')
+    serializer_class = ServiceSerializer
+    lookup_field = 'slug'
 
-class FilterOptionsView(APIView):
+
+class MaterialViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Get filter options for the catalogue page
+    ViewSet for Materials (read-only for public)
     """
-    def get(self, request):
-        # Get active categories
-        categories = Category.objects.filter(is_active=True)
-        
-        # Get active brands
-        brands = Brand.objects.filter(is_active=True)
-        
-        # Get price range
-        price_range = Product.objects.filter(status='active').aggregate(
-            min_price=Min('price'),
-            max_price=Max('price')
-        )
-        
-        data = {
-            'categories': CategorySerializer(categories, many=True).data,
-            'brands': [{'id': b.id, 'name': b.name, 'slug': b.slug} for b in brands],
-            'materials': [{'value': choice[0], 'label': choice[1]} for choice in Product.MATERIAL_CHOICES],
-            'colors': [{'value': choice[0], 'label': choice[1]} for choice in Product.COLOR_CHOICES],
-            'conditions': [{'value': choice[0], 'label': choice[1]} for choice in Product.CONDITION_CHOICES],
-            'price_range': {
-                'min': float(price_range['min_price'] or 0),
-                'max': float(price_range['max_price'] or 0)
+    queryset = Material.objects.filter(is_active=True).order_by('type', 'sort_order', 'name')
+    serializer_class = MaterialSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Filter by material type if provided
+        material_type = self.request.query_params.get('type')
+        if material_type:
+            queryset = queryset.filter(type=material_type)
+
+        return queryset
+
+
+class TestimonialViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for Testimonials (read-only for public)
+    """
+    queryset = Testimonial.objects.filter(is_active=True).select_related('project').order_by('-created_at')
+    serializer_class = TestimonialSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Filter featured testimonials
+        featured_only = self.request.query_params.get('featured', '').lower() == 'true'
+        if featured_only:
+            queryset = queryset.filter(is_featured=True)
+
+        # Filter by rating
+        min_rating = self.request.query_params.get('min_rating')
+        if min_rating:
+            queryset = queryset.filter(rating__gte=min_rating)
+
+        return queryset
+
+
+class FAQViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for FAQs (read-only for public)
+    """
+    queryset = FAQ.objects.filter(is_active=True).order_by('category', 'sort_order', 'created_at')
+    serializer_class = FAQSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Filter by category if provided
+        category = self.request.query_params.get('category')
+        if category:
+            queryset = queryset.filter(category=category)
+
+        return queryset
+
+    @action(detail=False, methods=['get'])
+    def categories(self, request):
+        """Get all available FAQ categories"""
+        categories = FAQ.objects.filter(is_active=True).values_list('category', flat=True).distinct()
+        category_choices = dict(FAQ._meta.get_field('category').choices)
+
+        result = [
+            {
+                'value': cat,
+                'label': category_choices.get(cat, cat),
+                'count': FAQ.objects.filter(is_active=True, category=cat).count()
             }
-        }
-        
-        return Response(data)
+            for cat in categories
+        ]
 
-class AdminStatsView(APIView):
-    """
-    Get dashboard statistics for admin
-    """
-    def get(self, request):
-        # Calculate basic stats
-        total_products = Product.objects.count()
-        active_products = Product.objects.filter(status='active').count()
-        total_messages = ContactMessage.objects.count()
-        unread_messages = ContactMessage.objects.filter(is_read=False).count()
-        low_stock_products = Product.objects.filter(
-            track_inventory=True,
-            stock_quantity__lte=F('min_stock_level')
-        ).count()
-        pending_reviews = ProductReview.objects.filter(is_approved=False).count()
-        
-        # Mock data for orders and revenue (implement when you add order models)
-        total_orders = 0
-        total_customers = 0
-        total_revenue = 0
-        monthly_revenue = [0] * 12
-        
-        data = {
-            'total_products': total_products,
-            'active_products': active_products,
-            'total_orders': total_orders,
-            'total_customers': total_customers,
-            'total_revenue': total_revenue,
-            'monthly_revenue': monthly_revenue,
-            'low_stock_products': low_stock_products,
-            'pending_reviews': pending_reviews,
-            'unread_messages': unread_messages,
-        }
-        
-        return Response(data)
+        return Response(result)

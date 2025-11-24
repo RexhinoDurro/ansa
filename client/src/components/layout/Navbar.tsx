@@ -28,13 +28,11 @@ const Navbar: React.FC = () => {
     setIsOpen(false);
   }, [pathname]);
 
-  const navItems: Array<{ name: string; path: string; isSection?: boolean }> = [
-    { name: t('navigation.home'), path: '/' },
-    { name: t('navigation.catalogue'), path: '/catalogue' },
-    { name: t('navigation.about'), path: '/about', isSection: true },
-    { name: t('navigation.contact'), path: '/contact' },
-    { name: t('navigation.gallery'), path: '/gallery' },
-    { name: t('navigation.custom'), path: '/custom-request-page' },
+  const navItems: Array<{ name: string; path: string }> = [
+    { name: 'Home', path: '/' },
+    { name: 'Portfolio', path: '/portfolio' },
+    { name: 'Services', path: '/services' },
+    { name: 'Contact', path: '/contact' },
   ];
 
   const isActivePath = (path: string) => {
@@ -43,42 +41,10 @@ const Navbar: React.FC = () => {
     return false;
   };
 
-  const handleAboutClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    setIsOpen(false);
-
-    if (pathname === '/') {
-      // Already on homepage, just scroll
-      const section = document.getElementById('about-us');
-      if (section) {
-        const navbarHeight = 80; // Approximate navbar height
-        const sectionTop = section.offsetTop - navbarHeight;
-        window.scrollTo({
-          top: sectionTop,
-          behavior: 'smooth'
-        });
-      }
-    } else {
-      // Navigate to homepage first, then scroll
-      router.push('/#about-us');
-      setTimeout(() => {
-        const section = document.getElementById('about-us');
-        if (section) {
-          const navbarHeight = 80;
-          const sectionTop = section.offsetTop - navbarHeight;
-          window.scrollTo({
-            top: sectionTop,
-            behavior: 'smooth'
-          });
-        }
-      }, 100);
-    }
-  };
-
   return (
     <nav className={`fixed w-full z-50 transition-all duration-500 ease-in-out ${
   scrolled
-    ? 'transparent backdrop-blur-lg shadow-sm border-b border-neutral-200/30'
+    ? 'transparent backdrop-blur-lg shadow-sm border-b border-cream-200/30'
     : 'transparent border-b border-white/10'
 }`}>
       <div className="container mx-auto px-4 lg:px-8">
@@ -86,9 +52,9 @@ const Navbar: React.FC = () => {
           {/* Logo */}
           <Link
             href="/"
-            className="text-2xl lg:text-3xl font-serif font-bold text-primary-700 hover:text-primary-800 transition-colors duration-200"
+            className="text-2xl lg:text-3xl font-serif font-bold text-accent hover:text-accent-dark transition-colors duration-200"
           >
-            Furniture Ansa
+            Ansa Furniture
           </Link>
           
           {/* Desktop Navigation */}
@@ -97,15 +63,14 @@ const Navbar: React.FC = () => {
               <Link
                 key={item.name}
                 href={item.path}
-                onClick={item.isSection ? handleAboutClick : undefined}
-                className={`relative font-medium transition-all duration-200 hover:text-primary-600 ${
+                className={`relative font-medium transition-all duration-200 hover:text-accent ${
                     isActivePath(item.path)
-                      ? 'text-primary-600'
-                      : 'text-neutral-700'
+                      ? 'text-accent'
+                      : 'text-brown-800'
                 } group`}
               >
                 {item.name}
-                <span className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-600 transition-all duration-300 group-hover:w-full ${
+                <span className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full ${
                   isActivePath(item.path) ? 'w-full' : ''
                 }`}></span>
               </Link>
@@ -121,7 +86,7 @@ const Navbar: React.FC = () => {
             <button
               onClick={() => setIsOpen(!isOpen)}
               className={`p-2 rounded-lg transition-colors duration-200 ${
-                scrolled ? 'text-neutral-700 hover:bg-neutral-100' : 'text-white hover:bg-white/10'
+                scrolled ? 'text-brown-800 hover:bg-cream-100' : 'text-white hover:bg-white/10'
               }`}
               aria-label="Toggle mobile menu"
             >
@@ -134,17 +99,16 @@ const Navbar: React.FC = () => {
         <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
           isOpen ? 'max-h-64 pb-4' : 'max-h-0'
         }`}>
-          <div className="border-t border-neutral-200/20 pt-4">
+          <div className="border-t border-cream-200/20 pt-4">
             <div className="flex flex-col space-y-4">
               {navItems.map((item) => (
                 <Link
                   key={item.name}
                   href={item.path}
-                  onClick={item.isSection ? handleAboutClick : undefined}
-                  className={`font-medium transition-colors duration-200 hover:text-primary-600 ${
+                  className={`font-medium transition-colors duration-200 hover:text-accent ${
                       isActivePath(item.path)
-                        ? 'text-primary-600'
-                        : 'text-neutral-700'
+                        ? 'text-accent'
+                        : 'text-brown-800'
                   }`}
                 >
                   {item.name}
