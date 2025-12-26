@@ -79,45 +79,50 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Contact Info Cards */}
-      <section className="py-16 bg-white">
-        <div className="max-w-container mx-auto px-4 md:px-8">
-          <ContactInfo />
-        </div>
-      </section>
-
-      {/* Tabbed Forms Section */}
+      {/* Forms Section with Sidebar */}
       <section className="py-16 bg-cream-50">
-        <div className="max-w-container mx-auto px-4 md:px-8">
-          {/* Tab Navigation */}
-          <div className="max-w-4xl mx-auto mb-8">
-            <div className="flex border-b border-cream-300">
-              <button
-                onClick={() => setActiveTab('contact')}
-                className={`flex-1 py-4 px-6 text-center font-semibold transition-all duration-300 ${
-                  activeTab === 'contact'
-                    ? 'text-accent border-b-2 border-accent bg-white'
-                    : 'text-brown-700 hover:text-accent hover:bg-cream-100'
-                }`}
-              >
-                {t('contact.contactUs')}
-              </button>
-              <button
-                onClick={() => setActiveTab('custom')}
-                className={`flex-1 py-4 px-6 text-center font-semibold transition-all duration-300 ${
-                  activeTab === 'custom'
-                    ? 'text-accent border-b-2 border-accent bg-white'
-                    : 'text-brown-700 hover:text-accent hover:bg-cream-100'
-                }`}
-              >
-                {t('contact.customRequest')}
-              </button>
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Sidebar - Contact Info Cards */}
+            <div className="lg:col-span-1">
+              <div className="lg:sticky lg:top-24 space-y-6">
+                <ContactInfoSidebar />
+              </div>
             </div>
-          </div>
 
-          {/* Tab Content */}
-          <div className="max-w-4xl mx-auto">
-            {activeTab === 'contact' ? <ContactForm /> : <CustomRequestForm />}
+            {/* Right Content - Forms */}
+            <div className="lg:col-span-2">
+              {/* Tab Navigation */}
+              <div className="mb-8">
+                <div className="flex border-b border-cream-300 bg-white rounded-t-2xl overflow-hidden shadow-sm">
+                  <button
+                    onClick={() => setActiveTab('contact')}
+                    className={`flex-1 py-4 px-6 text-center font-semibold transition-all duration-300 ${
+                      activeTab === 'contact'
+                        ? 'text-accent border-b-2 border-accent bg-white'
+                        : 'text-brown-700 hover:text-accent hover:bg-cream-100'
+                    }`}
+                  >
+                    {t('contact.contactUs')}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('custom')}
+                    className={`flex-1 py-4 px-6 text-center font-semibold transition-all duration-300 ${
+                      activeTab === 'custom'
+                        ? 'text-accent border-b-2 border-accent bg-white'
+                        : 'text-brown-700 hover:text-accent hover:bg-cream-100'
+                    }`}
+                  >
+                    {t('contact.customRequest')}
+                  </button>
+                </div>
+              </div>
+
+              {/* Tab Content */}
+              <div>
+                {activeTab === 'contact' ? <ContactForm /> : <CustomRequestForm />}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -135,6 +140,87 @@ export default function ContactPage() {
           <FAQSection />
         </div>
       </section>
+    </div>
+  );
+}
+
+// ===============================
+// CONTACT INFO SIDEBAR
+// ===============================
+function ContactInfoSidebar() {
+  const { t } = useTranslation('common');
+
+  const contactDetails = [
+    {
+      icon: MapPin,
+      titleKey: 'contact.visitWorkshop',
+      details: ['Rruga e Elbasanit', 'Tirana, Albania'],
+      actionKey: 'contact.getDirections',
+      actionLink: 'https://maps.google.com'
+    },
+    {
+      icon: Phone,
+      titleKey: 'contact.callUs',
+      detailsKeys: ['+355 XX XXX XXXX', 'contact.mondaySaturday'],
+      actionKey: 'contact.callNow',
+      actionLink: 'tel:+355XXXXXXXX'
+    },
+    {
+      icon: Mail,
+      titleKey: 'contact.emailUs',
+      detailsKeys: ['info@ansafurniture.al', 'contact.respondWithin'],
+      actionKey: 'contact.sendEmail',
+      actionLink: 'mailto:info@ansafurniture.al'
+    },
+    {
+      icon: Clock,
+      titleKey: 'contact.workshopHours',
+      detailsKeys: ['contact.mondayFriday', 'contact.saturday', 'contact.sunday'],
+      actionKey: 'contact.scheduleVisit',
+      actionLink: '#'
+    }
+  ];
+
+  return (
+    <div className="space-y-4">
+      {contactDetails.map((detail, index) => {
+        const Icon = detail.icon;
+        return (
+          <div
+            key={index}
+            className="group bg-white p-6 rounded-2xl hover:shadow-xl transition-all duration-500 border border-cream-200 hover:border-accent relative overflow-hidden hover:-translate-y-1 animate-fade-in-up"
+            style={{ animationDelay: `${index * 0.1}s` }}
+          >
+            {/* Shimmer effect */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+              <div className="animate-shimmer absolute inset-0"></div>
+            </div>
+
+            <div className="relative z-10">
+              <div className="bg-accent/10 group-hover:bg-accent w-12 h-12 rounded-lg flex items-center justify-center mb-4 transition-all duration-300 group-hover:scale-110">
+                <Icon className="w-6 h-6 text-accent group-hover:text-white transition-colors duration-300" />
+              </div>
+              <h3 className="font-semibold text-brown-900 group-hover:text-accent mb-3 transition-colors duration-300 text-lg">
+                {t(detail.titleKey)}
+              </h3>
+              <div className="space-y-1 mb-4">
+                {(detail.details || detail.detailsKeys || []).map((item, idx) => (
+                  <p key={idx} className="text-sm text-brown-700 group-hover:text-brown-900 transition-colors duration-300">
+                    {item.startsWith('contact.') ? t(item) : item}
+                  </p>
+                ))}
+              </div>
+              <a
+                href={detail.actionLink}
+                className="text-accent hover:text-accent-dark font-medium text-sm transition-all duration-200 inline-flex items-center group-hover:gap-2 gap-1"
+              >
+                {t(detail.actionKey)}
+                <span className="inline-block group-hover:translate-x-1 transition-transform duration-300">→</span>
+              </a>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -684,16 +770,16 @@ function MapSection() {
   const { t } = useTranslation('common');
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="text-center mb-8">
+    <div className="max-w-3xl">
+      <div className="mb-8">
         <h2 className="font-serif text-3xl md:text-4xl text-brown-900 mb-3">{t('contact.visitWorkshop')}</h2>
-        <p className="text-brown-700 max-w-2xl mx-auto">
+        <p className="text-brown-700 max-w-xl">
           {t('contact.visitWorkshopDesc')}
         </p>
       </div>
 
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-cream-100">
-        <div className="h-[300px] md:h-[400px] bg-cream-100 relative">
+        <div className="h-[250px] md:h-[300px] bg-cream-100 relative">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d11988.544086733365!2d19.834755531922887!3d41.305904449121265!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x135031c1d9418cfb%3A0xa2e2088da9965781!2sFlladi%20i%20Tuneleve!5e0!3m2!1sen!2s!4v1755091610264!5m2!1sen!2s"
             width="100%"

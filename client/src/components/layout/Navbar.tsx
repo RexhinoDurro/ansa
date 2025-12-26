@@ -3,38 +3,33 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { Home, Info, Images, Mail, Menu, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../LanguageSwitcher';
 
+interface NavItem {
+  nameKey: string;
+  path: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+}
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [logoError, setLogoError] = useState(false);
   const pathname = usePathname();
-  const router = useRouter();
   const { t } = useTranslation('common');
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Close mobile menu when route changes
   useEffect(() => {
     setIsOpen(false);
   }, [pathname]);
 
-  const navItems: Array<{ nameKey: string; path: string }> = [
-    { nameKey: 'navigation.home', path: '/' },
-    { nameKey: 'navigation.gallery', path: '/portfolio' },
-    { nameKey: 'navigation.about', path: '/services' },
-    { nameKey: 'navigation.contact', path: '/contact' },
+  const navItems: NavItem[] = [
+    { nameKey: 'navigation.home', path: '/', icon: Home },
+    { nameKey: 'navigation.gallery', path: '/portfolio', icon: Images },
+    { nameKey: 'navigation.about', path: '/services', icon: Info },
+    { nameKey: 'navigation.contact', path: '/contact', icon: Mail },
   ];
 
   const isActivePath = (path: string) => {
@@ -44,97 +39,162 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-500 ease-in-out ${
-      scrolled
-        ? 'bg-white/95 backdrop-blur-xl shadow-lg border-b border-gray-200'
-        : 'bg-transparent border-b border-white/10'
-    }`}>
-      <div className="container mx-auto px-4 lg:px-8">
-        <div className="flex justify-between items-center py-4">
-          {/* Logo */}
-          <Link
-            href="/"
-            className="hover:opacity-80 transition-opacity duration-200"
-          >
-            {!logoError ? (
-              <Image
-                src="/logo.png"
-                alt="Logo"
-                width={201}
-                height={69}
-                className="h-12 w-auto"
-                priority
-                onError={() => setLogoError(true)}
-              />
-            ) : (
-              <div className="h-12 flex items-center text-accent font-serif font-bold text-xl">
-                ANSA
-              </div>
-            )}
-          </Link>
+    <>
+      {/* Desktop Pill Navbar */}
+      <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 hidden lg:block w-full max-w-7xl px-4">
+        {/* Outer Pill Container */}
+        <div className="bg-gradient-to-r from-amber-900/20 via-stone-800/20 to-amber-900/20 backdrop-blur-2xl rounded-full border border-white/20 shadow-2xl shadow-black/20 px-6 py-3">
+          <div className="flex items-center justify-between gap-8">
+            {/* Logo Section */}
+            <Link
+              href="/"
+              className="flex items-center hover:opacity-80 transition-opacity duration-200 pl-2"
+            >
+              {!logoError ? (
+                <Image
+                  src="/logo.png"
+                  alt="Logo"
+                  width={48}
+                  height={48}
+                  className="h-10 w-auto"
+                  priority
+                  onError={() => setLogoError(true)}
+                />
+              ) : (
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white font-bold">
+                  S
+                </div>
+              )}
+            </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.nameKey}
-                href={item.path}
-                className={`relative font-medium transition-all duration-200 ${
-                  scrolled ? 'text-black hover:text-accent' : 'text-white hover:text-accent'
-                } group`}
-              >
-                {t(item.nameKey)}
-                <span className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full ${
-                  isActivePath(item.path) ? 'w-full' : ''
-                }`}></span>
-              </Link>
-            ))}
+            {/* Inner Pill - Navigation Links */}
+            <div className="bg-white/10 backdrop-blur-xl rounded-full border border-white/20 px-2 py-2 shadow-lg">
+              <div className="flex items-center gap-1">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = isActivePath(item.path);
+
+                  return (
+                    <Link
+                      key={item.path}
+                      href={item.path}
+                      className={`relative flex items-center gap-2 px-5 py-2.5 rounded-full transition-all duration-300 group ${
+                        isActive
+                          ? 'bg-white/20 text-white shadow-lg shadow-white/10'
+                          : 'text-white/70 hover:text-white/95 hover:bg-white/5'
+                      }`}
+                    >
+                      <Icon
+                        size={18}
+                        className={`transition-colors duration-300 ${
+                          isActive ? 'text-blue-400' : 'text-white/60 group-hover:text-white/90'
+                        }`}
+                      />
+                      <span className="text-sm font-medium whitespace-nowrap">
+                        {t(item.nameKey)}
+                      </span>
+
+                      {/* Active glow effect */}
+                      {isActive && (
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400/20 to-purple-400/20 blur-sm -z-10" />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
 
             {/* Language Switcher */}
-            <LanguageSwitcher isLightBackground={scrolled} />
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center space-x-4">
-            <LanguageSwitcher isLightBackground={scrolled} />
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className={`p-2 rounded-lg transition-colors duration-200 ${
-                scrolled ? 'text-black hover:bg-gray-100' : 'text-white hover:bg-white/10'
-              }`}
-              aria-label="Toggle mobile menu"
-            >
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-          isOpen ? 'max-h-64 pb-4' : 'max-h-0'
-        }`}>
-          <div className={`border-t pt-4 ${
-            scrolled ? 'border-gray-200' : 'border-white/20'
-          }`}>
-            <div className="flex flex-col space-y-4">
-              {navItems.map((item) => (
-                <Link
-                  key={item.nameKey}
-                  href={item.path}
-                  className={`font-medium transition-colors duration-200 ${
-                      isActivePath(item.path)
-                        ? 'text-accent'
-                        : scrolled ? 'text-black hover:text-accent' : 'text-white hover:text-accent'
-                  }`}
-                >
-                  {t(item.nameKey)}
-                </Link>
-              ))}
+            <div className="pr-2">
+              <LanguageSwitcher isLightBackground={false} />
             </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {/* Mobile/Tablet Navbar */}
+      <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 lg:hidden w-[calc(100%-2rem)] max-w-2xl">
+        <div className="bg-gradient-to-r from-amber-900/20 via-stone-800/20 to-amber-900/20 backdrop-blur-2xl rounded-full border border-white/20 shadow-2xl shadow-black/20 px-4 py-3">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <Link
+              href="/"
+              className="flex items-center hover:opacity-80 transition-opacity duration-200"
+            >
+              {!logoError ? (
+                <Image
+                  src="/logo.png"
+                  alt="Logo"
+                  width={40}
+                  height={40}
+                  className="h-9 w-auto"
+                  priority
+                  onError={() => setLogoError(true)}
+                />
+              ) : (
+                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white font-bold text-sm">
+                  S
+                </div>
+              )}
+            </Link>
+
+            {/* Right side - Language Switcher + Menu */}
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher isLightBackground={false} />
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all duration-200 backdrop-blur-sm border border-white/10"
+                aria-label="Toggle mobile menu"
+              >
+                {isOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Menu Dropdown */}
+          <div
+            className={`overflow-hidden transition-all duration-300 ease-in-out ${
+              isOpen ? 'max-h-96 mt-4' : 'max-h-0'
+            }`}
+          >
+            <div className="bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 p-3 shadow-lg">
+              <div className="flex flex-col gap-1">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = isActivePath(item.path);
+
+                  return (
+                    <Link
+                      key={item.path}
+                      href={item.path}
+                      className={`relative flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 ${
+                        isActive
+                          ? 'bg-white/20 text-white shadow-lg shadow-white/10'
+                          : 'text-white/70 hover:text-white/95 hover:bg-white/5'
+                      }`}
+                    >
+                      <Icon
+                        size={20}
+                        className={`transition-colors duration-300 ${
+                          isActive ? 'text-blue-400' : 'text-white/60'
+                        }`}
+                      />
+                      <span className="text-sm font-medium">
+                        {t(item.nameKey)}
+                      </span>
+
+                      {isActive && (
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-400/20 to-purple-400/20 blur-sm -z-10" />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </>
   );
 };
 

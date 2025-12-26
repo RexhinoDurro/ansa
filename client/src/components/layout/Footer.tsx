@@ -54,9 +54,9 @@ const Footer: React.FC = () => {
   ];
 
   return (
-    <footer className="bg-blue-100 text-gray-800">
+    <footer className="bg-black text-white">
       {/* Features Bar */}
-      <div className="border-b border-blue-200">
+      <div className="border-b border-gray-800">
         <div className="container mx-auto px-4 lg:px-8 py-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => {
@@ -67,8 +67,8 @@ const Footer: React.FC = () => {
                     <Icon className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">{t(feature.titleKey)}</h3>
-                    <p className="text-sm text-gray-600">{t(feature.descKey)}</p>
+                    <h3 className="font-semibold text-white">{t(feature.titleKey)}</h3>
+                    <p className="text-sm text-gray-400">{t(feature.descKey)}</p>
                   </div>
                 </div>
               );
@@ -78,27 +78,27 @@ const Footer: React.FC = () => {
       </div>
 
       {/* Newsletter Section */}
-      <div className="border-b border-blue-200">
+      <div className="border-b border-gray-800">
         <div className="container mx-auto px-4 lg:px-8 py-12">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl font-serif font-bold mb-4">
               {t('footer.newsletter.title')}
             </h2>
-            <p className="text-gray-600 mb-8 text-lg">
+            <p className="text-gray-400 mb-8 text-lg">
               {t('footer.newsletter.description')}
             </p>
             <div className="flex flex-col sm:flex-row max-w-md mx-auto gap-3">
               <input
                 type="email"
                 placeholder={t('footer.newsletter.placeholder')}
-                className="flex-1 px-4 py-3 bg-white border border-blue-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-gray-800 placeholder-gray-400"
+                className="flex-1 px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-white placeholder-gray-500"
               />
               <button className="flex items-center justify-center bg-accent hover:bg-accent-dark text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200 group">
                 {t('footer.newsletter.subscribe')}
                 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
               </button>
             </div>
-            <p className="text-xs text-gray-500 mt-4">
+            <p className="text-xs text-white mt-4">
               {t('footer.newsletter.agreementText')}
             </p>
           </div>
@@ -111,11 +111,11 @@ const Footer: React.FC = () => {
           {/* Company Info */}
           <div className="lg:col-span-1">
             <Link href="/" className="inline-block mb-6">
-              <h3 className="text-3xl font-serif font-bold text-gray-900">
+              <h3 className="text-3xl font-serif font-bold text-white">
                 Ansa Furniture
               </h3>
             </Link>
-            <p className="text-gray-600 mb-6 leading-relaxed">
+            <p className="text-white mb-6 leading-relaxed">
               Crafting custom furniture with passion, precision, and commitment to quality since 2015.
               Every piece is made to fit your unique space and style.
             </p>
@@ -129,7 +129,7 @@ const Footer: React.FC = () => {
                     key={index}
                     href={social.href}
                     aria-label={social.label}
-                    className="bg-blue-200 hover:bg-accent p-3 rounded-lg transition-colors duration-200 group"
+                    className="bg-gray-800 hover:bg-accent p-3 rounded-lg transition-colors duration-200 group"
                   >
                     <Icon className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
                   </a>
@@ -140,13 +140,13 @@ const Footer: React.FC = () => {
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-semibold text-gray-900 mb-6 text-lg">{t('footer.quickLinks')}</h4>
+            <h4 className="font-semibold text-white mb-6 text-lg">{t('footer.quickLinks')}</h4>
             <ul className="space-y-3">
               {quickLinks.map((link, index) => (
                 <li key={index}>
                   <Link
                     href={link.path}
-                    className="text-gray-600 hover:text-accent-light transition-colors duration-200 flex items-center group"
+                    className="text-white hover:text-accent transition-colors duration-200 flex items-center group"
                   >
                     <span className="group-hover:translate-x-1 transition-transform duration-200">
                       {t(link.nameKey)}
@@ -159,13 +159,13 @@ const Footer: React.FC = () => {
 
           {/* Categories */}
           <div>
-            <h4 className="font-semibold text-gray-900 mb-6 text-lg">{t('footer.categories')}</h4>
+            <h4 className="font-semibold text-white mb-6 text-lg">{t('footer.categories')}</h4>
             <ul className="space-y-3">
               {categories.map((category, index) => (
                 <li key={index}>
                   <Link
                     href={category.path}
-                    className="text-gray-600 hover:text-accent-light transition-colors duration-200 flex items-center group"
+                    className="text-white hover:text-accent transition-colors duration-200 flex items-center group"
                   >
                     <span className="group-hover:translate-x-1 transition-transform duration-200">
                       {category.name}
@@ -178,12 +178,12 @@ const Footer: React.FC = () => {
 
           {/* Contact Info */}
           <div>
-            <h4 className="font-semibold text-gray-900 mb-6 text-lg">{t('footer.getInTouch')}</h4>
+            <h4 className="font-semibold text-white mb-6 text-lg">{t('footer.getInTouch')}</h4>
             <div className="space-y-4">
               <div className="flex items-start space-x-3">
-                <MapPin className="w-5 h-5 text-accent-light mt-1 flex-shrink-0" />
+                <MapPin className="w-5 h-5 text-accent mt-1 flex-shrink-0" />
                 <div>
-                  <p className="text-gray-600">
+                  <p className="text-white">
                     Rruga e Elbasanit<br />
                     Tirana<br />
                     Albania
@@ -192,29 +192,29 @@ const Footer: React.FC = () => {
               </div>
 
               <div className="flex items-center space-x-3">
-                <Phone className="w-5 h-5 text-accent-light flex-shrink-0" />
+                <Phone className="w-5 h-5 text-accent flex-shrink-0" />
                 <a
                   href="tel:+355XXXXXXXX"
-                  className="text-gray-600 hover:text-accent-light transition-colors duration-200"
+                  className="text-white hover:text-accent transition-colors duration-200"
                 >
                   +355 XX XXX XXXX
                 </a>
               </div>
 
               <div className="flex items-center space-x-3">
-                <Mail className="w-5 h-5 text-accent-light flex-shrink-0" />
+                <Mail className="w-5 h-5 text-accent flex-shrink-0" />
                 <a
                   href="mailto:info@ansafurniture.al"
-                  className="text-gray-600 hover:text-accent-light transition-colors duration-200"
+                  className="text-white hover:text-accent transition-colors duration-200"
                 >
                   info@ansafurniture.al
                 </a>
               </div>
 
               <div className="flex items-start space-x-3">
-                <Clock className="w-5 h-5 text-accent-light mt-1 flex-shrink-0" />
-                <div className="text-gray-600">
-                  <p className="font-medium text-gray-900 mb-1">{t('footer.storeHours')}</p>
+                <Clock className="w-5 h-5 text-accent mt-1 flex-shrink-0" />
+                <div className="text-white">
+                  <p className="font-medium text-white mb-1">{t('footer.storeHours')}</p>
                   <p className="text-sm">{t('footer.mondayFriday')}</p>
                   <p className="text-sm">{t('footer.weekend')}</p>
                 </div>
@@ -225,11 +225,11 @@ const Footer: React.FC = () => {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-blue-200">
+      <div className="border-t border-gray-800">
         <div className="container mx-auto px-4 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
             <div className="text-center md:text-left">
-              <p className="text-gray-600 text-sm">
+              <p className="text-white text-sm">
                 © {currentYear} Ansa Furniture. {t('footer.allRightsReserved')}
               </p>
             </div>
@@ -237,25 +237,25 @@ const Footer: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-6 text-sm">
               <Link
                 href="/privacy"
-                className="text-gray-600 hover:text-accent-light transition-colors duration-200"
+                className="text-white hover:text-accent transition-colors duration-200"
               >
                 {t('footer.privacyPolicy')}
               </Link>
               <Link
                 href="/terms"
-                className="text-gray-600 hover:text-accent-light transition-colors duration-200"
+                className="text-white hover:text-accent transition-colors duration-200"
               >
                 {t('footer.termsOfService')}
               </Link>
               <Link
                 href="/cookies"
-                className="text-gray-600 hover:text-accent-light transition-colors duration-200"
+                className="text-white hover:text-accent transition-colors duration-200"
               >
                 {t('footer.cookiePolicy')}
               </Link>
               <Link
                 href="/sitemap"
-                className="text-gray-600 hover:text-accent-light transition-colors duration-200"
+                className="text-white hover:text-accent transition-colors duration-200"
               >
                 {t('footer.sitemap')}
               </Link>
@@ -263,7 +263,7 @@ const Footer: React.FC = () => {
 
             {/* Payment Methods */}
             <div className="flex items-center space-x-2">
-              <span className="text-gray-600 text-sm mr-2">{t('footer.weAccept')}</span>
+              <span className="text-white text-sm mr-2">{t('footer.weAccept')}</span>
               <div className="flex space-x-2 opacity-60">
                 <div className="w-8 h-5 bg-blue-600 rounded flex items-center justify-center">
                   <span className="text-white text-xs font-bold">V</span>
