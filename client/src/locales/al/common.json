@@ -87,11 +87,25 @@
   },
   "contact": {
     "title": "Na Kontakto",
-    "subtitle": "Ke pyetje për mobiljet tona? Dëshiron të planifikosh një konsultim? Apo vetëm ke nevojë për këshilla dizajni? Jemi këtu për të ndihmuar.",
-    "visitShowroom": "Vizito Sallën Tonë të Ekspozimit",
+    "subtitle": "Ke një projekt në mendje? Do të donim të dëgjonim nga ju. Na kontakto për të diskutuar nevojat tuaja për mobilje të personalizuara.",
+    "freeConsultation": "Konsultim Dizajni Falas",
+    "responseTime": "Përgjigje brenda 24 orësh",
+    "expertAdvice": "Këshilla Eksperte për Mobilje",
+    "contactUs": "Na Kontakto",
+    "customRequest": "Kërkesë e Personalizuar",
+    "visitWorkshop": "Vizito Punishten Tonë",
     "callUs": "Na Telefono",
     "emailUs": "Na Dërgo Email",
-    "storeHours": "Oraret e Dyqanit",
+    "workshopHours": "Oraret e Punishtës",
+    "getDirections": "Merr Drejtimet",
+    "callNow": "Telefono Tani",
+    "sendEmail": "Dërgo Email",
+    "scheduleVisit": "Planifiko Vizitën",
+    "respondWithin": "Përgjigjemi brenda 24 orësh",
+    "mondayFriday": "Hën-Pre: 9:00-18:00",
+    "saturday": "Shtunë: 10:00-16:00",
+    "sunday": "E Diel: Mbyllur",
+    "mondaySaturday": "Hën-Sht: 9:00-18:00",
     "sendMessage": "Na Dërgo një Mesazh",
     "fullName": "Emri i Plotë",
     "emailAddress": "Adresa e Email-it",
@@ -100,8 +114,60 @@
     "message": "Mesazhi",
     "sendButton": "Dërgo Mesazhin",
     "messageSent": "Mesazhi u Dërgua me Sukses!",
-    "getDirections": "Merr Drejtimet",
-    "scheduleVisit": "Planifiko Vizitën"
+    "messageError": "Dështoi dërgimi i mesazhit. Ju lutemi provoni përsëri.",
+    "requiredField": "Kjo fushë është e detyrueshme",
+    "invalidEmail": "Ju lutemi vendosni një adresë email të vlefshme",
+    "name": "Emri",
+    "email": "Email",
+    "phoneOptional": "Telefoni (opsionale)",
+    "selectSubject": "Zgjidh një objekt...",
+    "generalInquiry": "Pyetje e Përgjithshme",
+    "projectQuestion": "Pyetje mbi Projektin",
+    "customFurniture": "Mobilje të Personalizuara",
+    "pricingQuote": "Çmim & Ofertë",
+    "existingOrder": "Porosi Ekzistuese",
+    "feedback": "Komente",
+    "other": "Tjetër",
+    "yourFullName": "Emri juaj i plotë",
+    "yourEmail": "emaili@juaj.com",
+    "phoneNumber": "+355 XX XXX XXXX",
+    "tellUsAboutInquiry": "Na trego për pyetjen tuaj...",
+    "sending": "Duke dërguar...",
+    "thankYouMessage": "Faleminderit! Do t'ju përgjigjemi brenda 24 orësh.",
+    "errorMessage": "Diçka shkoi keq. Ju lutemi provoni përsëri ose na kontaktoni direkt.",
+    "requestCustomFurniture": "Kërko Mobilje të Personalizuara",
+    "customFurnitureDesc": "Na trego për projektin tuaj dhe do të krijojmë diçka të përsosur për hapësirën tuaj.",
+    "whatRoom": "Cila dhomë?",
+    "selectRoom": "Zgjidh një dhomë...",
+    "kitchen": "Kuzhinë",
+    "livingRoom": "Dhomë Ndenjeje",
+    "bedroom": "Dhomë Gjumi",
+    "wardrobe": "Garderobë",
+    "office": "Zyrë",
+    "diningRoom": "Dhomë Ngrënie",
+    "budgetRange": "Buxheti",
+    "selectRange": "Zgjidh një interval...",
+    "projectDescription": "Përshkrimi i Projektit",
+    "describeVision": "Përshkruaj vizionin tuaj, masat, preferencat e stilit, materialet...",
+    "referenceImages": "Imazhe Referuese (opsionale)",
+    "uploadPhotos": "Ngarko foto të hapësirës tuaj ose imazhe frymëzuese",
+    "submitRequest": "Dërgo Kërkesën",
+    "requestReceivedMessage": "Faleminderit! Do ta shqyrtojmë kërkesën tuaj dhe do t'ju kontaktojmë brenda 24 orësh.",
+    "visitWorkshopDesc": "Ejani të shihni zejtarinë tonë personalisht. Punishta jonë shfaq projekte të përfunduara dhe punë në proces.",
+    "faqTitle": "Pyetje të Shpeshta",
+    "faqDesc": "Gjeni përgjigje për pyetje të zakonshme rreth shërbimeve tona të mobilieve të personalizuara.",
+    "searchQuestions": "Kërko pyetje...",
+    "all": "Të Gjitha",
+    "general": "Të Përgjithshme",
+    "process": "Procesi",
+    "pricing": "Çmimet",
+    "materials": "Materialet",
+    "delivery": "Dërgesa",
+    "warranty": "Garancia",
+    "loadingFaqs": "Duke ngarkuar Pyetjet...",
+    "noFaqsFound": "Nuk u gjetën pyetje që përputhen me",
+    "noFaqsCategory": "Nuk u gjetën pyetje në këtë kategori",
+    "clearFilters": "Pastro filtrat"
   },
   "catalogue": {
     "title": "Katalogu Ynë",
@@ -183,5 +249,115 @@
       "title": "Mbështetja e Klientit",
       "description": "Nga porosia në dorëzim, ekipi ynë siguron një përvojë të qetë."
     }
+  },
+  "home": {
+    "heroTitle": "Mobilje të Personalizuara, të Ndërtuara për Hapësirën Tënde.",
+    "heroSubtitle": "Nga ideja në instalim, ne dizajnojmë dhe ndërtojmë mobilje të personalizuara për shtëpinë dhe stilin tënd të jetesës.",
+    "requestDesign": "Kërko një Dizajn të Personalizuar",
+    "viewWork": "Shiko Punën Tonë",
+    "ourJourney": "Udhëtimi Ynë",
+    "craftingDreams": "Duke Krijuar Ëndrra Në",
+    "reality": "Realitet",
+    "storyParagraph1": "Për më shumë se një dekadë, Ansa Furniture ka transformuar shtëpitë në të gjithë Shqipërinë me mobilje të dizajnuara dhe të punuara me ekspertizë. Ajo që filloi si një punishte e vogël në Tiranë është rritur në një emër të besueshëm në dizajnin e mobiljeve të personalizuara.",
+    "storyParagraph2": "Ne besojmë se çdo shtëpi është unike dhe mobiljet tuaja duhet të jenë gjithashtu. Kjo është arsyeja pse ne nuk shesim copë të gatshme. Në vend të kësaj, ne punojmë ngushtë me ju për të kuptuar hapësirën tuaj, stilin tuaj dhe nevojat tuaja—pastaj ne dizajnojmë dhe ndërtojmë mobilje që janë plotësisht të personalizuara për jetën tuaj.",
+    "storyParagraph3": "Zejtarët tanë kombinojnë teknikat tradicionale të punës me dru me parimet e dizajnit modern për të krijuar mobilje që jo vetëm janë të bukura por janë ndërtuar për të zgjatur breza.",
+    "quote": "Përsosmëria nuk është një destinacion, është një udhëtim i vazhdueshëm që nuk përfundon kurrë.",
+    "quoteAuthor": "— Ekipi i Ansa Furniture",
+    "stats": {
+      "yearsExperience": "Vjet Përvojë",
+      "projectsCompleted": "Projekte të Përfunduara",
+      "masterCraftsmen": "Zejtarë Mjeshtër",
+      "customMade": "E Personalizuar"
+    },
+    "workshopTitle": "Punishta Jonë, Idetë Tuaja",
+    "workshopSubtitle": "Ajo që na dallon është përkushtimi ynë për të sjellë në jetë vizionin tuaj me cilësi dhe vëmendje ndaj detajeve pa kompromis.",
+    "features": {
+      "feature1": {
+        "title": "Dizajne të Personalizuara për Hapësirën Tënde",
+        "description": "Çdo copë është e dizajnuar me porosi për t'iu përshtatur matjeve tuaja të sakta, preferencave të stilit dhe nevojave funksionale. Nuk ka dy projekte të njëjta."
+      },
+      "feature2": {
+        "title": "Precizion i Punuar me Dorë",
+        "description": "Zejtarët tanë të aftë përdorin teknika të testuara me kohë dhe mjete bashkëkohore për të siguruar që çdo bashkim, skaj dhe përfundim të jetë perfekt."
+      },
+      "feature3": {
+        "title": "Qëndrueshmëri Afatgjatë",
+        "description": "Ne përdorim vetëm materiale premium dhe metoda ndërtimi që qëndrojnë në provën e kohës, kështu që mobiljet tuaja zgjatin për dekada."
+      }
+    },
+    "howItWorks": "Si Funksionon",
+    "howItWorksSubtitle": "Çdo projekt ndjek procesin tonë të provuar, duke siguruar rezultate të jashtëzakonshme nga fillimi deri në fund.",
+    "process": {
+      "step1": {
+        "title": "Konsultimi",
+        "description": "Ne takohemi për të diskutuar vizionin, nevojat dhe buxhetin tuaj. Kuptimi i hapësirës dhe stilit tuaj të jetesës është prioriteti ynë i parë."
+      },
+      "step2": {
+        "title": "Dizajn 3D dhe Matje",
+        "description": "Dizajnerët tanë krijojnë renderime 3D të detajuara dhe marrin matje të sakta për të siguruar një përshtatje të përsosur."
+      },
+      "step3": {
+        "title": "Krijimi në Punishten Tonë",
+        "description": "Zejtarët e aftë sjellin dizajnin tuaj në jetë duke përdorur materiale cilësore dhe teknika eksperte."
+      },
+      "step4": {
+        "title": "Dorëzimi dhe Instalimi",
+        "description": "Ne dorëzojmë dhe instalojmë profesionalisht mobiljet tuaja të personalizuara, duke siguruar që gjithçka të jetë e përsosur."
+      }
+    },
+    "testimonials": {
+      "title": "Dëshmi",
+      "subtitle": "Çfarë Thonë Klientët Tanë",
+      "description": "Mos na besoni vetëm në fjalë - dëgjoni nga njerëzit që na besuan me hapësirat e tyre.",
+      "client1": {
+        "name": "Maria K.",
+        "project": "Kuzhinë e Personalizuar – Tiranë",
+        "quote": "Ekipi i Ansa transformoi kuzhinën tonë saktësisht në atë që kishim imagjinuar. Vëmendja ndaj detajeve dhe cilësia e zejtarisë është e jashtëzakonshme."
+      },
+      "client2": {
+        "name": "Alban S.",
+        "project": "Dollape të Integruara – Durrës",
+        "quote": "Shërbim profesional nga fillimi deri në fund. Ata maksimizuan hapësirën e ruajtjes së dhomës sonë të gjumit duke mbajtur një estetikë të bukur dhe minimaliste."
+      },
+      "client3": {
+        "name": "Elira M.",
+        "project": "Sistem Dhome Ndenjeje – Tiranë",
+        "quote": "Nuk mund të jemi më të lumtur me njësinë tonë të personalizuar të murit të TV. Përputhet perfekt dhe cilësia është e jashtëzakonshme. Shumë e rekomanduar!"
+      }
+    }
+  },
+  "work": {
+    "title": "Disa nga punët tona",
+    "description": "Eksploro projektet tona të fundit që tregojnë",
+    "craftsmanship": "zejtari të jashtëzakonshme",
+    "and": "dhe",
+    "design": "zgjidhje dizajni inovative",
+    "forSpaces": "për hapësira të ndryshme.",
+    "images": "imazhe",
+    "noProjects": "Nuk ka projekte të veçuara në dispozicion në këtë moment.",
+    "viewAll": "Shiko të gjitha projektet",
+    "seePortfolio": "Shiko Portfolion e Plotë",
+    "error": "Dështoi ngarkimi i projekteve",
+    "tryAgain": "Ju lutemi provoni përsëri më vonë ose na kontaktoni drejtpërdrejt."
+  },
+  "services": {
+    "title": "Shërbimet Tona",
+    "subtitle": "Nga koncepti në instalim, ne ofrojmë zgjidhje të plota mobiljesh të personalizuara të përshtatura për hapësirën, stilin dhe nevojat tuaja.",
+    "loading": "Duke ngarkuar shërbimet...",
+    "noServices": "Nuk ka shërbime të disponueshme në këtë moment.",
+    "howWeWork": "Si Punojmë",
+    "processSubtitle": "Çdo projekt ndjek procesin tonë të provuar, duke siguruar rezultate të jashtëzakonshme nga fillimi deri në fund.",
+    "consultation": "Konsultimi",
+    "consultationDesc": "Ne diskutojmë vizionin, nevojat dhe buxhetin tuaj",
+    "design": "Dizajni",
+    "designDesc": "Renderime 3D dhe matje të sakta",
+    "crafting": "Krijimi",
+    "craftingDesc": "Zejtarët ekspertë ndërtojnë mobiljet tuaja",
+    "installation": "Instalimi",
+    "installationDesc": "Dorëzim dhe instalim profesional",
+    "startProject": "Fillo Projektin Tënd",
+    "seeWork": "Shiko Punën Tonë",
+    "portfolioDesc": "Eksploro portfolion tonë të projekteve të përfunduara për të parë cilësinë dhe zejtarinë që sjellim në çdo copë.",
+    "viewPortfolio": "Shiko Portfolion"
   }
-} 
+}

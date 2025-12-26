@@ -1,0 +1,6 @@
+Please place your logo.png file in this directory.
+
+The navbar is configured to use /logo.png
+
+Recommended dimensions: 300x120 pixels or similar aspect ratio
+Format: PNG with transparent background

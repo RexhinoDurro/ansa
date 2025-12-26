@@ -39,7 +39,7 @@ const ServiceManager: React.FC = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/admin/services/', {
+      const response = await fetch('/api/admin/services/', {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -65,8 +65,8 @@ const ServiceManager: React.FC = () => {
 
     try {
       const url = editingService
-        ? `http://localhost:8000/api/admin/services/${editingService.id}/`
-        : 'http://localhost:8000/api/admin/services/';
+        ? `/api/admin/services/${editingService.id}/`
+        : '/api/admin/services/';
 
       const method = editingService ? 'PATCH' : 'POST';
 
@@ -124,7 +124,7 @@ const ServiceManager: React.FC = () => {
     if (!confirm('Are you sure you want to delete this service?')) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/services/${id}/`, {
+      const response = await fetch(`/api/admin/services/${id}/`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -143,7 +143,7 @@ const ServiceManager: React.FC = () => {
 
   const toggleActive = async (service: Service) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/services/${service.id}/`, {
+      const response = await fetch(`/api/admin/services/${service.id}/`, {
         method: 'PATCH',
         credentials: 'include',
         headers: {

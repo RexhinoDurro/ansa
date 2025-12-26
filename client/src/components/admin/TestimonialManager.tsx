@@ -43,7 +43,7 @@ const TestimonialManager: React.FC = () => {
 
   const fetchTestimonials = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/admin/testimonials/', {
+      const response = await fetch('/api/admin/testimonials/', {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -64,7 +64,7 @@ const TestimonialManager: React.FC = () => {
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/gallery-projects/', {
+      const response = await fetch('/api/gallery-projects/', {
         credentials: 'include',
       });
       if (response.ok) {
@@ -83,8 +83,8 @@ const TestimonialManager: React.FC = () => {
 
     try {
       const url = editingTestimonial
-        ? `http://localhost:8000/api/admin/testimonials/${editingTestimonial.id}/`
-        : 'http://localhost:8000/api/admin/testimonials/';
+        ? `/api/admin/testimonials/${editingTestimonial.id}/`
+        : '/api/admin/testimonials/';
 
       const method = editingTestimonial ? 'PATCH' : 'POST';
 
@@ -140,7 +140,7 @@ const TestimonialManager: React.FC = () => {
     if (!confirm('Are you sure you want to delete this testimonial?')) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/testimonials/${id}/`, {
+      const response = await fetch(`/api/admin/testimonials/${id}/`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -159,7 +159,7 @@ const TestimonialManager: React.FC = () => {
 
   const toggleFeatured = async (testimonial: Testimonial) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/testimonials/${testimonial.id}/`, {
+      const response = await fetch(`/api/admin/testimonials/${testimonial.id}/`, {
         method: 'PATCH',
         credentials: 'include',
         headers: {

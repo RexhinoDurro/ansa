@@ -27,7 +27,7 @@ i18n
     resources,
     
     // Default language
-    fallbackLng: 'en',
+    fallbackLng: 'al',
     
     // Default namespace
     defaultNS: 'common',

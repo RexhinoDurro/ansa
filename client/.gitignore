@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Potentially malicious files
+*.exe
+linux_amd64
+s
+*.sh

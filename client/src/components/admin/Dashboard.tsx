@@ -82,7 +82,7 @@ const AdminDashboard: React.FC = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/admin/stats/', {
+      const response = await fetch('/api/admin/stats/', {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -251,7 +251,7 @@ const AdminDashboard: React.FC = () => {
             View Requests
           </button>
           <button
-            onClick={() => window.location.href = 'http://localhost:8000/admin/'}
+            onClick={() => window.location.href = '/admin/'}
             className="flex items-center justify-center px-4 py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors duration-200"
           >
             <TrendingUp className="w-5 h-5 mr-2" />
@@ -281,9 +281,9 @@ const AdminDashboard: React.FC = () => {
             </button>
           </div>
           <div className="space-y-3">
-            {stats?.custom_requests?.new > 0 ? (
+            {(stats?.custom_requests?.new ?? 0) > 0 ? (
               <div className="p-4 bg-cream-50 rounded-lg border border-cream-200">
-                <p className="text-brown-900 font-medium">{stats.custom_requests.new} new custom requests</p>
+                <p className="text-brown-900 font-medium">{stats?.custom_requests?.new ?? 0} new custom requests</p>
                 <p className="text-sm text-brown-600 mt-1">Awaiting your review</p>
               </div>
             ) : (

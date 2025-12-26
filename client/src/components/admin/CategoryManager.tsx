@@ -37,7 +37,7 @@ const CategoryManager: React.FC = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/admin/categories/', {
+      const response = await fetch('/api/admin/categories/', {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -63,8 +63,8 @@ const CategoryManager: React.FC = () => {
 
     try {
       const url = editingCategory 
-        ? `http://localhost:8000/api/admin/categories/${editingCategory.id}/`
-        : 'http://localhost:8000/api/admin/categories/';
+        ? `/api/admin/categories/${editingCategory.id}/`
+        : '/api/admin/categories/';
       
       const method = editingCategory ? 'PATCH' : 'POST';
 
@@ -110,7 +110,7 @@ const CategoryManager: React.FC = () => {
     if (!confirm(`Are you sure you want to delete "${name}"? This will also delete all subcategories.`)) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/categories/${id}/`, {
+      const response = await fetch(`/api/admin/categories/${id}/`, {
         method: 'DELETE',
         credentials: 'include'
       });

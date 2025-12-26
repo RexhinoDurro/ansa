@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface GalleryImage {
   id: number;
@@ -30,6 +31,7 @@ interface Project {
 }
 
 const SomeOfOurWork: React.FC = () => {
+  const { t } = useTranslation('common');
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -46,7 +48,7 @@ const SomeOfOurWork: React.FC = () => {
     // Fetch featured projects from backend
     const fetchProjects = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/gallery-projects/?featured=true');
+        const response = await fetch('/api/gallery-projects/?featured=true');
         if (!response.ok) {
           throw new Error('Failed to fetch projects');
         }
@@ -73,7 +75,7 @@ const SomeOfOurWork: React.FC = () => {
       if (imageUrl.startsWith('http')) {
         return imageUrl;
       }
-      return `http://localhost:8000${imageUrl}`;
+      return `${imageUrl}`;
     }
     return ''; // Fallback - no placeholder
   };
@@ -91,7 +93,7 @@ const SomeOfOurWork: React.FC = () => {
             }`}
           >
             <span className="inline-block animate-text-gradient bg-gradient-to-r from-brown-900 via-accent to-brown-900 bg-[length:200%_auto] bg-clip-text text-transparent">
-              Some of our work
+              {t('work.title')}
             </span>
           </h2>
           <p
@@ -101,11 +103,11 @@ const SomeOfOurWork: React.FC = () => {
                 : 'opacity-0 -translate-y-8'
             }`}
           >
-            <span className="inline-block">Explore our recent projects showcasing </span>
-            <span className="inline-block font-semibold text-accent animate-pulse-slow">exceptional craftsmanship</span>
-            <span className="inline-block"> and </span>
-            <span className="inline-block font-semibold text-accent animate-pulse-slow animation-delay-300">innovative design solutions</span>
-            <span className="inline-block"> for diverse spaces.</span>
+            <span className="inline-block">{t('work.description')} </span>
+            <span className="inline-block font-semibold text-accent animate-pulse-slow">{t('work.craftsmanship')}</span>
+            <span className="inline-block"> {t('work.and')} </span>
+            <span className="inline-block font-semibold text-accent animate-pulse-slow animation-delay-300">{t('work.design')}</span>
+            <span className="inline-block"> {t('work.forSpaces')}</span>
           </p>
         </div>
 
@@ -125,8 +127,8 @@ const SomeOfOurWork: React.FC = () => {
         {/* Error State */}
         {error && (
           <div className="text-center py-12">
-            <p className="text-brown-700 mb-4">{error}</p>
-            <p className="text-brown-600">Please try again later or contact us directly.</p>
+            <p className="text-brown-700 mb-4">{t('work.error')}</p>
+            <p className="text-brown-600">{t('work.tryAgain')}</p>
           </div>
         )}
 
@@ -221,7 +223,7 @@ const SomeOfOurWork: React.FC = () => {
                         {project.location && <span>{project.location}</span>}
                         {project.image_count > 0 && (
                           <span className="flex items-center">
-                            <span className="mr-1">📷</span> {project.image_count} images
+                            <span className="mr-1">📷</span> {project.image_count} {t('work.images')}
                           </span>
                         )}
                       </div>
@@ -247,9 +249,9 @@ const SomeOfOurWork: React.FC = () => {
         {/* No projects message */}
         {!loading && !error && projects.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-brown-700 mb-4">No featured projects available at the moment.</p>
+            <p className="text-brown-700 mb-4">{t('work.noProjects')}</p>
             <Link href="/portfolio" className="text-accent hover:underline">
-              View all projects
+              {t('work.viewAll')}
             </Link>
           </div>
         )}
@@ -261,7 +263,7 @@ const SomeOfOurWork: React.FC = () => {
               href="/portfolio"
               className="inline-flex items-center space-x-2 px-6 py-3 text-base font-semibold text-accent border-2 border-accent rounded-lg hover:bg-accent hover:text-white transition-all duration-300 group"
             >
-              <span>See Full Portfolio</span>
+              <span>{t('work.seePortfolio')}</span>
               <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </div>

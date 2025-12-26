@@ -52,7 +52,7 @@ const CustomRequestManager: React.FC = () => {
   const fetchRequests = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/admin/custom-requests/', {
+      const response = await fetch('/api/admin/custom-requests/', {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ const CustomRequestManager: React.FC = () => {
 
   const updateStatus = async (requestId: string, newStatus: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/custom-requests/${requestId}/`, {
+      const response = await fetch(`/api/admin/custom-requests/${requestId}/`, {
         method: 'PATCH',
         credentials: 'include',
         headers: {

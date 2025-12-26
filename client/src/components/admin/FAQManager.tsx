@@ -45,7 +45,7 @@ const FAQManager: React.FC = () => {
 
   const fetchFaqs = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/admin/faqs/', {
+      const response = await fetch('/api/admin/faqs/', {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -71,8 +71,8 @@ const FAQManager: React.FC = () => {
 
     try {
       const url = editingFaq
-        ? `http://localhost:8000/api/admin/faqs/${editingFaq.id}/`
-        : 'http://localhost:8000/api/admin/faqs/';
+        ? `/api/admin/faqs/${editingFaq.id}/`
+        : '/api/admin/faqs/';
 
       const method = editingFaq ? 'PATCH' : 'POST';
 
@@ -118,7 +118,7 @@ const FAQManager: React.FC = () => {
     if (!confirm('Are you sure you want to delete this FAQ?')) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/faqs/${id}/`, {
+      const response = await fetch(`/api/admin/faqs/${id}/`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -137,7 +137,7 @@ const FAQManager: React.FC = () => {
 
   const toggleActive = async (faq: FAQ) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/faqs/${faq.id}/`, {
+      const response = await fetch(`/api/admin/faqs/${faq.id}/`, {
         method: 'PATCH',
         credentials: 'include',
         headers: {

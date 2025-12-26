@@ -65,7 +65,7 @@ const ContactForm: React.FC = () => {
         formDataToSend.append('images', image);
       });
 
-      const response = await fetch('http://localhost:8000/api/custom-request/', {
+      const response = await fetch('/api/custom-request/', {
         method: 'POST',
         body: formDataToSend,
       });

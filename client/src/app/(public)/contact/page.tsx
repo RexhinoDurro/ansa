@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle, ChevronDown, Search, Filter } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 // ===============================
 // INTERFACES
@@ -38,33 +39,41 @@ interface FAQ {
 // MAIN CONTACT PAGE
 // ===============================
 export default function ContactPage() {
+  const { t } = useTranslation('common');
   const [activeTab, setActiveTab] = useState<'contact' | 'custom'>('contact');
 
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative py-20 bg-cream-100">
-        <div className="max-w-container mx-auto px-4 md:px-8">
-          <div className="text-center animate-fade-in-up">
-            <h1 className="font-serif text-hero text-brown-900 mb-6">
-              Get in Touch
+      <section className="relative py-20 bg-gradient-to-br from-cream-100 via-cream-50 to-white overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute top-10 left-10 w-72 h-72 bg-accent/10 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute bottom-10 right-10 w-96 h-96 bg-brown-900/5 rounded-full blur-3xl animate-bounce-slow"></div>
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-accent/5 rounded-full blur-2xl animate-scale-pulse"></div>
+
+        <div className="max-w-container mx-auto px-4 md:px-8 relative z-10">
+          <div className="text-center">
+            <h1 className="font-serif text-hero text-brown-900 mb-6 animate-fade-in-up">
+              <span className="inline-block animate-wiggle">{t('contact.title')}</span>
             </h1>
-            <p className="text-xl text-brown-800 max-w-3xl mx-auto leading-relaxed mb-8">
-              Have a project in mind? We'd love to hear from you. Reach out to discuss your custom furniture needs.
+            <p className="text-xl text-brown-800 max-w-3xl mx-auto leading-relaxed mb-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+              {t('contact.subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-brown-700">
-              <div className="flex items-center">
-                <CheckCircle className="w-4 h-4 text-accent mr-2" />
-                <span>Free Design Consultation</span>
-              </div>
-              <div className="flex items-center">
-                <CheckCircle className="w-4 h-4 text-accent mr-2" />
-                <span>24-hour Response Time</span>
-              </div>
-              <div className="flex items-center">
-                <CheckCircle className="w-4 h-4 text-accent mr-2" />
-                <span>Expert Furniture Advice</span>
-              </div>
+              {[
+                { icon: CheckCircle, textKey: 'contact.freeConsultation', delay: '0.3s' },
+                { icon: CheckCircle, textKey: 'contact.responseTime', delay: '0.4s' },
+                { icon: CheckCircle, textKey: 'contact.expertAdvice', delay: '0.5s' }
+              ].map((item, index) => (
+                <div
+                  key={index}
+                  className="flex items-center bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 animate-fade-in-up"
+                  style={{ animationDelay: item.delay }}
+                >
+                  <item.icon className="w-4 h-4 text-accent mr-2 animate-scale-pulse" />
+                  <span>{t(item.textKey)}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -91,7 +100,7 @@ export default function ContactPage() {
                     : 'text-brown-700 hover:text-accent hover:bg-cream-100'
                 }`}
               >
-                Contact Us
+                {t('contact.contactUs')}
               </button>
               <button
                 onClick={() => setActiveTab('custom')}
@@ -101,7 +110,7 @@ export default function ContactPage() {
                     : 'text-brown-700 hover:text-accent hover:bg-cream-100'
                 }`}
               >
-                Custom Request
+                {t('contact.customRequest')}
               </button>
             </div>
           </div>
@@ -134,33 +143,35 @@ export default function ContactPage() {
 // CONTACT INFO CARDS
 // ===============================
 function ContactInfo() {
+  const { t } = useTranslation('common');
+
   const contactDetails = [
     {
       icon: MapPin,
-      title: 'Visit Our Workshop',
+      titleKey: 'contact.visitWorkshop',
       details: ['Rruga e Elbasanit', 'Tirana, Albania'],
-      action: 'Get Directions',
+      actionKey: 'contact.getDirections',
       actionLink: 'https://maps.google.com'
     },
     {
       icon: Phone,
-      title: 'Call Us',
-      details: ['+355 XX XXX XXXX', 'Mon-Sat: 9AM - 6PM'],
-      action: 'Call Now',
+      titleKey: 'contact.callUs',
+      detailsKeys: ['+355 XX XXX XXXX', 'contact.mondaySaturday'],
+      actionKey: 'contact.callNow',
       actionLink: 'tel:+355XXXXXXXX'
     },
     {
       icon: Mail,
-      title: 'Email Us',
-      details: ['info@ansafurniture.al', 'We respond within 24 hours'],
-      action: 'Send Email',
+      titleKey: 'contact.emailUs',
+      detailsKeys: ['info@ansafurniture.al', 'contact.respondWithin'],
+      actionKey: 'contact.sendEmail',
       actionLink: 'mailto:info@ansafurniture.al'
     },
     {
       icon: Clock,
-      title: 'Workshop Hours',
-      details: ['Mon-Fri: 9AM - 6PM', 'Saturday: 10AM - 4PM', 'Sunday: Closed'],
-      action: 'Schedule Visit',
+      titleKey: 'contact.workshopHours',
+      detailsKeys: ['contact.mondayFriday', 'contact.saturday', 'contact.sunday'],
+      actionKey: 'contact.scheduleVisit',
       actionLink: '#'
     }
   ];
@@ -172,23 +183,40 @@ function ContactInfo() {
         return (
           <div
             key={index}
-            className="bg-cream-50 p-6 rounded-card hover:shadow-card transition-all duration-300 border border-cream-200"
+            className="group bg-gradient-to-br from-cream-50 to-white p-6 rounded-2xl hover:shadow-2xl transition-all duration-500 border border-cream-200 hover:border-accent relative overflow-hidden hover:-translate-y-2 animate-fade-in-up"
+            style={{ animationDelay: `${index * 0.1}s` }}
           >
-            <div className="bg-accent/10 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-              <Icon className="w-6 h-6 text-accent" />
+            {/* Shimmer effect */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+              <div className="animate-shimmer absolute inset-0"></div>
             </div>
-            <h3 className="font-semibold text-brown-900 mb-3">{detail.title}</h3>
-            <div className="space-y-1 mb-4">
-              {detail.details.map((item, idx) => (
-                <p key={idx} className="text-sm text-brown-700">{item}</p>
-              ))}
+
+            {/* Rotating background circle */}
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-accent/5 rounded-full group-hover:animate-rotate-slow transition-all duration-500"></div>
+
+            <div className="relative z-10">
+              <div className="bg-accent/10 group-hover:bg-accent w-12 h-12 rounded-lg flex items-center justify-center mb-4 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12">
+                <Icon className="w-6 h-6 text-accent group-hover:text-white transition-colors duration-300" />
+              </div>
+              <h3 className="font-semibold text-brown-900 group-hover:text-accent mb-3 transition-colors duration-300">{t(detail.titleKey)}</h3>
+              <div className="space-y-1 mb-4">
+                {(detail.details || detail.detailsKeys || []).map((item, idx) => (
+                  <p key={idx} className="text-sm text-brown-700 group-hover:text-brown-900 transition-colors duration-300">
+                    {item.startsWith('contact.') ? t(item) : item}
+                  </p>
+                ))}
+              </div>
+              <a
+                href={detail.actionLink}
+                className="text-accent hover:text-accent-dark font-medium text-sm transition-all duration-200 inline-flex items-center group-hover:gap-2 gap-1"
+              >
+                {t(detail.actionKey)}
+                <span className="inline-block group-hover:translate-x-1 transition-transform duration-300">→</span>
+              </a>
             </div>
-            <a
-              href={detail.actionLink}
-              className="text-accent hover:text-accent-dark font-medium text-sm transition-colors duration-200"
-            >
-              {detail.action} →
-            </a>
+
+            {/* Decorative corner */}
+            <div className="absolute bottom-0 right-0 w-16 h-16 bg-accent/5 group-hover:bg-accent/10 rounded-tl-full transition-all duration-500"></div>
           </div>
         );
       })}
@@ -200,6 +228,7 @@ function ContactInfo() {
 // CONTACT FORM
 // ===============================
 function ContactForm() {
+  const { t } = useTranslation('common');
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
@@ -209,14 +238,42 @@ function ContactForm() {
   });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
+  const getCsrfToken = async () => {
+    // First ensure we have the CSRF token cookie
+    try {
+      await fetch('/api/csrf-token/', { credentials: 'include' });
+    } catch (err) {
+      console.error('Failed to fetch CSRF token:', err);
+    }
+
+    const name = 'csrftoken';
+    let cookieValue = '';
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('loading');
 
     try {
-      const response = await fetch('http://localhost:8000/api/contact/', {
+      const csrfToken = await getCsrfToken();
+      const response = await fetch('/api/contact/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken
+        },
+        credentials: 'include',
         body: JSON.stringify(formData),
       });
 
@@ -225,9 +282,12 @@ function ContactForm() {
         setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
         setTimeout(() => setStatus('idle'), 5000);
       } else {
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
         setStatus('error');
       }
     } catch (error) {
+      console.error('Submit error:', error);
       setStatus('error');
     }
   };
@@ -237,14 +297,18 @@ function ContactForm() {
   };
 
   return (
-    <div className="bg-white rounded-card p-8 shadow-card">
-      <h2 className="text-2xl font-serif font-semibold text-brown-900 mb-6">Send Us a Message</h2>
+    <div className="bg-white rounded-2xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 animate-fade-in-up relative overflow-hidden">
+      {/* Animated background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-brown-900/5 opacity-0 hover:opacity-100 transition-opacity duration-700"></div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="relative z-10">
+        <h2 className="text-2xl font-serif font-semibold text-brown-900 mb-6 animate-slide-in-left">{t('contact.sendMessage')}</h2>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-brown-900 mb-2">
-              Name <span className="text-red-500">*</span>
+              {t('contact.name')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -253,13 +317,13 @@ function ContactForm() {
               onChange={handleChange}
               required
               className="w-full px-4 py-3 rounded-lg border border-cream-300 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all duration-300 bg-white"
-              placeholder="Your full name"
+              placeholder={t('contact.yourFullName')}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-brown-900 mb-2">
-              Email <span className="text-red-500">*</span>
+              {t('contact.email')} <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
@@ -268,7 +332,7 @@ function ContactForm() {
               onChange={handleChange}
               required
               className="w-full px-4 py-3 rounded-lg border border-cream-300 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all duration-300 bg-white"
-              placeholder="your@email.com"
+              placeholder={t('contact.yourEmail')}
             />
           </div>
         </div>
@@ -276,7 +340,7 @@ function ContactForm() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-brown-900 mb-2">
-              Phone (optional)
+              {t('contact.phoneOptional')}
             </label>
             <input
               type="tel"
@@ -284,13 +348,13 @@ function ContactForm() {
               value={formData.phone}
               onChange={handleChange}
               className="w-full px-4 py-3 rounded-lg border border-cream-300 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all duration-300 bg-white"
-              placeholder="+355 XX XXX XXXX"
+              placeholder={t('contact.phoneNumber')}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-brown-900 mb-2">
-              Subject <span className="text-red-500">*</span>
+              {t('contact.subject')} <span className="text-red-500">*</span>
             </label>
             <select
               name="subject"
@@ -299,21 +363,21 @@ function ContactForm() {
               required
               className="w-full px-4 py-3 rounded-lg border border-cream-300 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all duration-300 bg-white"
             >
-              <option value="">Select a subject...</option>
-              <option value="General Inquiry">General Inquiry</option>
-              <option value="Project Question">Project Question</option>
-              <option value="Custom Furniture">Custom Furniture</option>
-              <option value="Pricing & Quote">Pricing & Quote</option>
-              <option value="Existing Order">Existing Order</option>
-              <option value="Feedback">Feedback</option>
-              <option value="Other">Other</option>
+              <option value="">{t('contact.selectSubject')}</option>
+              <option value="general">{t('contact.generalInquiry')}</option>
+              <option value="general">{t('contact.projectQuestion')}</option>
+              <option value="custom">{t('contact.customFurniture')}</option>
+              <option value="general">{t('contact.pricingQuote')}</option>
+              <option value="support">{t('contact.existingOrder')}</option>
+              <option value="feedback">{t('contact.feedback')}</option>
+              <option value="other">{t('contact.other')}</option>
             </select>
           </div>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-brown-900 mb-2">
-            Message <span className="text-red-500">*</span>
+            {t('contact.message')} <span className="text-red-500">*</span>
           </label>
           <textarea
             name="message"
@@ -322,40 +386,41 @@ function ContactForm() {
             required
             rows={6}
             className="w-full px-4 py-3 rounded-lg border border-cream-300 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all duration-300 bg-white resize-none"
-            placeholder="Tell us about your inquiry..."
+            placeholder={t('contact.tellUsAboutInquiry')}
           ></textarea>
         </div>
 
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="w-full bg-accent hover:bg-accent-dark text-white font-semibold px-8 py-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+          className="w-full bg-gradient-to-r from-accent to-accent-dark hover:from-accent-dark hover:to-accent text-white font-semibold px-8 py-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center hover:scale-105 animate-glow"
         >
           {status === 'loading' ? (
             <>
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-              Sending...
+              {t('contact.sending')}
             </>
           ) : (
             <>
-              <Send className="w-5 h-5 mr-2" />
-              Send Message
+              <Send className="w-5 h-5 mr-2 animate-bounce-slow" />
+              {t('contact.sendButton')}
             </>
           )}
         </button>
 
         {status === 'success' && (
-          <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center">
-            <CheckCircle className="w-5 h-5 mr-2" />
-            Thank you! We'll get back to you within 24 hours.
+          <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center animate-fade-in-scale">
+            <CheckCircle className="w-5 h-5 mr-2 animate-scale-pulse" />
+            {t('contact.thankYouMessage')}
           </div>
         )}
         {status === 'error' && (
-          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
-            Something went wrong. Please try again or contact us directly.
+          <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg animate-wiggle">
+            {t('contact.errorMessage')}
           </div>
         )}
       </form>
+      </div>
     </div>
   );
 }
@@ -364,6 +429,7 @@ function ContactForm() {
 // CUSTOM REQUEST FORM
 // ===============================
 function CustomRequestForm() {
+  const { t } = useTranslation('common');
   const [formData, setFormData] = useState<CustomRequestFormData>({
     name: '',
     email: '',
@@ -375,24 +441,58 @@ function CustomRequestForm() {
   });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
+  const getCsrfToken = async () => {
+    // First ensure we have the CSRF token cookie
+    try {
+      await fetch('/api/csrf-token/', { credentials: 'include' });
+    } catch (err) {
+      console.error('Failed to fetch CSRF token:', err);
+    }
+
+    const name = 'csrftoken';
+    let cookieValue = '';
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('loading');
 
     try {
       const formDataToSend = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        if (key === 'images' && value) {
-          Array.from(value as FileList).forEach((file) => {
-            formDataToSend.append('images', file);
-          });
-        } else if (value) {
-          formDataToSend.append(key, value as string);
-        }
-      });
 
-      const response = await fetch('http://localhost:8000/api/custom-requests/', {
+      // Map form fields to backend field names
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('email', formData.email);
+      if (formData.phone) formDataToSend.append('phone', formData.phone);
+      if (formData.room) formDataToSend.append('room_type', formData.room);
+      if (formData.budget) formDataToSend.append('budget_range', formData.budget);
+      formDataToSend.append('message', formData.message);
+
+      // Handle images
+      if (formData.images) {
+        Array.from(formData.images).forEach((file) => {
+          formDataToSend.append('images', file);
+        });
+      }
+
+      const csrfToken = await getCsrfToken();
+      const response = await fetch('/api/custom-request/', {
         method: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken
+        },
+        credentials: 'include',
         body: formDataToSend,
       });
 
@@ -401,9 +501,12 @@ function CustomRequestForm() {
         setFormData({ name: '', email: '', phone: '', room: '', budget: '', message: '', images: null });
         setTimeout(() => setStatus('idle'), 5000);
       } else {
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
         setStatus('error');
       }
     } catch (error) {
+      console.error('Submit error:', error);
       setStatus('error');
     }
   };
@@ -419,14 +522,14 @@ function CustomRequestForm() {
 
   return (
     <div className="bg-white rounded-card p-8 shadow-card">
-      <h2 className="text-2xl font-serif font-semibold text-brown-900 mb-2">Request Custom Furniture</h2>
-      <p className="text-brown-700 mb-6">Tell us about your project and we'll create something perfect for your space.</p>
+      <h2 className="text-2xl font-serif font-semibold text-brown-900 mb-2">{t('contact.requestCustomFurniture')}</h2>
+      <p className="text-brown-700 mb-6">{t('contact.customFurnitureDesc')}</p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-brown-900 mb-2">
-              Name <span className="text-red-500">*</span>
+              {t('contact.name')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -435,13 +538,13 @@ function CustomRequestForm() {
               onChange={handleChange}
               required
               className="w-full px-4 py-3 rounded-lg border border-cream-300 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all duration-300 bg-white"
-              placeholder="Your full name"
+              placeholder={t('contact.yourFullName')}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-brown-900 mb-2">
-              Email <span className="text-red-500">*</span>
+              {t('contact.email')} <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
@@ -450,7 +553,7 @@ function CustomRequestForm() {
               onChange={handleChange}
               required
               className="w-full px-4 py-3 rounded-lg border border-cream-300 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all duration-300 bg-white"
-              placeholder="your@email.com"
+              placeholder={t('contact.yourEmail')}
             />
           </div>
         </div>
@@ -458,7 +561,7 @@ function CustomRequestForm() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-brown-900 mb-2">
-              Phone (optional)
+              {t('contact.phoneOptional')}
             </label>
             <input
               type="tel"
@@ -466,13 +569,13 @@ function CustomRequestForm() {
               value={formData.phone}
               onChange={handleChange}
               className="w-full px-4 py-3 rounded-lg border border-cream-300 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all duration-300 bg-white"
-              placeholder="+355 XX XXX XXXX"
+              placeholder={t('contact.phoneNumber')}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-brown-900 mb-2">
-              What room?
+              {t('contact.whatRoom')}
             </label>
             <select
               name="room"
@@ -480,21 +583,21 @@ function CustomRequestForm() {
               onChange={handleChange}
               className="w-full px-4 py-3 rounded-lg border border-cream-300 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all duration-300 bg-white"
             >
-              <option value="">Select a room...</option>
-              <option value="kitchen">Kitchen</option>
-              <option value="living-room">Living Room</option>
-              <option value="bedroom">Bedroom</option>
-              <option value="wardrobe">Wardrobe</option>
-              <option value="office">Office</option>
-              <option value="dining-room">Dining Room</option>
-              <option value="other">Other</option>
+              <option value="">{t('contact.selectRoom')}</option>
+              <option value="kitchen">{t('contact.kitchen')}</option>
+              <option value="living-room">{t('contact.livingRoom')}</option>
+              <option value="bedroom">{t('contact.bedroom')}</option>
+              <option value="wardrobe">{t('contact.wardrobe')}</option>
+              <option value="office">{t('contact.office')}</option>
+              <option value="dining-room">{t('contact.diningRoom')}</option>
+              <option value="other">{t('contact.other')}</option>
             </select>
           </div>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-brown-900 mb-2">
-            Budget Range
+            {t('contact.budgetRange')}
           </label>
           <select
             name="budget"
@@ -502,7 +605,7 @@ function CustomRequestForm() {
             onChange={handleChange}
             className="w-full px-4 py-3 rounded-lg border border-cream-300 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all duration-300 bg-white"
           >
-            <option value="">Select a range...</option>
+            <option value="">{t('contact.selectRange')}</option>
             <option value="<1000">&lt;€1000</option>
             <option value="1000-3000">€1000–€3000</option>
             <option value="3000-6000">€3000–€6000</option>
@@ -512,7 +615,7 @@ function CustomRequestForm() {
 
         <div>
           <label className="block text-sm font-medium text-brown-900 mb-2">
-            Project Description <span className="text-red-500">*</span>
+            {t('contact.projectDescription')} <span className="text-red-500">*</span>
           </label>
           <textarea
             name="message"
@@ -521,13 +624,13 @@ function CustomRequestForm() {
             required
             rows={6}
             className="w-full px-4 py-3 rounded-lg border border-cream-300 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all duration-300 bg-white resize-none"
-            placeholder="Describe your vision, measurements, style preferences, materials..."
+            placeholder={t('contact.describeVision')}
           ></textarea>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-brown-900 mb-2">
-            Reference Images (optional)
+            {t('contact.referenceImages')}
           </label>
           <input
             type="file"
@@ -537,7 +640,7 @@ function CustomRequestForm() {
             accept="image/*"
             className="w-full px-4 py-3 rounded-lg border border-cream-300 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all duration-300 bg-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-white hover:file:bg-accent-dark"
           />
-          <p className="text-sm text-brown-600 mt-1">Upload photos of your space or inspiration images</p>
+          <p className="text-sm text-brown-600 mt-1">{t('contact.uploadPhotos')}</p>
         </div>
 
         <button
@@ -548,12 +651,12 @@ function CustomRequestForm() {
           {status === 'loading' ? (
             <>
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-              Sending...
+              {t('contact.sending')}
             </>
           ) : (
             <>
               <Send className="w-5 h-5 mr-2" />
-              Submit Request
+              {t('contact.submitRequest')}
             </>
           )}
         </button>
@@ -561,12 +664,12 @@ function CustomRequestForm() {
         {status === 'success' && (
           <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center">
             <CheckCircle className="w-5 h-5 mr-2" />
-            Thank you! We'll review your request and contact you within 24 hours.
+            {t('contact.requestReceivedMessage')}
           </div>
         )}
         {status === 'error' && (
           <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
-            Something went wrong. Please try again or contact us directly.
+            {t('contact.errorMessage')}
           </div>
         )}
       </form>
@@ -578,42 +681,49 @@ function CustomRequestForm() {
 // MAP SECTION
 // ===============================
 function MapSection() {
+  const { t } = useTranslation('common');
+
   return (
-    <div className="bg-white rounded-card shadow-card overflow-hidden">
-      <div className="aspect-video bg-cream-200 relative">
-        <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d11988.544086733365!2d19.834755531922887!3d41.305904449121265!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x135031c1d9418cfb%3A0xa2e2088da9965781!2sFlladi%20i%20Tuneleve!5e0!3m2!1sen!2s!4v1755091610264!5m2!1sen!2s"
-          width="100%"
-          height="100%"
-          style={{ border: 0 }}
-          allowFullScreen
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-          title="Ansa Furniture Location"
-          className="absolute inset-0"
-        ></iframe>
+    <div className="max-w-5xl mx-auto">
+      <div className="text-center mb-8">
+        <h2 className="font-serif text-3xl md:text-4xl text-brown-900 mb-3">{t('contact.visitWorkshop')}</h2>
+        <p className="text-brown-700 max-w-2xl mx-auto">
+          {t('contact.visitWorkshopDesc')}
+        </p>
       </div>
 
-      <div className="p-6">
-        <h3 className="font-serif text-xl font-semibold text-brown-900 mb-2">Visit Our Workshop</h3>
-        <p className="text-brown-700 mb-4">
-          Come see our craftsmanship in person. Our workshop showcases completed projects and works in progress.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <a
-            href="https://www.google.com/maps/place/Flladi+i+Tuneleve/@41.305904449121265,19.834755531922887,12z"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 bg-accent hover:bg-accent-dark text-white font-semibold py-3 px-4 rounded-lg text-center transition-colors duration-200"
-          >
-            Get Directions
-          </a>
-          <a
-            href="#"
-            className="flex-1 border border-cream-300 hover:border-accent hover:bg-accent/5 text-brown-900 hover:text-accent font-semibold py-3 px-4 rounded-lg text-center transition-all duration-200"
-          >
-            Schedule Visit
-          </a>
+      <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-cream-100">
+        <div className="h-[300px] md:h-[400px] bg-cream-100 relative">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d11988.544086733365!2d19.834755531922887!3d41.305904449121265!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x135031c1d9418cfb%3A0xa2e2088da9965781!2sFlladi%20i%20Tuneleve!5e0!3m2!1sen!2s!4v1755091610264!5m2!1sen!2s"
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Ansa Furniture Location"
+            className="absolute inset-0"
+          ></iframe>
+        </div>
+
+        <div className="p-6 bg-gradient-to-br from-cream-50 to-white">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <a
+              href="https://www.google.com/maps/place/Flladi+i+Tuneleve/@41.305904449121265,19.834755531922887,12z"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 bg-accent hover:bg-accent-dark text-white font-semibold py-3 px-6 rounded-lg text-center transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105"
+            >
+              {t('contact.getDirections')}
+            </a>
+            <a
+              href="#"
+              className="flex-1 border-2 border-accent hover:bg-accent text-brown-900 hover:text-white font-semibold py-3 px-6 rounded-lg text-center transition-all duration-300 hover:scale-105"
+            >
+              {t('contact.scheduleVisit')}
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -624,6 +734,7 @@ function MapSection() {
 // FAQ SECTION
 // ===============================
 function FAQSection() {
+  const { t } = useTranslation('common');
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [filteredFaqs, setFilteredFaqs] = useState<FAQ[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -632,13 +743,13 @@ function FAQSection() {
   const [loading, setLoading] = useState(true);
 
   const categories = [
-    { value: 'all', label: 'All' },
-    { value: 'general', label: 'General' },
-    { value: 'process', label: 'Process' },
-    { value: 'pricing', label: 'Pricing' },
-    { value: 'materials', label: 'Materials' },
-    { value: 'delivery', label: 'Delivery' },
-    { value: 'warranty', label: 'Warranty' }
+    { value: 'all', label: t('contact.all') },
+    { value: 'general', label: t('contact.general') },
+    { value: 'process', label: t('contact.process') },
+    { value: 'pricing', label: t('contact.pricing') },
+    { value: 'materials', label: t('contact.materials') },
+    { value: 'delivery', label: t('contact.delivery') },
+    { value: 'warranty', label: t('contact.warranty') }
   ];
 
   useEffect(() => {
@@ -651,7 +762,7 @@ function FAQSection() {
 
   const fetchFaqs = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/faqs/');
+      const response = await fetch('/api/faqs/');
       const data = await response.json();
       setFaqs(data.results || data);
     } catch (error) {
@@ -687,10 +798,10 @@ function FAQSection() {
     <div className="max-w-4xl mx-auto">
       <div className="text-center mb-12">
         <h2 className="font-serif text-section text-brown-900 mb-4">
-          Frequently Asked Questions
+          {t('contact.faqTitle')}
         </h2>
         <p className="text-lg text-brown-800 max-w-2xl mx-auto">
-          Find answers to common questions about our custom furniture services.
+          {t('contact.faqDesc')}
         </p>
       </div>
 
@@ -700,7 +811,7 @@ function FAQSection() {
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-brown-600" />
           <input
             type="text"
-            placeholder="Search questions..."
+            placeholder={t('contact.searchQuestions')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-12 pr-4 py-3 rounded-lg border border-cream-300 focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all duration-300 bg-white"
@@ -729,7 +840,7 @@ function FAQSection() {
       {loading ? (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto"></div>
-          <p className="text-brown-800 mt-4">Loading FAQs...</p>
+          <p className="text-brown-800 mt-4">{t('contact.loadingFaqs')}</p>
         </div>
       ) : filteredFaqs.length > 0 ? (
         <div className="space-y-4">
@@ -777,8 +888,8 @@ function FAQSection() {
         <div className="text-center py-12 bg-white rounded-card">
           <p className="text-lg text-brown-800 mb-4">
             {searchQuery
-              ? `No FAQs found matching "${searchQuery}"`
-              : 'No FAQs found in this category'}
+              ? `${t('contact.noFaqsFound')} "${searchQuery}"`
+              : t('contact.noFaqsCategory')}
           </p>
           <button
             onClick={() => {
@@ -787,7 +898,7 @@ function FAQSection() {
             }}
             className="text-accent font-medium hover:underline"
           >
-            Clear filters
+            {t('contact.clearFilters')}
           </button>
         </div>
       )}

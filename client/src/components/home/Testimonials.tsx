@@ -22,7 +22,7 @@ const Testimonials: React.FC = () => {
 
   const fetchTestimonials = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/testimonials/?featured=true');
+      const response = await fetch('/api/testimonials/?featured=true');
       const data = await response.json();
       // Take first 4 testimonials
       setTestimonials(data.results.slice(0, 4));

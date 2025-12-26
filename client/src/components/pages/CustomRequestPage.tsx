@@ -351,7 +351,7 @@ const CustomRequestPage: React.FC = () => {
     }
     
     try {
-      const response = await fetch('http://localhost:8000/api/custom-request/', {
+      const response = await fetch('/api/custom-request/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

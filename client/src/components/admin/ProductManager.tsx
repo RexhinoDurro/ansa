@@ -68,7 +68,7 @@ const ProductManager: React.FC = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/admin/products/', {
+      const response = await fetch('/api/admin/products/', {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -90,7 +90,7 @@ const ProductManager: React.FC = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/admin/categories/', {
+      const response = await fetch('/api/admin/categories/', {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -174,8 +174,8 @@ const ProductManager: React.FC = () => {
       }
 
       const url = editingProduct && editingProduct.id
-        ? `http://localhost:8000/api/admin/products/${editingProduct.id}/`
-        : 'http://localhost:8000/api/admin/products/';
+        ? `/api/admin/products/${editingProduct.id}/`
+        : '/api/admin/products/';
       
       const method = editingProduct && editingProduct.id ? 'PATCH' : 'POST';
 
@@ -248,7 +248,7 @@ const ProductManager: React.FC = () => {
     if (!confirm('Are you sure you want to delete this product?')) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/products/${id}/`, {
+      const response = await fetch(`/api/admin/products/${id}/`, {
         method: 'DELETE',
         credentials: 'include'
       });

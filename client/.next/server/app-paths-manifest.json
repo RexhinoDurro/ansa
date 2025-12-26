@@ -1,10 +1,16 @@
 {
-  "/admin/login/page": "app/admin/login/page.js",
-  "/admin/gallery/page": "app/admin/gallery/page.js",
-  "/(public)/portfolio/page": "app/(public)/portfolio/page.js",
-  "/admin/dashboard/page": "app/admin/dashboard/page.js",
-  "/admin/products/page": "app/admin/products/page.js",
-  "/admin/page": "app/admin/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
   "/(public)/page": "app/(public)/page.js",
-  "/admin/categories/page": "app/admin/categories/page.js"
+  "/(public)/contact/page": "app/(public)/contact/page.js",
+  "/(public)/portfolio/[slug]/page": "app/(public)/portfolio/[slug]/page.js",
+  "/(public)/services/page": "app/(public)/services/page.js",
+  "/(public)/portfolio/page": "app/(public)/portfolio/page.js",
+  "/admin/categories/page": "app/admin/categories/page.js",
+  "/admin/contacts/page": "app/admin/contacts/page.js",
+  "/admin/dashboard/page": "app/admin/dashboard/page.js",
+  "/admin/gallery/page": "app/admin/gallery/page.js",
+  "/admin/login/page": "app/admin/login/page.js",
+  "/admin/orders/page": "app/admin/orders/page.js",
+  "/admin/products/page": "app/admin/products/page.js",
+  "/admin/page": "app/admin/page.js"
 }

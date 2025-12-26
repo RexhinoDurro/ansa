@@ -1,4 +1,4 @@
-// File: /Users/MacOs/Documents/GitHub/ansa/client/src/app/(public)/services/page.tsx
+// File: /home/ubuntu/ansa/client/src/app/(public)/services/page.tsx
 import * as entry from '../../../../../src/app/(public)/services/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

@@ -38,7 +38,7 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/admin/profile/', {
+      const response = await fetch('/api/admin/profile/', {
         credentials: 'include',
         signal: AbortSignal.timeout(3000) // 3 second timeout
       });
@@ -63,7 +63,7 @@ export const AdminProvider: React.FC<AdminProviderProps> = ({ children }) => {
 
   const logout = async () => {
     try {
-      await fetch('http://localhost:8000/api/admin/logout/', {
+      await fetch('/api/admin/logout/', {
         method: 'POST',
         credentials: 'include',
         signal: AbortSignal.timeout(3000) // 3 second timeout

@@ -45,7 +45,7 @@ const MaterialManager: React.FC = () => {
 
   const fetchMaterials = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/admin/materials/', {
+      const response = await fetch('/api/admin/materials/', {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -71,8 +71,8 @@ const MaterialManager: React.FC = () => {
 
     try {
       const url = editingMaterial
-        ? `http://localhost:8000/api/admin/materials/${editingMaterial.id}/`
-        : 'http://localhost:8000/api/admin/materials/';
+        ? `/api/admin/materials/${editingMaterial.id}/`
+        : '/api/admin/materials/';
 
       const method = editingMaterial ? 'PATCH' : 'POST';
 
@@ -128,7 +128,7 @@ const MaterialManager: React.FC = () => {
     if (!confirm('Are you sure you want to delete this material?')) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/materials/${id}/`, {
+      const response = await fetch(`/api/admin/materials/${id}/`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -147,7 +147,7 @@ const MaterialManager: React.FC = () => {
 
   const toggleActive = async (material: Material) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/materials/${material.id}/`, {
+      const response = await fetch(`/api/admin/materials/${material.id}/`, {
         method: 'PATCH',
         credentials: 'include',
         headers: {

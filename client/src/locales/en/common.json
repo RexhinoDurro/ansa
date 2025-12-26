@@ -87,11 +87,25 @@
   },
   "contact": {
     "title": "Get in Touch",
-    "subtitle": "Have questions about our furniture? Want to schedule a consultation? Or just need some design advice? We're here to help.",
-    "visitShowroom": "Visit Our Showroom",
+    "subtitle": "Have a project in mind? We'd love to hear from you. Reach out to discuss your custom furniture needs.",
+    "freeConsultation": "Free Design Consultation",
+    "responseTime": "24-hour Response Time",
+    "expertAdvice": "Expert Furniture Advice",
+    "contactUs": "Contact Us",
+    "customRequest": "Custom Request",
+    "visitWorkshop": "Visit Our Workshop",
     "callUs": "Call Us",
     "emailUs": "Email Us",
-    "storeHours": "Store Hours",
+    "workshopHours": "Workshop Hours",
+    "getDirections": "Get Directions",
+    "callNow": "Call Now",
+    "sendEmail": "Send Email",
+    "scheduleVisit": "Schedule Visit",
+    "respondWithin": "We respond within 24 hours",
+    "mondayFriday": "Mon-Fri: 9AM - 6PM",
+    "saturday": "Saturday: 10AM - 4PM",
+    "sunday": "Sunday: Closed",
+    "mondaySaturday": "Mon-Sat: 9AM - 6PM",
     "sendMessage": "Send us a Message",
     "fullName": "Full Name",
     "emailAddress": "Email Address",
@@ -100,8 +114,60 @@
     "message": "Message",
     "sendButton": "Send Message",
     "messageSent": "Message Sent Successfully!",
-    "getDirections": "Get Directions",
-    "scheduleVisit": "Schedule Visit"
+    "messageError": "Failed to send message. Please try again.",
+    "requiredField": "This field is required",
+    "invalidEmail": "Please enter a valid email address",
+    "name": "Name",
+    "email": "Email",
+    "phoneOptional": "Phone (optional)",
+    "selectSubject": "Select a subject...",
+    "generalInquiry": "General Inquiry",
+    "projectQuestion": "Project Question",
+    "customFurniture": "Custom Furniture",
+    "pricingQuote": "Pricing & Quote",
+    "existingOrder": "Existing Order",
+    "feedback": "Feedback",
+    "other": "Other",
+    "yourFullName": "Your full name",
+    "yourEmail": "your@email.com",
+    "phoneNumber": "+355 XX XXX XXXX",
+    "tellUsAboutInquiry": "Tell us about your inquiry...",
+    "sending": "Sending...",
+    "thankYouMessage": "Thank you! We'll get back to you within 24 hours.",
+    "errorMessage": "Something went wrong. Please try again or contact us directly.",
+    "requestCustomFurniture": "Request Custom Furniture",
+    "customFurnitureDesc": "Tell us about your project and we'll create something perfect for your space.",
+    "whatRoom": "What room?",
+    "selectRoom": "Select a room...",
+    "kitchen": "Kitchen",
+    "livingRoom": "Living Room",
+    "bedroom": "Bedroom",
+    "wardrobe": "Wardrobe",
+    "office": "Office",
+    "diningRoom": "Dining Room",
+    "budgetRange": "Budget Range",
+    "selectRange": "Select a range...",
+    "projectDescription": "Project Description",
+    "describeVision": "Describe your vision, measurements, style preferences, materials...",
+    "referenceImages": "Reference Images (optional)",
+    "uploadPhotos": "Upload photos of your space or inspiration images",
+    "submitRequest": "Submit Request",
+    "requestReceivedMessage": "Thank you! We'll review your request and contact you within 24 hours.",
+    "visitWorkshopDesc": "Come see our craftsmanship in person. Our workshop showcases completed projects and works in progress.",
+    "faqTitle": "Frequently Asked Questions",
+    "faqDesc": "Find answers to common questions about our custom furniture services.",
+    "searchQuestions": "Search questions...",
+    "all": "All",
+    "general": "General",
+    "process": "Process",
+    "pricing": "Pricing",
+    "materials": "Materials",
+    "delivery": "Delivery",
+    "warranty": "Warranty",
+    "loadingFaqs": "Loading FAQs...",
+    "noFaqsFound": "No FAQs found matching",
+    "noFaqsCategory": "No FAQs found in this category",
+    "clearFilters": "Clear filters"
   },
   "catalogue": {
     "title": "Our Catalogue",
@@ -183,5 +249,115 @@
       "title": "Customer Support",
       "description": "From order to delivery, our team ensures a seamless experience."
     }
+  },
+  "home": {
+    "heroTitle": "Custom Furniture, Built for Your Space.",
+    "heroSubtitle": "From idea to installation, we design and build furniture tailored to your home and lifestyle.",
+    "requestDesign": "Request a Custom Design",
+    "viewWork": "View Our Work",
+    "ourJourney": "Our Journey",
+    "craftingDreams": "Crafting Dreams Into",
+    "reality": "Reality",
+    "storyParagraph1": "For over a decade, Ansa Furniture has been transforming homes across Albania with custom-designed and expertly crafted furniture. What started as a small workshop in Tirana has grown into a trusted name in bespoke furniture design.",
+    "storyParagraph2": "We believe every home is unique, and your furniture should be too. That's why we don't sell pre-made pieces. Instead, we work closely with you to understand your space, your style, and your needs—then we design and build furniture that's perfectly tailored to your life.",
+    "storyParagraph3": "Our craftsmen combine traditional woodworking techniques with modern design principles to create furniture that's not only beautiful but built to last for generations.",
+    "quote": "Excellence is not a destination, it's a continuous journey that never ends.",
+    "quoteAuthor": "— Ansa Furniture Team",
+    "stats": {
+      "yearsExperience": "Years Experience",
+      "projectsCompleted": "Projects Completed",
+      "masterCraftsmen": "Master Craftsmen",
+      "customMade": "Custom Made"
+    },
+    "workshopTitle": "Our Workshop, Your Ideas",
+    "workshopSubtitle": "What sets us apart is our dedication to bringing your vision to life with uncompromising quality and attention to detail.",
+    "features": {
+      "feature1": {
+        "title": "Tailored Designs for Your Space",
+        "description": "Every piece is custom-designed to fit your exact measurements, style preferences, and functional needs. No two projects are the same."
+      },
+      "feature2": {
+        "title": "Handcrafted Precision",
+        "description": "Our skilled craftsmen use time-tested techniques and state-of-the-art tools to ensure every joint, edge, and finish is perfect."
+      },
+      "feature3": {
+        "title": "Long-Term Durability",
+        "description": "We use only premium materials and construction methods that stand the test of time, so your furniture lasts for decades."
+      }
+    },
+    "howItWorks": "How It Works",
+    "howItWorksSubtitle": "Every project follows our proven process, ensuring exceptional results from start to finish.",
+    "process": {
+      "step1": {
+        "title": "Consultation",
+        "description": "We meet to discuss your vision, needs, and budget. Understanding your space and lifestyle is our first priority."
+      },
+      "step2": {
+        "title": "3D Design & Measurements",
+        "description": "Our designers create detailed 3D renderings and take precise measurements to ensure a perfect fit."
+      },
+      "step3": {
+        "title": "Crafting in Our Workshop",
+        "description": "Skilled craftsmen bring your design to life using quality materials and expert techniques."
+      },
+      "step4": {
+        "title": "Delivery & Installation",
+        "description": "We deliver and professionally install your custom furniture, ensuring everything is perfect."
+      }
+    },
+    "testimonials": {
+      "title": "Testimonials",
+      "subtitle": "What Our Clients Say",
+      "description": "Don't just take our word for it – hear from the people who trusted us with their spaces.",
+      "client1": {
+        "name": "Maria K.",
+        "project": "Custom Kitchen – Tirana",
+        "quote": "The team at Ansa transformed our kitchen into exactly what we envisioned. The attention to detail and quality of craftsmanship is outstanding."
+      },
+      "client2": {
+        "name": "Alban S.",
+        "project": "Built-in Wardrobes – Durrës",
+        "quote": "Professional service from start to finish. They maximized our bedroom storage while maintaining a beautiful, minimalist aesthetic."
+      },
+      "client3": {
+        "name": "Elira M.",
+        "project": "Living Room System – Tirana",
+        "quote": "We couldn't be happier with our custom TV wall unit. It fits perfectly and the quality is exceptional. Highly recommend!"
+      }
+    }
+  },
+  "work": {
+    "title": "Some of our work",
+    "description": "Explore our recent projects showcasing",
+    "craftsmanship": "exceptional craftsmanship",
+    "and": "and",
+    "design": "innovative design solutions",
+    "forSpaces": "for diverse spaces.",
+    "images": "images",
+    "noProjects": "No featured projects available at the moment.",
+    "viewAll": "View all projects",
+    "seePortfolio": "See Full Portfolio",
+    "error": "Failed to load projects",
+    "tryAgain": "Please try again later or contact us directly."
+  },
+  "services": {
+    "title": "Our Services",
+    "subtitle": "From concept to installation, we offer comprehensive custom furniture solutions tailored to your space, style, and needs.",
+    "loading": "Loading services...",
+    "noServices": "No services available at the moment.",
+    "howWeWork": "How We Work",
+    "processSubtitle": "Every project follows our proven process, ensuring exceptional results from start to finish.",
+    "consultation": "Consultation",
+    "consultationDesc": "We discuss your vision, needs, and budget",
+    "design": "Design",
+    "designDesc": "3D renderings and precise measurements",
+    "crafting": "Crafting",
+    "craftingDesc": "Expert craftsmen build your furniture",
+    "installation": "Installation",
+    "installationDesc": "Professional delivery and setup",
+    "startProject": "Start Your Project",
+    "seeWork": "See Our Work",
+    "portfolioDesc": "Explore our portfolio of completed projects to see the quality and craftsmanship we bring to every piece.",
+    "viewPortfolio": "View Portfolio"
   }
-} 
+}

@@ -87,11 +87,25 @@
   },
   "contact": {
     "title": "Contattaci",
-    "subtitle": "Hai domande sui nostri mobili? Vuoi programmare una consulenza? O hai solo bisogno di consigli di design? Siamo qui per aiutarti.",
-    "visitShowroom": "Visita il Nostro Showroom",
+    "subtitle": "Hai un progetto in mente? Ci piacerebbe sentirti. Contattaci per discutere delle tue esigenze di mobili personalizzati.",
+    "freeConsultation": "Consulenza di Design Gratuita",
+    "responseTime": "Risposta entro 24 ore",
+    "expertAdvice": "Consulenza Esperta sui Mobili",
+    "contactUs": "Contattaci",
+    "customRequest": "Richiesta Personalizzata",
+    "visitWorkshop": "Visita il Nostro Laboratorio",
     "callUs": "Chiamaci",
     "emailUs": "Inviaci un'Email",
-    "storeHours": "Orari del Negozio",
+    "workshopHours": "Orari del Laboratorio",
+    "getDirections": "Ottieni Indicazioni",
+    "callNow": "Chiama Ora",
+    "sendEmail": "Invia Email",
+    "scheduleVisit": "Programma Visita",
+    "respondWithin": "Rispondiamo entro 24 ore",
+    "mondayFriday": "Lun-Ven: 9:00-18:00",
+    "saturday": "Sabato: 10:00-16:00",
+    "sunday": "Domenica: Chiuso",
+    "mondaySaturday": "Lun-Sab: 9:00-18:00",
     "sendMessage": "Inviaci un Messaggio",
     "fullName": "Nome Completo",
     "emailAddress": "Indirizzo Email",
@@ -100,8 +114,60 @@
     "message": "Messaggio",
     "sendButton": "Invia Messaggio",
     "messageSent": "Messaggio Inviato con Successo!",
-    "getDirections": "Ottieni Indicazioni",
-    "scheduleVisit": "Programma Visita"
+    "messageError": "Impossibile inviare il messaggio. Riprova.",
+    "requiredField": "Questo campo è obbligatorio",
+    "invalidEmail": "Inserisci un indirizzo email valido",
+    "name": "Nome",
+    "email": "Email",
+    "phoneOptional": "Telefono (facoltativo)",
+    "selectSubject": "Seleziona un oggetto...",
+    "generalInquiry": "Richiesta Generale",
+    "projectQuestion": "Domanda sul Progetto",
+    "customFurniture": "Mobili Personalizzati",
+    "pricingQuote": "Preventivo",
+    "existingOrder": "Ordine Esistente",
+    "feedback": "Feedback",
+    "other": "Altro",
+    "yourFullName": "Il tuo nome completo",
+    "yourEmail": "tua@email.com",
+    "phoneNumber": "+355 XX XXX XXXX",
+    "tellUsAboutInquiry": "Raccontaci della tua richiesta...",
+    "sending": "Invio in corso...",
+    "thankYouMessage": "Grazie! Ti risponderemo entro 24 ore.",
+    "errorMessage": "Qualcosa è andato storto. Riprova o contattaci direttamente.",
+    "requestCustomFurniture": "Richiedi Mobili Personalizzati",
+    "customFurnitureDesc": "Raccontaci del tuo progetto e creeremo qualcosa di perfetto per il tuo spazio.",
+    "whatRoom": "Quale stanza?",
+    "selectRoom": "Seleziona una stanza...",
+    "kitchen": "Cucina",
+    "livingRoom": "Soggiorno",
+    "bedroom": "Camera da Letto",
+    "wardrobe": "Guardaroba",
+    "office": "Ufficio",
+    "diningRoom": "Sala da Pranzo",
+    "budgetRange": "Fascia di Budget",
+    "selectRange": "Seleziona una fascia...",
+    "projectDescription": "Descrizione del Progetto",
+    "describeVision": "Descrivi la tua visione, misure, preferenze di stile, materiali...",
+    "referenceImages": "Immagini di Riferimento (facoltative)",
+    "uploadPhotos": "Carica foto del tuo spazio o immagini di ispirazione",
+    "submitRequest": "Invia Richiesta",
+    "requestReceivedMessage": "Grazie! Esamineremo la tua richiesta e ti contatteremo entro 24 ore.",
+    "visitWorkshopDesc": "Vieni a vedere la nostra maestria di persona. Il nostro laboratorio mostra progetti completati e lavori in corso.",
+    "faqTitle": "Domande Frequenti",
+    "faqDesc": "Trova risposte alle domande comuni sui nostri servizi di mobili personalizzati.",
+    "searchQuestions": "Cerca domande...",
+    "all": "Tutte",
+    "general": "Generale",
+    "process": "Processo",
+    "pricing": "Prezzi",
+    "materials": "Materiali",
+    "delivery": "Consegna",
+    "warranty": "Garanzia",
+    "loadingFaqs": "Caricamento FAQ...",
+    "noFaqsFound": "Nessuna FAQ trovata corrispondente a",
+    "noFaqsCategory": "Nessuna FAQ trovata in questa categoria",
+    "clearFilters": "Cancella filtri"
   },
   "catalogue": {
     "title": "Il Nostro Catalogo",
@@ -183,5 +249,115 @@
       "title": "Assistenza Clienti",
       "description": "Dall'ordine alla consegna, il nostro team garantisce un'esperienza senza interruzioni."
     }
+  },
+  "home": {
+    "heroTitle": "Mobili Su Misura, Costruiti per il Tuo Spazio.",
+    "heroSubtitle": "Dall'idea all'installazione, progettiamo e costruiamo mobili su misura per la tua casa e il tuo stile di vita.",
+    "requestDesign": "Richiedi un Design Personalizzato",
+    "viewWork": "Guarda i Nostri Lavori",
+    "ourJourney": "Il Nostro Viaggio",
+    "craftingDreams": "Realizzare Sogni In",
+    "reality": "Realtà",
+    "storyParagraph1": "Da oltre un decennio, Ansa Furniture trasforma le case in tutta l'Albania con mobili su misura ed expertly realizzati. Ciò che è iniziato come una piccola officina a Tirana è diventato un nome di fiducia nel design di mobili su misura.",
+    "storyParagraph2": "Crediamo che ogni casa sia unica e i tuoi mobili dovrebbero esserlo anche. Ecco perché non vendiamo pezzi prefabbricati. Invece, lavoriamo a stretto contatto con te per comprendere il tuo spazio, il tuo stile e le tue esigenze, quindi progettiamo e costruiamo mobili perfettamente su misura per la tua vita.",
+    "storyParagraph3": "I nostri artigiani combinano tecniche tradizionali di lavorazione del legno con principi di design moderno per creare mobili che non sono solo belli ma costruiti per durare generazioni.",
+    "quote": "L'eccellenza non è una destinazione, è un viaggio continuo che non finisce mai.",
+    "quoteAuthor": "— Team Ansa Furniture",
+    "stats": {
+      "yearsExperience": "Anni di Esperienza",
+      "projectsCompleted": "Progetti Completati",
+      "masterCraftsmen": "Maestri Artigiani",
+      "customMade": "Su Misura"
+    },
+    "workshopTitle": "Il Nostro Laboratorio, Le Tue Idee",
+    "workshopSubtitle": "Ciò che ci distingue è la nostra dedizione nel dare vita alla tua visione con qualità e attenzione ai dettagli senza compromessi.",
+    "features": {
+      "feature1": {
+        "title": "Design Su Misura per il Tuo Spazio",
+        "description": "Ogni pezzo è progettato su misura per adattarsi alle tue misure esatte, preferenze di stile ed esigenze funzionali. Non ci sono due progetti uguali."
+      },
+      "feature2": {
+        "title": "Precisione Artigianale",
+        "description": "I nostri abili artigiani utilizzano tecniche collaudate e strumenti all'avanguardia per garantire che ogni giunzione, bordo e finitura sia perfetto."
+      },
+      "feature3": {
+        "title": "Durabilità a Lungo Termine",
+        "description": "Utilizziamo solo materiali premium e metodi di costruzione che resistono alla prova del tempo, quindi i tuoi mobili durano per decenni."
+      }
+    },
+    "howItWorks": "Come Funziona",
+    "howItWorksSubtitle": "Ogni progetto segue il nostro processo collaudato, garantendo risultati eccezionali dall'inizio alla fine.",
+    "process": {
+      "step1": {
+        "title": "Consulenza",
+        "description": "Ci incontriamo per discutere della tua visione, esigenze e budget. Comprendere il tuo spazio e stile di vita è la nostra priorità."
+      },
+      "step2": {
+        "title": "Design 3D e Misurazioni",
+        "description": "I nostri designer creano rendering 3D dettagliati e prendono misure precise per garantire una vestibilità perfetta."
+      },
+      "step3": {
+        "title": "Realizzazione nel Nostro Laboratorio",
+        "description": "Artigiani esperti danno vita al tuo design utilizzando materiali di qualità e tecniche esperte."
+      },
+      "step4": {
+        "title": "Consegna e Installazione",
+        "description": "Consegniamo e installiamo professionalmente i tuoi mobili su misura, assicurando che tutto sia perfetto."
+      }
+    },
+    "testimonials": {
+      "title": "Testimonianze",
+      "subtitle": "Cosa Dicono i Nostri Clienti",
+      "description": "Non crederci solo sulla parola: ascolta le persone che si sono fidate di noi con i loro spazi.",
+      "client1": {
+        "name": "Maria K.",
+        "project": "Cucina Su Misura – Tirana",
+        "quote": "Il team di Ansa ha trasformato la nostra cucina esattamente in ciò che avevamo immaginato. L'attenzione ai dettagli e la qualità dell'artigianato sono eccezionali."
+      },
+      "client2": {
+        "name": "Alban S.",
+        "project": "Armadi a Muro – Durrës",
+        "quote": "Servizio professionale dall'inizio alla fine. Hanno massimizzato lo spazio di archiviazione della nostra camera da letto mantenendo un'estetica bella e minimalista."
+      },
+      "client3": {
+        "name": "Elira M.",
+        "project": "Sistema Soggiorno – Tirana",
+        "quote": "Non potremmo essere più felici del nostro mobile TV su misura. Si adatta perfettamente e la qualità è eccezionale. Altamente raccomandato!"
+      }
+    }
+  },
+  "work": {
+    "title": "Alcuni dei nostri lavori",
+    "description": "Esplora i nostri progetti recenti che mostrano",
+    "craftsmanship": "maestria eccezionale",
+    "and": "e",
+    "design": "soluzioni di design innovative",
+    "forSpaces": "per spazi diversi.",
+    "images": "immagini",
+    "noProjects": "Nessun progetto in evidenza disponibile al momento.",
+    "viewAll": "Vedi tutti i progetti",
+    "seePortfolio": "Guarda il Portfolio Completo",
+    "error": "Impossibile caricare i progetti",
+    "tryAgain": "Riprova più tardi o contattaci direttamente."
+  },
+  "services": {
+    "title": "I Nostri Servizi",
+    "subtitle": "Dal concetto all'installazione, offriamo soluzioni complete di mobili su misura adattate al tuo spazio, stile ed esigenze.",
+    "loading": "Caricamento servizi...",
+    "noServices": "Nessun servizio disponibile al momento.",
+    "howWeWork": "Come Lavoriamo",
+    "processSubtitle": "Ogni progetto segue il nostro processo collaudato, garantendo risultati eccezionali dall'inizio alla fine.",
+    "consultation": "Consulenza",
+    "consultationDesc": "Discutiamo della tua visione, esigenze e budget",
+    "design": "Design",
+    "designDesc": "Rendering 3D e misure precise",
+    "crafting": "Realizzazione",
+    "craftingDesc": "Artigiani esperti costruiscono i tuoi mobili",
+    "installation": "Installazione",
+    "installationDesc": "Consegna e installazione professionale",
+    "startProject": "Inizia il Tuo Progetto",
+    "seeWork": "Guarda i Nostri Lavori",
+    "portfolioDesc": "Esplora il nostro portfolio di progetti completati per vedere la qualità e l'artigianalità che portiamo in ogni pezzo.",
+    "viewPortfolio": "Guarda il Portfolio"
   }
 }

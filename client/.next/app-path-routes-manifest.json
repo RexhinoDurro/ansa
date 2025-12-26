@@ -1,0 +1,16 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/(public)/page": "/",
+  "/(public)/contact/page": "/contact",
+  "/(public)/portfolio/[slug]/page": "/portfolio/[slug]",
+  "/(public)/services/page": "/services",
+  "/(public)/portfolio/page": "/portfolio",
+  "/admin/categories/page": "/admin/categories",
+  "/admin/contacts/page": "/admin/contacts",
+  "/admin/dashboard/page": "/admin/dashboard",
+  "/admin/gallery/page": "/admin/gallery",
+  "/admin/login/page": "/admin/login",
+  "/admin/orders/page": "/admin/orders",
+  "/admin/products/page": "/admin/products",
+  "/admin/page": "/admin"
+}

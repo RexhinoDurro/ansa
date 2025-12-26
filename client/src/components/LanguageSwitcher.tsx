@@ -3,7 +3,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
-const LanguageSwitcher: React.FC = () => {
+interface LanguageSwitcherProps {
+  isLightBackground?: boolean;
+}
+
+const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ isLightBackground = false }) => {
   const { currentLanguage, changeLanguage, supportedLanguages } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -30,14 +34,22 @@ const LanguageSwitcher: React.FC = () => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+        className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors duration-200 ${
+          isLightBackground
+            ? 'hover:bg-gray-100'
+            : 'hover:bg-white/10'
+        }`}
         aria-label="Change language"
       >
         <span className="text-xl">{currentLang.flag}</span>
-        <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-300">
+        <span className={`hidden sm:inline text-sm font-medium ${
+          isLightBackground ? 'text-black' : 'text-white'
+        }`}>
           {currentLang.nativeName}
         </span>
-        <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${
+          isLightBackground ? 'text-gray-500' : 'text-gray-300'
+        } ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (

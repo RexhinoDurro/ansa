@@ -123,8 +123,8 @@ const CategoryModal: React.FC<{
       }
 
       const url = category
-        ? `http://localhost:8000/api/admin/gallery-categories/${category.id}/`
-        : 'http://localhost:8000/api/admin/gallery-categories/';
+        ? `/api/admin/gallery-categories/${category.id}/`
+        : '/api/admin/gallery-categories/';
 
       const method = category ? 'PATCH' : 'POST';
 
@@ -384,8 +384,8 @@ const ProjectModal: React.FC<{
       });
 
       const url = project
-        ? `http://localhost:8000/api/admin/gallery-projects/${project.id}/`
-        : 'http://localhost:8000/api/admin/gallery-projects/';
+        ? `/api/admin/gallery-projects/${project.id}/`
+        : '/api/admin/gallery-projects/';
 
       const method = project ? 'PATCH' : 'POST';
 
@@ -709,7 +709,7 @@ const GalleryManager: React.FC = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/admin/gallery-categories/', {
+      const response = await fetch('/api/admin/gallery-categories/', {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -730,7 +730,7 @@ const GalleryManager: React.FC = () => {
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/admin/gallery-projects/', {
+      const response = await fetch('/api/admin/gallery-projects/', {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
@@ -763,7 +763,7 @@ const GalleryManager: React.FC = () => {
     if (!confirm(`Are you sure you want to delete "${name}"? This will also delete all projects in this category.`)) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/gallery-categories/${id}/`, {
+      const response = await fetch(`/api/admin/gallery-categories/${id}/`, {
         method: 'DELETE',
         credentials: 'include'
       });
@@ -785,7 +785,7 @@ const GalleryManager: React.FC = () => {
     if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/gallery-projects/${id}/`, {
+      const response = await fetch(`/api/admin/gallery-projects/${id}/`, {
         method: 'DELETE',
         credentials: 'include'
       });
