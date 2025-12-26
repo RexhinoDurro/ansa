@@ -5,10 +5,11 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:800
 // Handle all HTTP methods
 async function handleRequest(
   request: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    const path = params.path.join('/');
+    const { path: pathArray } = await params;
+    const path = pathArray.join('/');
     // Ensure trailing slash for Django
     const url = `${BACKEND_URL}/api/admin/${path}/`;
 
