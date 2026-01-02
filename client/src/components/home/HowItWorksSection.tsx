@@ -3,20 +3,29 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
+import { ChevronDown, Check } from 'lucide-react';
 import ansaImage from '@/assets/ansa2.png';
 
-interface StepProps {
+interface AccordionItemProps {
+  step: number;
   titleKey: string;
   descriptionKey: string;
-  position: string;
-  animationClass: string;
+  isOpen: boolean;
+  onClick: () => void;
   delay: number;
 }
 
-const Step: React.FC<StepProps> = ({ titleKey, descriptionKey, position, animationClass, delay }) => {
+const AccordionItem: React.FC<AccordionItemProps> = ({
+  step,
+  titleKey,
+  descriptionKey,
+  isOpen,
+  onClick,
+  delay
+}) => {
   const { t } = useTranslation('common');
   const [isVisible, setIsVisible] = useState(false);
-  const stepRef = useRef<HTMLDivElement>(null);
+  const itemRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -32,36 +41,93 @@ const Step: React.FC<StepProps> = ({ titleKey, descriptionKey, position, animati
       { threshold: 0.2 }
     );
 
-    if (stepRef.current) {
-      observer.observe(stepRef.current);
+    if (itemRef.current) {
+      observer.observe(itemRef.current);
     }
 
     return () => {
-      if (stepRef.current) {
-        observer.unobserve(stepRef.current);
+      if (itemRef.current) {
+        observer.unobserve(itemRef.current);
       }
     };
   }, [delay]);
 
   return (
     <div
-      ref={stepRef}
-      className={`${position} transition-all duration-1000 ease-out ${
+      ref={itemRef}
+      className={`transition-all duration-700 ease-out ${
         isVisible
-          ? 'opacity-100 translate-y-0 translate-x-0'
-          : `opacity-0 ${animationClass}`
+          ? 'opacity-100 translate-x-0'
+          : 'opacity-0 -translate-x-10'
       }`}
     >
-      <div className="max-w-sm space-y-3">
-        {/* Title */}
-        <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white drop-shadow-2xl">
-          {t(titleKey)}
-        </h3>
+      <div
+        className={`group cursor-pointer transition-all duration-500 ease-in-out ${
+          isOpen
+            ? 'bg-white/10 backdrop-blur-md shadow-2xl'
+            : 'bg-white/5 backdrop-blur-sm hover:bg-white/8'
+        } rounded-xl sm:rounded-2xl border border-white/20 overflow-hidden`}
+        onClick={onClick}
+      >
+        {/* Question/Title - Mobile Optimized */}
+        <div className="flex items-center justify-between p-4 sm:p-5 md:p-6 lg:p-8">
+          <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+            {/* Step Number - Mobile Optimized */}
+            <div
+              className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full transition-all duration-500 flex-shrink-0 ${
+                isOpen
+                  ? 'bg-accent text-white shadow-lg scale-110'
+                  : 'bg-white/10 text-white/70 group-hover:bg-white/20'
+              }`}
+            >
+              {isOpen ? (
+                <Check className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
+              ) : (
+                <span className="text-lg sm:text-xl md:text-2xl font-bold">{step}</span>
+              )}
+            </div>
 
-        {/* Description */}
-        <p className="text-lg md:text-xl text-white/95 leading-relaxed drop-shadow-lg">
-          {t(descriptionKey)}
-        </p>
+            {/* Title - Mobile Optimized */}
+            <h3
+              className={`text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-semibold transition-colors duration-300 truncate sm:whitespace-normal ${
+                isOpen ? 'text-white' : 'text-white/90 group-hover:text-white'
+              }`}
+            >
+              {t(titleKey)}
+            </h3>
+          </div>
+
+          {/* Chevron Icon - Mobile Optimized */}
+          <ChevronDown
+            className={`w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-white/70 transition-transform duration-500 flex-shrink-0 ${
+              isOpen ? 'rotate-180 text-white' : 'group-hover:text-white'
+            }`}
+          />
+        </div>
+
+        {/* Answer/Description with Animation - Mobile Optimized */}
+        <div
+          className={`transition-all duration-500 ease-in-out overflow-hidden ${
+            isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          }`}
+        >
+          <div className="px-4 sm:px-5 md:px-6 lg:px-8 pb-4 sm:pb-5 md:pb-6 lg:pb-8 pt-0">
+            <div className="pl-13 sm:pl-16 md:pl-20">
+              <div
+                className={`h-px bg-gradient-to-r from-white/30 to-transparent mb-4 sm:mb-5 md:mb-6 transition-all duration-500 ${
+                  isOpen ? 'w-full' : 'w-0'
+                }`}
+              ></div>
+              <p
+                className={`text-sm sm:text-base md:text-lg text-white/90 leading-relaxed transition-all duration-700 ${
+                  isOpen ? 'translate-y-0' : 'translate-y-4'
+                }`}
+              >
+                {t(descriptionKey)}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -70,6 +136,7 @@ const Step: React.FC<StepProps> = ({ titleKey, descriptionKey, position, animati
 const HowItWorksSection: React.FC = () => {
   const { t } = useTranslation('common');
   const [headerVisible, setHeaderVisible] = useState(false);
+  const [openIndex, setOpenIndex] = useState<number>(0); // First item open by default
   const headerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -99,35 +166,27 @@ const HowItWorksSection: React.FC = () => {
     {
       titleKey: 'home.process.step1.title',
       descriptionKey: 'home.process.step1.description',
-      position: 'absolute top-16 left-8 md:top-24 md:left-16',
-      animationClass: '-translate-x-20',
-      delay: 200
     },
     {
       titleKey: 'home.process.step2.title',
       descriptionKey: 'home.process.step2.description',
-      position: 'absolute top-16 right-8 md:top-24 md:right-16',
-      animationClass: 'translate-x-20',
-      delay: 400
     },
     {
       titleKey: 'home.process.step3.title',
       descriptionKey: 'home.process.step3.description',
-      position: 'absolute bottom-1/3 left-1/2 -translate-x-1/2',
-      animationClass: 'translate-y-20',
-      delay: 600
     },
     {
       titleKey: 'home.process.step4.title',
       descriptionKey: 'home.process.step4.description',
-      position: 'absolute bottom-16 right-8 md:bottom-24 md:right-16',
-      animationClass: 'translate-x-20',
-      delay: 800
-    }
+    },
   ];
 
+  const handleToggle = (index: number) => {
+    setOpenIndex(openIndex === index ? -1 : index);
+  };
+
   return (
-    <section className="relative min-h-screen py-24 overflow-hidden">
+    <section className="relative py-12 sm:py-16 md:py-24 lg:py-32 overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -137,39 +196,52 @@ const HowItWorksSection: React.FC = () => {
           className="object-cover"
           priority
         />
-        {/* Dark overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-br from-brown-900/70 via-brown-900/50 to-black/60"></div>
+        {/* Sophisticated gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-brown-900/90 via-brown-900/80 to-black/75"></div>
+        {/* Subtle pattern overlay for texture */}
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+          backgroundSize: '40px 40px'
+        }}></div>
       </div>
 
-      {/* Content Container */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 min-h-[80vh]">
-        {/* Header - Centered */}
+      {/* Content Container - Mobile Optimized */}
+      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 md:px-8">
+        {/* Header - Mobile Optimized */}
         <div
           ref={headerRef}
-          className={`text-center mb-20 transition-all duration-1000 ${
+          className={`text-center mb-8 sm:mb-12 md:mb-16 transition-all duration-1000 ${
             headerVisible
               ? 'opacity-100 translate-y-0'
               : 'opacity-0 -translate-y-8'
           }`}
         >
-          <h2 className="font-serif text-4xl md:text-6xl lg:text-7xl text-white mb-6 drop-shadow-2xl">
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white mb-3 sm:mb-4 md:mb-6 drop-shadow-2xl px-2">
             {t('home.howItWorks')}
           </h2>
-          <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto drop-shadow-lg">
+          <p className="text-base sm:text-lg md:text-xl text-white/90 max-w-3xl mx-auto drop-shadow-lg px-4">
             {t('home.howItWorksSubtitle')}
           </p>
         </div>
 
-        {/* Steps positioned in different corners */}
-        <div className="relative min-h-[600px] md:min-h-[800px]">
+        {/* Accordion Items - Mobile Optimized */}
+        <div className="space-y-3 sm:space-y-4 md:space-y-6">
           {steps.map((step, index) => (
-            <Step key={index} {...step} />
+            <AccordionItem
+              key={index}
+              step={index + 1}
+              titleKey={step.titleKey}
+              descriptionKey={step.descriptionKey}
+              isOpen={openIndex === index}
+              onClick={() => handleToggle(index)}
+              delay={index * 150}
+            />
           ))}
         </div>
       </div>
 
-      {/* Decorative Elements */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-cream-50 to-transparent z-10"></div>
+      {/* Decorative gradient at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 h-20 sm:h-32 bg-gradient-to-t from-cream-50 to-transparent z-10"></div>
     </section>
   );
 };

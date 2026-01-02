@@ -2,7 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Filter, Sparkles } from 'lucide-react';
+import ansa5Image from '@/assets/ansa5.png';
 
 interface GalleryProject {
   id: number;
@@ -87,24 +89,43 @@ export default function PortfolioPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-cream-50 to-white">
-      {/* Premium Hero Header */}
-      <section className="relative py-24 md:py-32 bg-gradient-to-br from-cream-100 via-white to-cream-50 overflow-hidden">
-        {/* Decorative background elements */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-20 left-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-parallax-float"></div>
-          <div className="absolute bottom-20 right-10 w-80 h-80 bg-terracotta/10 rounded-full blur-3xl animate-parallax-float" style={{ animationDelay: '1.5s' }}></div>
+      {/* Premium Hero Header with Background Image */}
+      <section className="relative py-24 md:py-32 overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src={ansa5Image}
+            alt="Ansa Furniture Portfolio Background"
+            fill
+            className="object-cover"
+            priority
+            quality={90}
+          />
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-br from-brown-900/85 via-brown-900/75 to-black/70"></div>
+          {/* Subtle pattern overlay */}
+          <div className="absolute inset-0 opacity-10" style={{
+            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+            backgroundSize: '40px 40px'
+          }}></div>
         </div>
 
-        <div className="relative max-w-container mx-auto px-4 md:px-8">
+        {/* Decorative light accents */}
+        <div className="absolute inset-0 z-0 opacity-20">
+          <div className="absolute top-20 left-10 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-parallax-float"></div>
+          <div className="absolute bottom-20 right-10 w-80 h-80 bg-cream-50/20 rounded-full blur-3xl animate-parallax-float" style={{ animationDelay: '1.5s' }}></div>
+        </div>
+
+        <div className="relative z-10 max-w-container mx-auto px-4 md:px-8">
           <div className="text-center max-w-4xl mx-auto">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-accent/10 text-accent px-6 py-3 rounded-full text-sm font-semibold mb-8 animate-slide-in-bottom">
+            <div className="inline-flex items-center gap-2 bg-accent/90 backdrop-blur-sm text-white px-6 py-3 rounded-full text-sm font-semibold mb-8 animate-slide-in-bottom shadow-lg">
               <Sparkles className="w-4 h-4" />
               <span>Handcrafted Excellence</span>
             </div>
 
             {/* Title */}
-            <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl text-brown-900 mb-8 leading-tight animate-luxury-fade-in">
+            <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl text-white mb-8 leading-tight animate-luxury-fade-in drop-shadow-2xl">
               Our Portfolio
             </h1>
 
@@ -112,12 +133,15 @@ export default function PortfolioPage() {
             <div className="w-32 h-1 bg-gradient-to-r from-transparent via-accent to-transparent mx-auto mb-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}></div>
 
             {/* Description */}
-            <p className="text-xl md:text-2xl text-brown-800 leading-relaxed font-light animate-blur-fade-in" style={{ animationDelay: '0.3s' }}>
+            <p className="text-xl md:text-2xl text-cream-50 leading-relaxed font-light animate-blur-fade-in drop-shadow-lg" style={{ animationDelay: '0.3s' }}>
               Explore our collection of bespoke furniture projects. Each piece tells a story of
               craftsmanship, attention to detail, and dedication to bringing our clients' visions to life.
             </p>
           </div>
         </div>
+
+        {/* Bottom gradient fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent z-10"></div>
       </section>
 
       {/* Enhanced Category Filter - Sticky */}
